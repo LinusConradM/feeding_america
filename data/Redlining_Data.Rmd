@@ -1,0 +1,89 @@
+---
+title: "Red lining 2020"
+author: "Alex Arevalo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(here)
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+```
+
+```{r}
+redline <- read_csv(here("group project", "Historic Redlining Score 2020B.csv"))
+```
+
+## GEOID: The Census Bureau and other state and federal agencies are responsible for assigning geographic identifiers, or GEOIDs, to geographic entities to facilitate the organization, presentation, and exchange of geographic and statistical data.
+
+## CBSA: A core-based statistical area (CBSA) is a U.S. geographic area defined by the Office of Management and Budget (OMB). It contains a large population nucleus, or urban area, and adjacent communities that have a high degree of integration with that nucleus.
+
+## Metro_name: Refers to the name of the metropolitan or micropolitan area that corresponds to the CBSA code.
+
+## HRS2020: Historical Redlining Score calculated from the summed proportion of The Home Owners' Loan Corporation (HOLC) residential security grades multiplied by a weighting factor based on area within each census tract. A higher score means greater redlining of the census tract.
+
+## Interval2020: An ordinal version of that same score, divided into 4 equal intervals (quartiles). It groups tracts into four tiers of redlining intensity (1 = least, 4 = most).
+
+```{r}
+# converting to ordinal factor
+redline <- redline |>
+  mutate(INTERVAL2020 = factor(
+    INTERVAL2020,
+    levels = c(1, 2, 3, 4),
+    labels = c("Least redlined", "Moderately low", "Moderately high", "Most redlined"),
+    ordered = TRUE))
+```
+
+```{r}
+glimpse(redline)
+```
+
+```{r}
+# clean metro names, extract state abbreviations, drop rows with missing data, clean up factor levels
+
+redline <- redline |>
+  mutate(
+    METRO_NAME = str_replace_all(METRO_NAME, "–", "-"),
+    state = str_extract(METRO_NAME, "[A-Z]{2}$")) |>
+  filter(!is.na(state), !is.na(INTERVAL2020)) |>
+  droplevels()
+```
+
+
+```{r}
+# creating regions to avoid crowded plot with counties
+redline <- redline %>%
+  mutate(
+    region = case_when(
+      state %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA") ~ "Northeast",
+      state %in% c("IL","IN","MI","OH","WI","IA","KS","MN","MO","NE","ND","SD") ~ "Midwest",
+      state %in% c("DE","FL","GA","MD","NC","SC","VA","DC","WV",
+                   "AL","KY","MS","TN","AR","LA","OK","TX") ~ "South",
+      state %in% c("AZ","CO","ID","MT","NV","NM","UT","WY","AK","CA","HI","OR","WA") ~ "West",
+      TRUE ~ NA_character_))
+```
+
+```{r}
+# plot represents how redlining severity varies across U.S. states and regions; we can use/drop/adjust later if needed
+
+ggplot(
+  redline |> filter(complete.cases(state, INTERVAL2020, region)),
+  aes(x = state, y = as.numeric(INTERVAL2020), fill = region)) +
+  geom_boxplot(alpha = .7, outlier.alpha = .3) +
+  coord_flip() +
+  facet_wrap(~region, ncol = 2, scales = "free_y") +
+  scale_x_discrete(drop = TRUE) +
+  labs(
+    x = "State",
+    y = "Historic Redlining Interval (1 = Least, 4 = Most)",
+    title = "Distribution of Redlining Scores by State and Region") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+
