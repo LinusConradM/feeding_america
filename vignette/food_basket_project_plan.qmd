@@ -8,13 +8,6 @@ author:
 date: today
 course: "DATA-613: Data Science Practicum / R Shiny Group Project"
 format: 
-  pdf:
-    include-in-header: spacing.tex
-    toc: true
-    toc-depth: 3
-    geometry: "margin=1in"
-    fontsize: 11pt
-    linestretch: 1.0 
 
   html:
     embed-resources: true
@@ -226,11 +219,7 @@ All analyses will be fully transparent, with clear documentation of assumptions,
 
 # 6. Collaboration and Branching Plan
 
-The team will use a Shared Repository Workflow Model to coordinate development and version control through GitHub. The main branch will hold stable, production-ready code, while each member works on dedicated feature branches (e.g., data-cleaning, ui-design, analysis-module).
-
-Team members will commit regularly with clear messages, submit pull requests for peer review, and merge only approved changes. GitHub Issues and project boards will track tasks, and weekly meetings will align progress.
-
-This structured workflow ensures efficient collaboration, accountability, and consistent code quality while supporting independent contributions and smooth integration.
+The team will use a Shared Repository Workflow Model to coordinate development and version control through GitHub. The main branch will hold stable, production-ready code, while each member works on dedicated feature branches (e.g., data-cleaning, ui-design, analysis-module). Team members will commit regularly with clear messages, submit pull requests for peer review, and merge only approved changes. GitHub Issues and project boards will track tasks, and weekly meetings will align progress. This structured workflow ensures efficient collaboration, accountability, and consistent code quality while supporting independent contributions and smooth integration.
 
 ## 6.1 Team Roles and Responsibilities
 
@@ -268,9 +257,11 @@ This structured workflow ensures efficient collaboration, accountability, and co
 | Final submission                     | Dec 9 2025  | Final GitHub repo, HTML deliverables, and class demonstration.                  |
 +--------------------------------------+-------------+---------------------------------------------------------------------------------+
 
+
+![Timeline](images/Timeline.png){fig-align="center"}
+
 ![Critical Path](images/Critical%20Path-2.png){fig-align="center"}
 
-\clearpage
 
 # REFERENCES
 
