@@ -29,11 +29,7 @@ format:
 
 **App Title:** Investigating U.S. Food Insecurity Through Data
 
-**Team Members:** 
-  - Conrad Linus Muhirwe
-  - Sharon Wanyana
-  - Ryann Tompkins
-  - Alex Arevalo
+**Team Members:** - Conrad Linus Muhirwe - Sharon Wanyana - Ryann Tompkins - Alex Arevalo
 
 **Course:** DATA-613: Data Science Practicum
 
@@ -43,21 +39,22 @@ This project examines the prevalence and distribution of household food insecuri
 
 **Objectives**
 
-  1. Describe levels and trends in food insecurity across places and populations (2023–2025).
-  2. Explain variation using socioeconomic drivers and food-environment context.
-  3. Contextualize results with safety-net program reach (SNAP/WIC participation).
-  4. Communicate findings via an accessible, exportable, and update-ready Shiny tool.
+1.  Describe levels and trends in food insecurity across places and populations (2023–2025).
+2.  Explain variation using socioeconomic drivers and food-environment context.
+3.  Contextualize results with safety-net program reach (SNAP/WIC participation).
+4.  Communicate findings via an accessible, exportable, and update-ready Shiny tool.
 
 ## 2.1 Problem Context
+
 Food insecurity remains a persistent challenge in the United States, with far-reaching effects on public health, education, and economic mobility. It disproportionately affects low-income households, racial and ethnic minorities, families with children, and communities with limited access to stable employment or affordable food outlets. These disparities reflect broader structural inequities such as income volatility, housing costs, and unequal access to education and social safety nets.
 
 This project addresses food insecurity through three core objectives:
 
-- `Quantify` its prevalence and geographic distribution across states and demographic groups.
+-   `Quantify` its prevalence and geographic distribution across states and demographic groups.
 
-- `Analyze` relationships between food insecurity and socioeconomic factors such as income, poverty, employment, and education.
+-   `Analyze` relationships between food insecurity and socioeconomic factors such as income, poverty, employment, and education.
 
-- `Visualize` insights through an interactive Shiny app that maps trends and supports evidence-based decision-making.
+-   `Visualize` insights through an interactive Shiny app that maps trends and supports evidence-based decision-making.
 
 The application is designed for policymakers, researchers, and nonprofit practitioners who need accessible, timely data to inform interventions like SNAP outreach, school meal programs, and workforce initiatives. By integrating transparent analysis with interactive visualization, the project enables data-driven strategies to reduce food insecurity and promote social equity.
 
@@ -75,23 +72,25 @@ Finally, program participation plays a critical mitigating role. Rigorous quasi-
 
 The project will rely primarily on the USDA Economic Research Service (ERS) Food Access Research Atlas, a comprehensive open dataset that maps food access indicators across U.S. census tracts. This dataset supports the project’s objectives of analyzing geographic and socioeconomic disparities in food insecurity and related access conditions.
 
-| **Dataset**                    | **Source**                                                | **Year**                      | **Geographic Unit**            | **No of Variables** | **No of Observations**                | **Source Link**                                                                                                                          |
-| ------------------------------ | -------------------------------------------------------------------- | -------------------------------------- | ------------------------------ | ------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Food Access Research Atlas** | U.S. Department of Agriculture, Economic Research Service (USDA ERS) | 2025 (latest release, January 5, 2025) | Census tract (U.S. nationwide) | 147 variables      | ≈72,000 tracts across 50 states + DC | [https://www.ers.usda.gov/data-products/food-access-research-atlas/](https://www.ers.usda.gov/data-products/food-access-research-atlas/) |
++--------------------------------+----------------------------------------------------------------------+----------------------------------------+--------------------------------+---------------------+--------------------------------------+----------------------------------------------------------------------+
+| **Dataset**                    | **Source**                                                           | **Year**                               | **Geographic Unit**            | **No of Variables** | **No of Observations**               | **Source Link**                                                      |
++================================+======================================================================+========================================+================================+=====================+======================================+======================================================================+
+| **Food Access Research Atlas** | U.S. Department of Agriculture, Economic Research Service (USDA ERS) | 2025 (latest release, January 5, 2025) | Census tract (U.S. nationwide) | 147 variables       | ≈72,000 tracts across 50 states + DC | <https://www.ers.usda.gov/data-products/food-access-research-atlas/> |
++--------------------------------+----------------------------------------------------------------------+----------------------------------------+--------------------------------+---------------------+--------------------------------------+----------------------------------------------------------------------+
 
 ## 2.3.1 Description and Purpose:
+
 The USDA Food Access Research Atlas provides tract level data describing food access and socioeconomic characteristics that influence household food security. It includes measures such as income level, distance to supermarkets, vehicle availability, and urban-rural classification. The dataset also contains demographic attributes (e.g., poverty rate, racial composition, population density), enabling multivariate exploration of social determinants of food insecurity.
 
 **Key Variables of Interest:**
 
-- `TractFIPS`: Census tract identifier for geographic mapping.  
-- `State`: State name for aggregation and filtering.  
-- `LILATracts_1And10`: Low-income and low-access tract indicator.  
-- `PovertyRate`: Percent of population below poverty line.  
-- `lapophalfshare`: Population with low food access within ½ mile.  
-- `Urban`: Urban/rural classification.  
-- `Nsupermarkets`: Count of supermarkets within threshold distance. 
-
+-   `TractFIPS`: Census tract identifier for geographic mapping.\
+-   `State`: State name for aggregation and filtering.\
+-   `LILATracts_1And10`: Low-income and low-access tract indicator.\
+-   `PovertyRate`: Percent of population below poverty line.\
+-   `lapophalfshare`: Population with low food access within ½ mile.\
+-   `Urban`: Urban/rural classification.\
+-   `Nsupermarkets`: Count of supermarkets within threshold distance.
 
 # 3 Use Case and Actor Description
 
@@ -101,11 +100,11 @@ The primary users are public policy analysts and nonprofit researchers in food p
 
 Through the app, users can
 
-- Explore food insecurity data at national, state, and county levels.
+-   Explore food insecurity data at national, state, and county levels.
 
-- Analyze relationships with socioeconomic factors such as income, education, and employment.
+-   Analyze relationships with socioeconomic factors such as income, education, and employment.
 
-- Create visual summaries and reports for policy and program decisions.
+-   Create visual summaries and reports for policy and program decisions.
 
 The app combines exploration and analysis tools to support evidence-based decision-making across federal, state, and local contexts.
 
@@ -113,82 +112,81 @@ The app combines exploration and analysis tools to support evidence-based decisi
 
 The Shiny app is designed to help the actor answer key research and policy questions such as:
 
-  * How does food insecurity vary across U.S. states and regions over time?
+-   How does food insecurity vary across U.S. states and regions over time?
 
-  * Are there seasonal or long-term trends that can inform future policy focus?
+-   Are there seasonal or long-term trends that can inform future policy focus?
 
-  * What is the relationship between food insecurity and socioeconomic variables (e.g., income, unemployment, education)?
+-   What is the relationship between food insecurity and socioeconomic variables (e.g., income, unemployment, education)?
 
-  * Which factors appear to be the strongest predictors of food insecurity?
+-   Which factors appear to be the strongest predictors of food insecurity?
 
-  * How do rural vs. urban areas differ in food insecurity rates?
+-   How do rural vs. urban areas differ in food insecurity rates?
 
-  * Which demographic groups such as households with children or racial/ethnic minorities are most affected?
+-   Which demographic groups such as households with children or racial/ethnic minorities are most affected?
 
-  * Can we observe measurable shifts in food insecurity following policy interventions (e.g., SNAP expansions or COVID-era relief programs)?
+-   Can we observe measurable shifts in food insecurity following policy interventions (e.g., SNAP expansions or COVID-era relief programs)?
 
 ## 3.2 Anticipated Workflow for the Actor
 
 The app’s design follows the logical steps of a policy analyst’s exploratory workflow:
 
-  1. Select Scope – Choose a geographic level (national, state, or county) and a time frame (e.g., 2023–2025).
+1.  Select Scope – Choose a geographic level (national, state, or county) and a time frame (e.g., 2023–2025).
 
-  2. Filter Variables – Select socioeconomic indicators (e.g., poverty rate, income, unemployment, education).
+2.  Filter Variables – Select socioeconomic indicators (e.g., poverty rate, income, unemployment, education).
 
-  3. Visualize Data – Generate interactive charts, heatmaps, and choropleth maps showing temporal and geographic trends.
+3.  Visualize Data – Generate interactive charts, heatmaps, and choropleth maps showing temporal and geographic trends.
 
-  4. Explore Relationships – View summary statistics, correlations, and regression results dynamically.
+4.  Explore Relationships – View summary statistics, correlations, and regression results dynamically.
 
-  5. Generate Insights & Export – Download customized tables, figures, or reports for communication and decision-support.
+5.  Generate Insights & Export – Download customized tables, figures, or reports for communication and decision-support.
 
-  6. Iterate – Adjust filters or parameters to test new hypotheses or compare across states and years.
+6.  Iterate – Adjust filters or parameters to test new hypotheses or compare across states and years.
 
 # 4. Ethical Review
 
 Ethical conduct underpins the integrity and societal value of this project. Given the sensitivity of food insecurity data, the team will follow ethical principles throughout all stages of the data life cycle from acquisition to dissemination in alignment with the American Statistical Association’s (ASA) Ethical Guidelines for Statistical Practice (2023).
 
-**Ethical Considerations Across the Data Life Cycle** 
+**Ethical Considerations Across the Data Life Cycle**
 
-1. **Data Acquisition.** The project uses only publicly available, de-identified datasets from trusted sources such as the USDA ERS, U.S. Census Bureau (ACS), and Feeding America. All data comply with open-data licenses, include clear citations and metadata, and exclude any proprietary or personally identifiable information (PII).
+1.  **Data Acquisition.** The project uses only publicly available, de-identified datasets from trusted sources such as the USDA ERS, U.S. Census Bureau (ACS), and Feeding America. All data comply with open-data licenses, include clear citations and metadata, and exclude any proprietary or personally identifiable information (PII).
 
-2. **Data Storage and Management.** All data will be securely organized in the project’s GitHub repository with a clear directory structure and version control to ensure traceability and reproducibility. Only cleaned, approved datasets will be uploaded, while raw data remains unaltered in protected folders. Team members will limit access to necessary files and document all updates through detailed commit messages.
+2.  **Data Storage and Management.** All data will be securely organized in the project’s GitHub repository with a clear directory structure and version control to ensure traceability and reproducibility. Only cleaned, approved datasets will be uploaded, while raw data remains unaltered in protected folders. Team members will limit access to necessary files and document all updates through detailed commit messages.
 
-3. **Data Cleaning and Analysis.** All data transformations will be transparently documented to ensure reproducibility and objectivity. The team will follow ASA guidelines for methodological rigor, avoiding biased manipulation of variables or results. Model assumptions and limitations will be clearly stated, and correlations or regressions will be interpreted cautiously without implying causation.
+3.  **Data Cleaning and Analysis.** All data transformations will be transparently documented to ensure reproducibility and objectivity. The team will follow ASA guidelines for methodological rigor, avoiding biased manipulation of variables or results. Model assumptions and limitations will be clearly stated, and correlations or regressions will be interpreted cautiously without implying causation.
 
-4. **Data Visualization and Interpretation.** The app will follow strict visual ethics to ensure clarity and accuracy. All charts will use correct scaling, clear labels, and accessible color palettes, avoiding any distortion or omission of uncertainty. Language in visuals will remain neutral and respectful, especially when referencing vulnerable groups or regions with high food insecurity.
+4.  **Data Visualization and Interpretation.** The app will follow strict visual ethics to ensure clarity and accuracy. All charts will use correct scaling, clear labels, and accessible color palettes, avoiding any distortion or omission of uncertainty. Language in visuals will remain neutral and respectful, especially when referencing vulnerable groups or regions with high food insecurity.
 
-5. **Dissemination and Communication.** The Shiny app will be used for educational and analytical purposes to inform evidence-based policymaking. Results will include clear notes on limitations and potential errors, encouraging users to interpret findings within their broader socioeconomic context.
-
+5.  **Dissemination and Communication.** The Shiny app will be used for educational and analytical purposes to inform evidence-based policymaking. Results will include clear notes on limitations and potential errors, encouraging users to interpret findings within their broader socioeconomic context.
 
 # 5. Application Concept
 
-## 5.1 General Layout of the App to Support the Actor Workflow 
+## 5.1 General Layout of the App to Support the Actor Workflow
 
 The Shiny application is an interactive dashboard designed for policy analysts, researchers, and nonprofit professionals to explore U.S. food insecurity data through a structured workflow of overview → exploration → analysis.
 
 It features three main tabs:
 
-  1. `Overview` – Displays national food insecurity summaries, KPIs, and data definitions.
+1.  `Overview` – Displays national food insecurity summaries, KPIs, and data definitions.
 
-  2. `Exploration` – Offers interactive maps and charts to compare trends across states, counties, and demographic groups.
+2.  `Exploration` – Offers interactive maps and charts to compare trends across states, counties, and demographic groups.
 
-  3. `Analysis` – Provides statistical tools such as correlations, regressions, and group comparisons to examine relationships with socioeconomic variables.
+3.  `Analysis` – Provides statistical tools such as correlations, regressions, and group comparisons to examine relationships with socioeconomic variables.
 
 A consistent layout with sidebar controls and dynamic outputs ensures an intuitive, user-friendly experience for data-driven decision-making.
 
-## 5.2 Planned Options for User Data Selection and Manipulation 
+## 5.2 Planned Options for User Data Selection and Manipulation
 
 The app will allow users to tailor analyses through interactive inputs that dynamically update visualizations and tables. Key controls include:
 
-  * Geographic Filters - Dropdown menus for selecting specific states, regions, or counties.
+-   Geographic Filters - Dropdown menus for selecting specific states, regions, or counties.
 
-  * Temporal Filters - Sliders or dropdowns to set year ranges (e.g., 2010 – 2024).
+-   Temporal Filters - Sliders or dropdowns to set year ranges (e.g., 2010 – 2024).
 
-  * Variable Selection - Checkboxes or multi-select inputs to include/exclude socioeconomic indicators such as median income, unemployment, education, and poverty rate.
+-   Variable Selection - Checkboxes or multi-select inputs to include/exclude socioeconomic indicators such as median income, unemployment, education, and poverty rate.
 
-  * Transformations - Options to apply log transformations or normalization to improve comparability across scales.
+-   Transformations - Options to apply log transformations or normalization to improve comparability across scales.
 
-  * Subgroup Focus - Filters to isolate demographic or regional groups (e.g., rural vs. urban, households with children).
+-   Subgroup Focus - Filters to isolate demographic or regional groups (e.g., rural vs. urban, households with children).
 
 These tools will update outputs in real time, allowing flexible exploration from multiple analytical perspectives without requiring users to write code.
 
@@ -196,15 +194,15 @@ These tools will update outputs in real time, allowing flexible exploration from
 
 The Exploration Tab will include a range of descriptive and graphical tools to facilitate insight generation:
 
-  * Interactive Maps (Choropleths) - Show food-insecurity rates by state or county with color gradients for geographic comparison.
+-   Interactive Maps (Choropleths) - Show food-insecurity rates by state or county with color gradients for geographic comparison.
 
-  * Trend Analysis - Line and bar plots illustrating temporal changes in food insecurity and related socioeconomic factors.
+-   Trend Analysis - Line and bar plots illustrating temporal changes in food insecurity and related socioeconomic factors.
 
-  * Comparative Visuals - Multi-panel or faceted charts to compare multiple states or demographic groups simultaneously.
+-   Comparative Visuals - Multi-panel or faceted charts to compare multiple states or demographic groups simultaneously.
 
-  * Summary Tables - Interactive data tables built with {DT} for sorting, searching, and exporting selected metrics.
+-   Summary Tables - Interactive data tables built with {DT} for sorting, searching, and exporting selected metrics.
 
-  * Dynamic Tooltips - Hover-over elements displaying contextual statistics such as exact rates, rankings, or summary values.
+-   Dynamic Tooltips - Hover-over elements displaying contextual statistics such as exact rates, rankings, or summary values.
 
 Visualizations will be developed using {ggplot2}, {plotly}, and {leaflet}, ensuring interactivity, consistency in color schemes, and accessibility for all users.
 
@@ -212,20 +210,17 @@ Visualizations will be developed using {ggplot2}, {plotly}, and {leaflet}, ensur
 
 The Analysis Tab will provide lightweight, transparent tools for exploratory statistical modeling and inference:
 
-1. Correlation Analysis
-    * Compute Pearson and Spearman correlation coefficients between food insecurity and socioeconomic indicators.
-    * Display results as interactive correlation matrices or heatmaps.
-
+1.  Correlation Analysis
+    -   Compute Pearson and Spearman correlation coefficients between food insecurity and socioeconomic indicators.
+    -   Display results as interactive correlation matrices or heatmaps.
 2.  Regression Modeling
-    * Allow users to specify dependent and independent variables for simple or multiple linear regression.
-    * Present model summaries (coefficients, R², p-values) with diagnostic plots and interpretation notes.
-
-3. Group Comparisons
-    * Conduct two-sample t-tests comparing mean food-insecurity rates across categories (e.g., rural vs. urban, high- vs. low-income states).
-    * Report p-values, confidence intervals, and short text interpretations.
-
-4. Predictive Exploration
-    * Offer reactive model fitting to generate predicted food-insecurity rates given socioeconomic inputs.
+    -   Allow users to specify dependent and independent variables for simple or multiple linear regression.
+    -   Present model summaries (coefficients, R², p-values) with diagnostic plots and interpretation notes.
+3.  Group Comparisons
+    -   Conduct two-sample t-tests comparing mean food-insecurity rates across categories (e.g., rural vs. urban, high- vs. low-income states).
+    -   Report p-values, confidence intervals, and short text interpretations.
+4.  Predictive Exploration
+    -   Offer reactive model fitting to generate predicted food-insecurity rates given socioeconomic inputs.
 
 All analyses will be fully transparent, with clear documentation of assumptions, limitations, and non-causal interpretation. Users will have the option to download model results, tables, and figures for inclusion in reports or policy briefs.
 
@@ -239,33 +234,50 @@ This structured workflow ensures efficient collaboration, accountability, and co
 
 ## 6.1 Team Roles and Responsibilities
 
-| Team Member | Course Level | Primary Responsibilities |
-|--------------|---------------|----------------------------|
-| Conrad Linus Muhirwe | DATA-613 | Lead on statistical modeling and , interpretation of model outputs, reproducibility documentation, and GitHub coordination. |
-| Sharon Wanyana | DATA-613 | Lead on modeling, validation of assumptions,  analysis (regression, correlation). |
-| Ryann Tompkins | DATA-613 | Exploratory data visualization using `{ggplot2}` and `{plotly}`, Literature review, Maps, Tables. |
-| Alex Arevalo | DATA-413 | Data acquisition, cleaning, and transformation, UI & UX. |
++----------------------+-----------------+-----------------------------------------------------------------------------------------------------------------------+
+| Team Member          | Course Level    | Primary Responsibilities                                                                                              |
++======================+=================+=======================================================================================================================+
+| Conrad Linus Muhirwe | DATA-613        | -   Repository setup, version control & documentation.                                                                |
+|                      |                 | -   Statistical modeling, validation and interpretation                                                               |
++----------------------+-----------------+-----------------------------------------------------------------------------------------------------------------------+
+| Sharon Wanyana       | DATA-613        | Correlation & Regression analysis, hypothesis testing                                                                 |
++----------------------+-----------------+-----------------------------------------------------------------------------------------------------------------------+
+| Ryann Tompkins       | DATA-613        | -   Literature & ethical review                                                                                       |
+|                      |                 | -   Exploratory data analysis & visualization using `{ggplot2}` and `{plotly}`, summary tables plus interactive maps. |
++----------------------+-----------------+-----------------------------------------------------------------------------------------------------------------------+
+| Alex Arevalo         | DATA-413        | Data acquisition, cleaning, and transformation, UI & UX.                                                              |
++----------------------+-----------------+-----------------------------------------------------------------------------------------------------------------------+
 
 ## 6.2 Schedule and Milestones
 
-| Milestone | Target Date | Deliverable / Outcome |
-|------------|--------------|------------------------|
-| Data acquisition and Project Plan | Oct 24 2025 | Verified `.rds` datasets stored in `/data` folder; cleaning scripts documented. |
-| App skeleton (UI structure & tabs) | Oct 30 2025 | Functional navigation across Overview, Exploration, and Analysis tabs. |
-| Progress Report submission | Nov 11 2025 | Updated `.qmd` and HTML with preliminary visuals and workflow. |
-| Statistical modeling integration | Nov 20 2025 | Regression and correlation modules functional with outputs. |
-| App refinement & user testing | Dec 3 2025 | Fully interactive dashboard tested across user scenarios. |
-| Vignette drafting & demo preparation | Dec 8 2025 | Completed vignette, rehearsal of oral demonstration. |
-| Final submission | Dec 9 2025 | Final GitHub repo, HTML deliverables, and class demonstration. |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| Milestone                            | Target Date      | Deliverable / Outcome                                                           |
++======================================+==================+=================================================================================+
+| Data acquisition and Project Plan    | Oct 24 2025      | Verified `.rds` datasets stored in `/data` folder; cleaning scripts documented. |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| App skeleton (UI structure & tabs)   | Oct 30 2025      | Functional navigation across Overview, Exploration, and Analysis tabs.          |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| Progress Report submission           | Nov 11 2025      | Updated `.qmd` and HTML with preliminary visuals and workflow.                  |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| Statistical modeling integration     | Nov 20 2025      | Regression and correlation modules functional with outputs.                     |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| App refinement & user testing        | Dec 3 2025       | Fully interactive dashboard tested across user scenarios.                       |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| Vignette drafting & demo preparation | Dec 8 2025       | Completed vignette, rehearsal of oral demonstration.                            |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+| Final submission                     | Dec 9 2025       | Final GitHub repo, HTML deliverables, and class demonstration.                  |
++--------------------------------------+------------------+---------------------------------------------------------------------------------+
+
+![ Critical Path](images/Critical Path-2.png){fig-align="center"}
 
 \clearpage
 
 # REFERENCES
 
-* Feeding America. (2024). Map the Meal Gap 2024: Executive summary. `https://www.feedingamerica.org/research/map-the-meal-gap/overall-executive-summary`
- 
-* Gundersen, C., & Ziliak, J. P. (2015). Food insecurity and health outcomes. Health Affairs, 34(11), 1830–1839. `https://www.healthaffairs.org/doi/10.1377/hlthaff.2015.0645`
- 
-* Gundersen, C., Kreider, B., & Pepper, J. (2017). Partial identification methods for evaluating food assistance programs: A case study of the causal impact of SNAP on food insecurity. American Journal of Agricultural Economics, 99(4). `https://onlinelibrary.wiley.com/doi/10.1093/ajae/aax026`
- 
-* U.S. Department of Agriculture, Economic Research Service. (2024). Household food security in the United States in 2023 (ERR-337). `https://www.ers.usda.gov/publications/pub-details?pubid=109895`
+-   Feeding America. (2024). Map the Meal Gap 2024: Executive summary. `https://www.feedingamerica.org/research/map-the-meal-gap/overall-executive-summary`
+
+-   Gundersen, C., & Ziliak, J. P. (2015). Food insecurity and health outcomes. Health Affairs, 34(11), 1830–1839. `https://www.healthaffairs.org/doi/10.1377/hlthaff.2015.0645`
+
+-   Gundersen, C., Kreider, B., & Pepper, J. (2017). Partial identification methods for evaluating food assistance programs: A case study of the causal impact of SNAP on food insecurity. American Journal of Agricultural Economics, 99(4). `https://onlinelibrary.wiley.com/doi/10.1093/ajae/aax026`
+
+-   U.S. Department of Agriculture, Economic Research Service. (2024). Household food security in the United States in 2023 (ERR-337). `https://www.ers.usda.gov/publications/pub-details?pubid=109895`
