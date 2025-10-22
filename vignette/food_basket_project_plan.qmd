@@ -50,11 +50,11 @@ Food insecurity remains a persistent challenge in the United States, with far-re
 
 This project addresses food insecurity through three core objectives:
 
--   `Quantify` its prevalence and geographic distribution across states and demographic groups.
+-   Quantify its prevalence and geographic distribution across states and demographic groups.
 
--   `Analyze` relationships between food insecurity and socioeconomic factors such as income, poverty, employment, and education.
+-   Analyze relationships between food insecurity and socioeconomic factors such as income, poverty, employment, and education.
 
--   `Visualize` insights through an interactive Shiny app that maps trends and supports evidence-based decision-making.
+-   Visualize insights through an interactive Shiny app that maps trends and supports evidence-based decision-making.
 
 The application is designed for policymakers, researchers, and nonprofit practitioners who need accessible, timely data to inform interventions like SNAP outreach, school meal programs, and workforce initiatives. By integrating transparent analysis with interactive visualization, the project enables data-driven strategies to reduce food insecurity and promote social equity.
 
@@ -84,13 +84,13 @@ The USDA Food Access Research Atlas provides tract level data describing food ac
 
 **Key Variables of Interest:**
 
--   `TractFIPS`: Census tract identifier for geographic mapping.\
--   `State`: State name for aggregation and filtering.\
--   `LILATracts_1And10`: Low-income and low-access tract indicator.\
--   `PovertyRate`: Percent of population below poverty line.\
--   `lapophalfshare`: Population with low food access within ½ mile.\
--   `Urban`: Urban/rural classification.\
--   `Nsupermarkets`: Count of supermarkets within threshold distance.
+-   **TractFIPS** Census tract identifier for geographic mapping.
+-   **State** State name for aggregation and filtering.
+-   **LILATracts_1And10** Low-income and low-access tract indicator.
+-   **PovertyRate** Percent of population below poverty line.
+-   **lapophalfshare** Population with low food access within ½ mile.
+-   **Urban** Urban/rural classification.
+-   **Nsupermarkets** Count of supermarkets within threshold distance.
 
 # 3 Use Case and Actor Description
 
