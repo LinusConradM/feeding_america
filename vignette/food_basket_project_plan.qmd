@@ -234,39 +234,39 @@ This structured workflow ensures efficient collaboration, accountability, and co
 
 ## 6.1 Team Roles and Responsibilities
 
-+----------------------+------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Team Member          | Course Level     | Primary Responsibilities                                                                                              |
-+======================+==================+=======================================================================================================================+
-| Conrad Linus Muhirwe | DATA-613         | -   Repository setup, version control & documentation.                                                                |
-|                      |                  | -   Statistical modeling, validation and interpretation                                                               |
-+----------------------+------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Sharon Wanyana       | DATA-613         | Correlation & Regression analysis, hypothesis testing                                                                 |
-+----------------------+------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Ryann Tompkins       | DATA-613         | -   Literature & ethical review                                                                                       |
-|                      |                  | -   Exploratory data analysis & visualization using `{ggplot2}` and `{plotly}`, summary tables plus interactive maps. |
-+----------------------+------------------+-----------------------------------------------------------------------------------------------------------------------+
-| Alex Arevalo         | DATA-413         | Data acquisition, cleaning, and transformation, UI & UX.                                                              |
-+----------------------+------------------+-----------------------------------------------------------------------------------------------------------------------+
++----------------------+--------------+-----------------------------------------------------------------------------------------------------------------------+
+| Team Member          | Course Level | Primary Responsibilities                                                                                              |
++======================+==============+=======================================================================================================================+
+| Conrad Linus Muhirwe | DATA-613     | -   Repository setup, version control & documentation.                                                                |
+|                      |              | -   Statistical modeling, validation and interpretation                                                               |
++----------------------+--------------+-----------------------------------------------------------------------------------------------------------------------+
+| Sharon Wanyana       | DATA-613     | Correlation & Regression analysis, hypothesis testing                                                                 |
++----------------------+--------------+-----------------------------------------------------------------------------------------------------------------------+
+| Ryann Tompkins       | DATA-613     | -   Literature & ethical review                                                                                       |
+|                      |              | -   Exploratory data analysis & visualization using `{ggplot2}` and `{plotly}`, summary tables plus interactive maps. |
++----------------------+--------------+-----------------------------------------------------------------------------------------------------------------------+
+| Alex Arevalo         | DATA-413     | Data acquisition, cleaning, and transformation, UI & UX.                                                              |
++----------------------+--------------+-----------------------------------------------------------------------------------------------------------------------+
 
 ## 6.2 Schedule and Milestones
 
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| Milestone                            | Target Date  | Deliverable / Outcome                                                           |
-+======================================+==============+=================================================================================+
-| Data acquisition and Project Plan    | Oct 24 2025  | Verified `.rds` datasets stored in `/data` folder; cleaning scripts documented. |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| App skeleton (UI structure & tabs)   | Oct 30 2025  | Functional navigation across Overview, Exploration, and Analysis tabs.          |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| Progress Report submission           | Nov 11 2025  | Updated `.qmd` and HTML with preliminary visuals and workflow.                  |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| Statistical modeling integration     | Nov 20 2025  | Regression and correlation modules functional with outputs.                     |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| App refinement & user testing        | Dec 3 2025   | Fully interactive dashboard tested across user scenarios.                       |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| Vignette drafting & demo preparation | Dec 8 2025   | Completed vignette, rehearsal of oral demonstration.                            |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
-| Final submission                     | Dec 9 2025   | Final GitHub repo, HTML deliverables, and class demonstration.                  |
-+--------------------------------------+--------------+---------------------------------------------------------------------------------+
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| Milestone                            | Target Date | Deliverable / Outcome                                                           |
++======================================+=============+=================================================================================+
+| Data acquisition and Project Plan    | Oct 24 2025 | Verified `.rds` datasets stored in `/data` folder; cleaning scripts documented. |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| App skeleton (UI structure & tabs)   | Oct 30 2025 | Functional navigation across Overview, Exploration, and Analysis tabs.          |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| Progress Report submission           | Nov 11 2025 | Updated `.qmd` and HTML with preliminary visuals and workflow.                  |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| Statistical modeling integration     | Nov 20 2025 | Regression and correlation modules functional with outputs.                     |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| App refinement & user testing        | Dec 3 2025  | Fully interactive dashboard tested across user scenarios.                       |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| Vignette drafting & demo preparation | Dec 8 2025  | Completed vignette, rehearsal of oral demonstration.                            |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
+| Final submission                     | Dec 9 2025  | Final GitHub repo, HTML deliverables, and class demonstration.                  |
++--------------------------------------+-------------+---------------------------------------------------------------------------------+
 
 ![Critical Path](images/Critical%20Path-2.png){fig-align="center"}
 
