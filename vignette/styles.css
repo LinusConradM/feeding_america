@@ -1,0 +1,9 @@
+p, li {
+  line-height: 1.5;       /* line spacing within paragraphs/lists */
+  margin-top: 0.3em;      /* space before each paragraph */
+  margin-bottom: 0.3em;   /* space after each paragraph */
+}
+
+h1, h2, h3 {
+  line-height: 1.1;
+}
