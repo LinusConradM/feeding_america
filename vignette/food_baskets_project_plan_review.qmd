@@ -1,0 +1,58 @@
+---
+title: "Project Plan Review"
+author: "Food Baskets"
+format: html
+editor: visual
+---
+
+## Introduction
+
+On November 2 a peer review meeting was conducted between Group Food Baskets and Group Foodie Group, in which all members from both groups were present, to discuss the project plan focusing on the *Actor Workflow* and *App Layout* components of the Foodie Groups project plan. The reviewed group’s app concept centers on helping visitors in Washington, DC identify restaurants that are easily accessible via public transportation. The meeting covered expected users, workflow structure, app layout, and possible model features.
+
+## Summary of Discussion
+
+Strengths:
+
+-   The **use case** is clear and well-defined: helping DC visitors find restaurants that are realistically walkable from metro or bus stops, especially given high parking costs.
+
+<!-- -->
+
+-    The **workflow** is intuitive. The app includes a left-side filter bar allowing users to select cuisine, price level, rating, family-friendliness, transportation mode, and meal type. The right side displays a **map with results**, including walking times and a “tip list.”
+
+<!-- -->
+
+-    The layout supports user questions effectively and encourages **interaction through filtering**, helping users quickly identify the best restaurant options.
+
+<!-- -->
+
+-    The **model design** idea is promising, using predicted probabilities and confidence intervals to estimate if a restaurant is within a 15-minute walk of public transit.
+
+Areas for Improvement:
+
+-   The app currently relies heavily on the map; it **lacks visual features** such as restaurant images or menu previews that could enhance usability and engagement.
+
+<!-- -->
+
+-    It’s unclear how the app will **handle missing data**, especially with multiple categorical variables.
+
+<!-- -->
+
+-    Some **filter dependencies** might make it difficult for users if all filters are required before results appear.
+
+<!-- -->
+
+-    The app could benefit from including **menu data or brief descriptions** to give users more context about restaurant choices beyond distance.
+
+### Recommendations
+
+We recommend the team:
+
+1.   Integrate **visual elements** such as photos or menu previews to make the interface more engaging.
+
+2.   Ensure users can **see partial results** even if not all filters are selected or there is missing data, improving accessibility.
+
+3.   Include an **error-handling approach** for categorical data and consider how to display incomplete data gracefully.
+
+4.   Explore the addition of **menu or rating summaries** in the map results for a richer user experience.
+
+Overall, the app’s workflow and layout demonstrate a strong foundation and align well with the target users’ goals of finding accessible, affordable, and convenient restaurant options in DC.
