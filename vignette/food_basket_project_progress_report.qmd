@@ -141,6 +141,8 @@ Our commitment to responsible data science remains central. We continue to adher
 -   **Tab 2: Exploration** – Interactive choropleth maps, temporal line charts, demographic comparisons using `{ggplot2}`, `{plotly}`, and `{leaflet}`
 -   **Tab 3: Analysis** – Correlation matrices, regression modeling, group comparisons (t-tests)
 
+![Food-basket App Overview](../images/OverviewPage.png)
+
 *Implementation Note:* Following a peer review suggestion, we will add a **Data Table tab** using `{DT}` for interactive filtering and export.
 
 ### 4.2 User Data Selection Options
@@ -149,6 +151,8 @@ Our commitment to responsible data science remains central. We continue to adher
 -   **Temporal sliders:** Year range selection (2009-2023)
 -   **Variable selection:** Multi-select for socioeconomic indicators
 -   **Demographic focus:** Rural/urban, households with children, racial/ethnic groups
+
+![Food-basket User Data Option (Place Holder)](../images/ExplorationMap.png)
 
 *Implementation Note:* Following a peer review suggestion, we will implement **dynamic UI elements** allowing users to switch between state-level and county-level analysis seamlessly.
 
@@ -165,6 +169,9 @@ Our commitment to responsible data science remains central. We continue to adher
 
 -   Correlation analysis (Pearson/Spearman)
 -   Multiple linear regression with diagnostic plots
+
+![Food-basket Statistical Modeling](../images/AnalysisRegression.png)
+
 
 **For DATA-613 Students:**\
 *Implementation Note:* Following the project guidelines, team members who have completed DATA-427/627 will explore **classification modeling** (e.g., predicting high/low food insecurity categories) and **model comparison tools** beyond linear regression.
