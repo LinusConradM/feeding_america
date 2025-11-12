@@ -97,11 +97,11 @@ We adhere to ASA guidelines: using only public, de-identified data (Feeding Amer
 
 -   **Analysis**: Correlation matrices, regression modeling, t-tests.
 
-![Tab 3](images/AnalysisRegression-2.png)
+![Tab 3](images/AnalysisRegression.png)
 
 -   **User Controls:** Geographic filters (state/county), temporal sliders (2009-2023), variable selection (socioeconomic indicators), demographic focus (rural/urban, race/ethnicity). Dynamic UI switches between state/county analysis.
 
-    ![User Controls](images/UserDataOptions_PlaceHolder-2.png)
+    ![User Controls](images/UserDataOptions_PlaceHolder.png)
 
 -   **Statistical Tools:** DATA-413—correlation, linear regression with diagnostics; DATA-613—classification modeling (high/low food insecurity), model comparison beyond linear regression per team expertise in DATA-427/627.
 
