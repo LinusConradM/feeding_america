@@ -1,0 +1,1489 @@
+---
+title: "Meal Maps data"
+author: "Alex Arevalo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(readxl)
+library(dplyr)
+library(stringr)
+library(janitor)
+```
+
+### load xlsx sheet from 2009 into 3 seperate df's
+
+```{r}
+# 2009 raw data
+raw_foodinsc_09 <- "mealmaps/MMG_2009.xlsx"
+
+# county
+county_09_df <- read_xlsx(
+  raw_foodinsc_09, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_09_df <- read_xlsx(
+  raw_foodinsc_09, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_09_df <- read_xlsx(
+  raw_foodinsc_09,
+  sheet = "Congressional_district",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+```
+
+### clean df for county 2009 
+
+```{r, warning=FALSE}
+# convert char columns to numeric columns
+county_09_df <- county_09_df |>
+  mutate(across(
+    c(weighted_annual_dollars, cost_per_meal),
+    ~ as.numeric(str_replace_all(.x, "[$,]", ""))))
+
+# round df to 2 decimal points
+county_09_df <- county_09_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+
+# fips as first column
+county_09_df <- county_09_df |> 
+  select(fips, everything())
+
+# discard empty rows/observations
+county_09_df <- county_09_df |> 
+  slice(1:3137)
+
+# rename county column
+county_09_df <- county_09_df |> 
+  rename(county = county_code)
+```
+
+### clean df for state 2009 
+
+### ******need to add fips column*******
+
+```{r, warning=FALSE}
+# convert char columns to numeric columns
+state_09_df <- state_09_df |>
+  mutate(across(
+    c(weighted_annual_dollars, cost_per_meal),
+    ~ as.numeric(str_replace_all(.x, "[$,]", ""))))
+
+# round df to 2 decimal points
+state_09_df <- state_09_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+### clean df for congressional 2009
+
+```{r}
+# strip everything after district # in column
+cong_09_df <- cong_09_df |>
+   mutate(district = str_remove(district, "\\s*\\(.*"))
+
+# round df to 2 decimal points
+cong_09_df <- cong_09_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+### load xlsx sheet from 2010 into 3 seperate df's
+
+```{r}
+# 2010 raw data
+raw_foodinsc_10 <- "mealmaps/MMG_2010.xlsx"
+
+# county
+county_10_df <- read_xlsx(
+  raw_foodinsc_10, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_10_df <- read_xlsx(
+  raw_foodinsc_10, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_10_df <- read_xlsx(
+  raw_foodinsc_10,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2010
+
+```{r}
+# round df to 2 decimal points
+county_10_df <- county_10_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+
+# just keep county name
+county_10_df <- county_10_df |> 
+  mutate(county_state = str_remove(county_state, ",.*$"))
+
+# rename county and state column
+county_10_df <- county_10_df |> 
+  rename(county = county_state) |>
+  rename(state_name = state)
+```
+
+### clean df for state 2010
+
+```{r}
+# fips as first column
+state_10_df <- state_10_df |> 
+  select(fips, everything()) |>
+  mutate(fips = as.character(fips))
+
+# rename state column
+state_10_df <- state_10_df |> 
+  rename(state_name = state)
+
+# round df to 2 decimal points
+state_10_df <- state_10_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+### clean df for congressional 2010
+
+```{r}
+# strip everything after district # in column
+cong_10_df <- cong_10_df |>
+mutate(district = str_remove(district, "\\s*\\(.*\\),.*$"))
+
+# round df to 2 decimal points
+cong_10_df <- cong_10_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+### load xlsx sheet from 2011 into 3 seperate df's
+
+```{r}
+# 2011 raw data
+raw_foodinsc_11 <- "mealmaps/MMG_2011.xlsx"
+
+# county
+county_11_df <- read_xlsx(
+  raw_foodinsc_11, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_11_df <- read_xlsx(
+  raw_foodinsc_11, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_11_df <- read_xlsx(
+  raw_foodinsc_11,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2011
+
+```{r}
+# rename county/state column and keep only county name in row
+county_11_df <- county_11_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+  
+# round df to 2 decimal points
+county_11_df <- county_11_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2011
+
+```{r}
+# rename state and county_state column 
+state_11_df <- state_11_df |>
+  rename(state_name = state) |>
+  rename(state = county_state) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2011
+
+```{r}
+# strip everything after district # in column
+cong_11_df <- cong_11_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$"))
+
+# round df to 2 decimal points
+cong_11_df <- cong_11_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+### load xlsx sheet from 2012 into 3 seperate df's
+
+```{r}
+# 2012 raw data
+raw_foodinsc_12 <- "mealmaps/MMG_2012.xlsx"
+
+# county
+county_12_df <- read_xlsx(
+  raw_foodinsc_12, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_12_df <- read_xlsx(
+  raw_foodinsc_12, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_12_df <- read_xlsx(
+  raw_foodinsc_12,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2012
+
+```{r}
+# rename county/state column and keep only county name in row
+county_12_df <- county_12_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points; convert fips to char
+county_12_df <- county_12_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2012
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_12_df <- state_12_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2012
+
+```{r}
+# strip everything after district # in column & convert fips to char
+cong_12_df <- cong_12_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(fips = as.character(fips))
+
+# round df to 2 decimal points 
+cong_12_df <- cong_12_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+```
+
+### load xlsx sheet from 2013 into 3 seperate df's
+
+```{r}
+# 2013 raw data
+raw_foodinsc_13 <- "mealmaps/MMG_2013.xlsx"
+
+# county
+county_13_df <- read_xlsx(
+  raw_foodinsc_13, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_13_df <- read_xlsx(
+  raw_foodinsc_13, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_13_df <- read_xlsx(
+  raw_foodinsc_13,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2013
+
+```{r, warning=FALSE}
+# rename county/state column and keep only county name in row
+county_13_df <- county_13_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points
+county_13_df <- county_13_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# convert coluns
+county_13_df <- county_13_df |> 
+  mutate(
+    fips = as.character(fips), percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2013 = 
+  as.double(percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2013),
+percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2013 = 
+  as.double(percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2013), 
+x2013_child_food_insecurity_rate = 
+  as.double(x2013_child_food_insecurity_rate))
+```
+
+### clean df for state 2013
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_13_df <- state_13_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2013
+
+```{r}
+# strip everything after district # in column & convert fips to char
+cong_13_df <- cong_13_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(fips = as.character(fips))
+
+# round df to 2 decimal points 
+cong_13_df <- cong_13_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+```
+
+### load xlsx sheet from 2014 into 3 seperate df's
+
+```{r}
+# 2014 raw data
+raw_foodinsc_14 <- "mealmaps/MMG_2014.xlsx"
+
+# county
+county_14_df <- read_xlsx(
+  raw_foodinsc_14, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_14_df <- read_xlsx(
+  raw_foodinsc_14, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_14_df <- read_xlsx(
+  raw_foodinsc_14,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2014
+
+```{r}
+# rename county/state column and keep only county name in row
+county_14_df <- county_14_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points
+county_14_df <- county_14_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2014
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_14_df <- state_14_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2014
+
+```{r}
+# strip everything after district # in column; round df to 2 decimal points; convert fips to char
+cong_14_df <- cong_14_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### load xlsx sheet from 2015 into 3 seperate df's
+
+```{r}
+# 2015 raw data
+raw_foodinsc_15 <- "mealmaps/MMG_2015.xlsx"
+
+# county
+county_15_df <- read_xlsx(
+  raw_foodinsc_15, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_15_df <- read_xlsx(
+  raw_foodinsc_15, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_15_df <- read_xlsx(
+  raw_foodinsc_15,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2015
+
+```{r}
+# rename county/state column and keep only county name in row
+county_15_df <- county_15_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points
+county_15_df <- county_15_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2015
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_15_df <- state_15_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2015
+
+```{r}
+# strip everything after district # in column; round df to 2 decimal points; convert fips to char
+cong_15_df <- cong_15_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+## load xlsx sheet from 2016 into 3 seperate df's
+
+```{r}
+# 2016 raw data
+raw_foodinsc_16 <- "mealmaps/MMG_2016.xlsx"
+
+# county
+county_16_df <- read_xlsx(
+  raw_foodinsc_16, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_16_df <- read_xlsx(
+  raw_foodinsc_16, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_16_df <- read_xlsx(
+  raw_foodinsc_16,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2016
+
+```{r}
+# rename county/state column and keep only county name in row
+county_16_df <- county_16_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points; convert fips to char
+county_16_df <- county_16_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2016
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_16_df <- state_16_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2016
+
+```{r}
+# strip everything after district # in column; round df to 2 decimal points; convert fips to char
+cong_16_df <- cong_16_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+## load xlsx sheet from 2017 into 3 seperate df's
+
+```{r}
+# 2017 raw data
+raw_foodinsc_17 <- "mealmaps/MMG_2017.xlsx"
+
+# county
+county_17_df <- read_xlsx(
+  raw_foodinsc_17, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_17_df <- read_xlsx(
+  raw_foodinsc_17, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_17_df <- read_xlsx(
+  raw_foodinsc_17,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2017
+
+```{r}
+# rename county/state column and keep only county name in row
+county_17_df <- county_17_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points; convert fips to char
+county_17_df <- county_17_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2017
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_17_df <- state_17_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2017
+
+```{r}
+# strip everything after district # in column; round df to 2 decimal points; convert fips to char
+cong_17_df <- cong_17_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+## load xlsx sheet from 2018 into 3 seperate df's
+
+```{r}
+# 2018 raw data
+raw_foodinsc_18 <- "mealmaps/MMG_2018.xlsx"
+
+# county
+county_18_df <- read_xlsx(
+  raw_foodinsc_18, 
+  sheet = "County",
+  skip = 1, # remove extra header in this file only
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_18_df <- read_xlsx(
+  raw_foodinsc_18, 
+  sheet = "State",
+  skip = 1, # remove extra header in this file only
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_18_df <- read_xlsx(
+  raw_foodinsc_18,
+  sheet = "Congressional District",
+  skip = 1, # remove extra header in this file only
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2018
+```{r}
+# rename county/state column and keep only county name in row
+county_18_df <- county_18_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) 
+
+# round df to 2 decimal points; convert fips to char
+county_18_df <- county_18_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for state 2018
+
+```{r}
+# round df to 2 decimal points & convert fips to char
+state_18_df <- state_18_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+### clean df for congressional 2018
+
+```{r}
+# strip everything after district # in column; round df to 2 decimal points; convert fips to char
+cong_18_df <- cong_18_df |> 
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips))
+```
+
+## load xlsx sheet from 2019 into 4 seperate df's
+
+```{r}
+# 2019 raw data
+raw_foodinsc_19 <- "mealmaps/MMG_2019.xlsx"
+
+# county
+county_19_df <- read_xlsx(
+  raw_foodinsc_19, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_19_df <- read_xlsx(
+  raw_foodinsc_19, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_19_df <- read_xlsx(
+  raw_foodinsc_19,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### new data set introduced in 2019 for people in metro areas with age <50
+
+```{r}
+# Metro Area (50+ Only)
+metro_senior_19_df <- read_xlsx(
+  raw_foodinsc_19,
+  sheet = "Metro Area (50+ Only)",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+
+### clean df for county 2019
+
+### county df included 9 new variables: 
+- rural_urban_continuum_code_2013
+- rural_urban_continuum_code_2023
+- census_region
+- census_division
+- fns_region 
+- food_insecurity_rate_among_black_persons_all_ethnicities
+- food_insecurity_rate_among_hispanic_persons_any_race
+- food_insecurity_rate_among_white_non_hispanic_persons 
+- weighted_weekly_needed_by_fi
+
+### county df removed 4 columns in 2019 that were used in all previous years
+- low_threshold_type                                                      
+- high_threshold_in_state                                                 
+- high_threshold_type 
+- percent_fi_btwn_thresholds
+
+```{r}
+# rename county/state column
+# strip everything after district #
+# keep years for 2019
+# take first 0 out of fips column
+# remove year column
+county_19_df <- county_19_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) |>
+  filter(year == 2019) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  select(-year) 
+
+# round df to 2 decimal points
+# convert fips to char
+# remove first 0 from fips column for uniformity for previous years
+county_19_df <- county_19_df |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  mutate(fips = as.character(fips)) 
+
+# rename 2019 columns for uniformity to previous years
+county_19_df <- county_19_df |>
+  rename(
+    x2019_food_insecurity_rate = overall_food_insecurity_rate,
+    x2019_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2019_cost_per_meal = cost_per_meal,
+  x2019_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall)    
+
+# rename more columns to match uniformity to previous years
+county_19_df <- county_19_df |>
+  rename(
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold = percent_fi_snap_threshold,
+    number_of_food_insecure_persons_in_2019 = number_of_food_insecure_persons_overall,
+    percent_fi_high_threshold = percent_fi_snap_threshold_2)
+
+# # remove new columns 
+# county_19_df <- county_19_df |>
+#   select(
+#     -rural_urban_continuum_code_2013, 
+#     -rural_urban_continuum_code_2023, 
+#     -census_region, 
+#     -census_division, 
+#     -fns_region, 
+#     -food_insecurity_rate_among_black_persons_all_ethnicities, 
+#     -food_insecurity_rate_among_hispanic_persons_any_race, 
+#     -food_insecurity_rate_among_white_non_hispanic_persons, 
+#     -weighted_weekly_needed_by_fi)
+```
+
+### clean df for state 2019
+
+### state df included 12 new variables: 
+- year (later removed)
+- food_insecurity_rate_among_black_persons_all_ethnicities
+- food_insecurity_rate_among_hispanic_persons_any_race           
+- food_insecurity_rate_among_white_non_hispanic_person 
+- senior_food_insecurity_rate  
+- number_of_food_insecure_seniors 
+- older_adult_food_insecurity_rate 
+- number_of_food_insecure_older_adults
+- weighted_weekly_needed_by_fi     
+- census_division                                                
+- census_region                                                
+- fns_region       
+
+
+### state df removed 4 columns in 2019 that were used in all previous years
+- Low Threshold Type
+- High Threshold in state
+- High Threshold Type
+- % FI Btwn Thresholds
+
+```{r}
+# keep only obvs from 2019
+# remove year column
+# remove first 0 in fips column 
+# round to 2 decimal points
+state_19_df <- state_19_df |>
+  filter(year == 2019) |>
+  select(-year) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# rename 2019 columns for uniformity to previous years
+state_19_df <- state_19_df |>
+  rename(
+    x2019_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2019=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold_in_state,
+  percent_fi_low_threshold  = percent_fi_snap_threshold,
+  percent_fi_high_threshold = percent_fi_snap_threshold_2,
+  x2019_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2019_cost_per_meal = cost_per_meal,
+  percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2019=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2019=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl,
+  number_of_food_insecure_children_in_2019= number_of_food_insecure_children,
+  x2019_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall) 
+```
+
+### clean df for congressional 2019
+
+### state df included 7 new variables: 
+- year (later removed)
+- food_insecurity_rate_among_black_persons_all_ethnicities
+- food_insecurity_rate_among_hispanic_persons_any_race           
+- food_insecurity_rate_among_white_non_hispanic_person 
+- census_division                                                
+- census_region                                                
+- fns_region  
+
+### congressional df removed 4 columns in 2019 that were used in all previous years
+- Low Threshold Type
+- High Threshold in state
+- High Threshold Type
+- % FI Btwn Thresholds
+
+```{r}
+# keep only obvs from 2019
+# remove year column
+# strip everything after district # in column
+# round df to 2 decimal points; convert fips to char
+# rename state column to match previous years
+cong_19_df <- cong_19_df |>
+  filter(year == 2019) |>
+  select(-year) |>
+  mutate(district = str_remove(district, "\\s*\\(.*\\),.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  rename(state_name = state) 
+
+# rename columns
+cong_19_df <- cong_19_df |>
+  rename(
+    x2019_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2019=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold  = percent_fi_snap_threshold,
+    x2019_child_food_insecurity_rate = child_food_insecurity_rate,
+    number_of_food_insecure_children_in_2019= number_of_food_insecure_children,
+    percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2019=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2019=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl)
+
+```
+
+### clean df for metro 2019
+
+```{r}
+# keep data for 2019 and round decimal to 2 points
+metro_senior_19_df <- metro_senior_19_df |>
+  filter(year == 2019) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+  
+```
+
+## load xlsx sheet from 2020 into 4 seperate df's
+
+```{r}
+# 2020 raw data
+raw_foodinsc_20 <- "mealmaps/MMG_2020.xlsx"
+
+# county
+county_20_df <- read_xlsx(
+  raw_foodinsc_20, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_20_df <- read_xlsx(
+  raw_foodinsc_20, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_20_df <- read_xlsx(
+  raw_foodinsc_20,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# metro Area (50+ Only)
+metro_senior_20_df <- read_xlsx(
+  raw_foodinsc_20,
+  sheet = "Metro Area (50+ Only)",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2020
+
+```{r}
+# rename county/state column
+# strip everything after district #
+# keep years for 2020
+# take first 0 out of fips column
+# remove year column
+# round df to 2 decimal points
+county_20_df <- county_20_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) |>
+  filter(year == 2020) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+   mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  select(-year) 
+
+# rename 2020 columns for uniformity to previous years
+county_20_df <- county_20_df |>
+  rename(
+    x2020_food_insecurity_rate = overall_food_insecurity_rate,
+    x2020_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2020_cost_per_meal = cost_per_meal,
+  x2020_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall)    
+
+# rename more columns to match uniformity to previous years
+county_20_df <- county_20_df |>
+  rename(
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold = percent_fi_snap_threshold,
+    number_of_food_insecure_persons_in_2020 = number_of_food_insecure_persons_overall,
+    percent_fi_high_threshold = percent_fi_snap_threshold_2)
+```
+
+### clean df for state 2020
+
+```{r}
+# keep only obvs from 2020
+# remove year column
+# remove first 0 in fips column 
+state_20_df <- state_20_df |>
+  filter(year == 2020) |>
+  select(-year) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# rename 2020 columns for uniformity to previous years
+state_20_df <- state_20_df |>
+  rename(
+    x2020_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2020=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold_in_state,
+  percent_fi_low_threshold  = percent_fi_snap_threshold,
+  percent_fi_high_threshold = percent_fi_snap_threshold_2,
+  x2020_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2020_cost_per_meal = cost_per_meal,
+  percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2020=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2020=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl,
+  number_of_food_insecure_children_in_2020= number_of_food_insecure_children,
+  x2020_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall) 
+```
+
+### clean df for congressional 2020
+
+```{r}
+# keep only obvs from 2020
+# remove year column
+# strip everything after district # in column
+# round df to 2 decimal points; convert fips to char
+# rename state column to match previous years
+cong_20_df <- cong_20_df |>
+  filter(year == 2020) |>
+  select(-year) |>
+  mutate(district = str_remove(district, "\\s*(\\(.*\\))?,.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  rename(state_name = state) 
+
+# rename columns
+cong_20_df <- cong_20_df |>
+  rename(
+    x2020_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2020=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold  = percent_fi_snap_threshold,
+    x2020_child_food_insecurity_rate = child_food_insecurity_rate,
+    number_of_food_insecure_children_in_2020= number_of_food_insecure_children,
+    percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2020=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2020=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl)
+```
+
+### clean df for metro 2020
+
+```{r}
+# keep data for 2020 and round decimal to 2 points
+metro_senior_20_df <- metro_senior_20_df |>
+  filter(year == 2020) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+## load xlsx sheet from 2021 into 4 seperate df's
+
+```{r}
+# 2021 raw data
+raw_foodinsc_21 <- "mealmaps/MMG_2021.xlsx"
+
+# county
+county_21_df <- read_xlsx(
+  raw_foodinsc_21, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_21_df <- read_xlsx(
+  raw_foodinsc_21, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_21_df <- read_xlsx(
+  raw_foodinsc_21,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# metro Area (50+ Only)
+metro_senior_21_df <- read_xlsx(
+  raw_foodinsc_21,
+  sheet = "Metro Area (50+ Only)",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2021
+
+```{r}
+# rename county/state column
+# strip everything after district #
+# keep years for 2021
+# take first 0 out of fips column
+# remove year column
+# round df to 2 decimal points
+county_21_df <- county_21_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) |>
+  filter(year == 2021) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+   mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  select(-year) 
+
+# rename 2021 columns for uniformity to previous years
+county_21_df <- county_21_df |>
+  rename(
+    x2021_food_insecurity_rate = overall_food_insecurity_rate,
+    x2021_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2021_cost_per_meal = cost_per_meal,
+  x2021_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall)    
+
+# rename more columns to match uniformity to previous years
+county_21_df <- county_21_df |>
+  rename(
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold = percent_fi_snap_threshold,
+    number_of_food_insecure_persons_in_2021 = number_of_food_insecure_persons_overall,
+    percent_fi_high_threshold = percent_fi_snap_threshold_2)
+```
+
+### clean df for state 2021
+
+```{r}
+# keep only obvs from 2021
+# remove year column
+# remove first 0 in fips column 
+state_21_df <- state_21_df |>
+  filter(year == 2021) |>
+  select(-year) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# rename 2021 columns for uniformity to previous years
+state_21_df <- state_21_df |>
+  rename(
+    x2021_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2021=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold_in_state,
+  percent_fi_low_threshold  = percent_fi_snap_threshold,
+  percent_fi_high_threshold = percent_fi_snap_threshold_2,
+  x2021_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2021_cost_per_meal = cost_per_meal,
+  percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2021=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2021=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl,
+  number_of_food_insecure_children_in_2021= number_of_food_insecure_children,
+  x2021_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall) 
+```
+
+### clean df for congressional 2021
+
+```{r}
+# keep only obvs from 2021
+# remove year column
+# strip everything after district # in column
+# round df to 2 decimal points; convert fips to char
+# rename state column to match previous years
+# convert fips to char
+cong_21_df <- cong_21_df |>
+  filter(year == 2021) |>
+  select(-year) |>
+  mutate(district = str_remove(district, "\\s*(\\(.*\\))?,.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  rename(state_name = state) |>
+  mutate(fips = as.character(fips))
+
+# rename columns
+cong_21_df <- cong_21_df |>
+  rename(
+    x2021_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2021=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold  = percent_fi_snap_threshold,
+    x2021_child_food_insecurity_rate = child_food_insecurity_rate,
+    number_of_food_insecure_children_in_2021= number_of_food_insecure_children,
+    percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2021=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2021=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl)
+```
+
+### clean df for metro 2021
+
+```{r}
+# keep data for 2021 and round decimal to 2 points
+metro_senior_21_df <- metro_senior_21_df |>
+  filter(year == 2021) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2)))
+```
+
+## load xlsx sheet from 2022 into 4 seperate df's
+
+```{r}
+# 2022 raw data
+raw_foodinsc_22 <- "mealmaps/MMG_2022.xlsx"
+
+# county
+county_22_df <- read_xlsx(
+  raw_foodinsc_22, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_22_df <- read_xlsx(
+  raw_foodinsc_22, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_22_df <- read_xlsx(
+  raw_foodinsc_22,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# metro Area (50+ Only)
+metro_senior_22_df <- read_xlsx(
+  raw_foodinsc_22,
+  sheet = "Metro Area (50+ Only)",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2022
+
+```{r}
+# rename county/state column
+# strip everything after district #
+# keep years for 2022
+# take first 0 out of fips column
+# remove year column
+# round df to 2 decimal points
+county_22_df <- county_22_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) |>
+  filter(year == 2022) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+   mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  select(-year) 
+
+# rename 2022 columns for uniformity to previous years
+county_22_df <- county_22_df |>
+  rename(
+    x2022_food_insecurity_rate = overall_food_insecurity_rate,
+    x2022_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2022_cost_per_meal = cost_per_meal,
+  x2022_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall)    
+
+# rename more columns to match uniformity to previous years
+county_22_df <- county_22_df |>
+  rename(
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold = percent_fi_snap_threshold,
+    number_of_food_insecure_persons_in_2022 = number_of_food_insecure_persons_overall,
+    percent_fi_high_threshold = percent_fi_snap_threshold_2)
+```
+
+### clean df for state 2022
+
+```{r}
+# keep only obvs from 2022
+# remove year column
+# remove first 0 in fips column 
+state_22_df <- state_22_df |>
+  filter(year == 2022) |>
+  select(-year) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# rename 2022 columns for uniformity to previous years
+state_22_df <- state_22_df |>
+  rename(
+    x2022_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2022=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold_in_state,
+  percent_fi_low_threshold  = percent_fi_snap_threshold,
+  percent_fi_high_threshold = percent_fi_snap_threshold_2,
+  x2022_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2022_cost_per_meal = cost_per_meal,
+  percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2022=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2022=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl,
+  number_of_food_insecure_children_in_2022= number_of_food_insecure_children,
+  x2022_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall) 
+```
+
+### clean df for congressional 2022
+
+```{r}
+# keep only obvs from 2022
+# remove year column
+# strip everything after district # in column
+# round df to 2 decimal points; convert fips to char
+# rename state column to match previous years
+# convert fips to char
+cong_22_df <- cong_22_df |>
+  filter(year == 2022) |>
+  select(-year) |>
+  mutate(district = str_remove(district, "\\s*(\\(.*\\))?,.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  rename(state_name = state) |>
+  mutate(fips = as.character(fips))
+
+# rename columns
+cong_22_df <- cong_22_df |>
+  rename(
+    x2022_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2022=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold  = percent_fi_snap_threshold,
+    x2022_child_food_insecurity_rate = child_food_insecurity_rate,
+    number_of_food_insecure_children_in_2022= number_of_food_insecure_children,
+    percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2022=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2022=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl)
+```
+
+### clean df for metro 2022
+
+```{r}
+# keep data for 2022 and round decimal to 2 points
+metro_senior_22_df <- metro_senior_22_df |>
+  filter(year == 2022) |>
+  mutate(across(where(is.numeric),
+                ~ ifelse(abs(.x) >= 1, round(.x, 0), round(.x, 2))))
+```
+
+## load xlsx sheet from 2022 into 4 seperate df's
+
+```{r}
+# 2023 raw data
+raw_foodinsc_23 <- "mealmaps/MMG_2023.xlsx"
+
+# county
+county_23_df <- read_xlsx(
+  raw_foodinsc_23, 
+  sheet = "County",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |>
+  clean_names()
+
+# state 
+state_23_df <- read_xlsx(
+  raw_foodinsc_23, 
+  sheet = "State",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# congressional district
+cong_23_df <- read_xlsx(
+  raw_foodinsc_23,
+  sheet = "Congressional District",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+
+# metro Area (50+ Only)
+metro_senior_23_df <- read_xlsx(
+  raw_foodinsc_23,
+  sheet = "Metro Area (50+ Only)",
+  na = c("NA", "N/A", "NULL", ".", "--", "")) |> 
+  clean_names()
+```
+
+### clean df for county 2023
+
+```{r}
+# rename county/state column
+# strip everything after district #
+# keep years for 2023
+# take first 0 out of fips column
+# remove year column
+# round df to 2 decimal points
+county_23_df <- county_23_df |>
+  rename(state_name = state) |>
+  rename(county = county_state) |>
+  mutate(county = str_remove(county, ",.*$")) |>
+  filter(year == 2023) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+   mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  select(-year) 
+
+# rename 2023 columns for uniformity to previous years
+county_23_df <- county_23_df |>
+  rename(
+    x2023_food_insecurity_rate = overall_food_insecurity_rate,
+    x2023_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2023_cost_per_meal = cost_per_meal,
+  x2023_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall)    
+
+# rename more columns to match uniformity to previous years
+county_23_df <- county_23_df |>
+  rename(
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold = percent_fi_snap_threshold,
+    number_of_food_insecure_persons_in_2023 = number_of_food_insecure_persons_overall,
+    percent_fi_high_threshold = percent_fi_snap_threshold_2)
+```
+
+### clean df for state 2023
+
+```{r}
+# keep only obvs from 2023
+# remove year column
+# remove first 0 in fips column 
+state_23_df <- state_23_df |>
+  filter(year == 2023) |>
+  select(-year) |>
+  mutate(fips = str_remove(fips, "^0")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) 
+
+# rename 2023 columns for uniformity to previous years
+state_23_df <- state_23_df |>
+  rename(
+    x2023_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2023=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold_in_state,
+  percent_fi_low_threshold  = percent_fi_snap_threshold,
+  percent_fi_high_threshold = percent_fi_snap_threshold_2,
+  x2023_child_food_insecurity_rate = child_food_insecurity_rate,
+  x2023_cost_per_meal = cost_per_meal,
+  percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2023=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2023=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl,
+  number_of_food_insecure_children_in_2023= number_of_food_insecure_children,
+  x2023_weighted_annual_food_budget_shortfall = weighted_annual_food_budget_shortfall) 
+```
+
+### clean df for congressional 2023
+
+```{r}
+# keep only obvs from 2023
+# remove year column
+# strip everything after district # in column
+# round df to 2 decimal points; convert fips to char
+# rename state column to match previous years
+# convert fips to char
+cong_23_df <- cong_23_df |>
+  filter(year == 2023) |>
+  select(-year) |>
+  mutate(district = str_remove(district, "\\s*(\\(.*\\))?,.*$")) |>
+  mutate(across(where(is.numeric), ~ round(.x, 2))) |>
+  rename(state_name = state) |>
+  mutate(fips = as.character(fips))
+
+# rename columns
+cong_23_df <- cong_23_df |>
+  rename(
+    x2023_food_insecurity_rate = overall_food_insecurity_rate,
+    number_of_food_insecure_persons_in_2023=number_of_food_insecure_persons_overall,
+    low_threshold_in_state = snap_threshold,
+    percent_fi_low_threshold  = percent_fi_snap_threshold,
+    x2023_child_food_insecurity_rate = child_food_insecurity_rate,
+    number_of_food_insecure_children_in_2023= number_of_food_insecure_children,
+    percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl_in_2023=percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl,
+    percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl_in_2023=percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl)
+```
+
+### clean df for metro 2023
+
+```{r}
+# keep data for 2023 and round decimal to 2 points
+metro_senior_23_df <- metro_senior_23_df |>
+  filter(year == 2023) |>
+  mutate(across(where(is.numeric),
+                ~ ifelse(abs(.x) >= 1, round(.x, 0), round(.x, 2))))
+```
+
+
+```{r}
+# visual checks
+
+# check class
+glimpse(metro_senior_23_df)
+
+# check names
+names(metro_senior_23_df)
+
+# compare df with same # of column
+compare <-tibble(
+  metro_senior_23_df  = names(metro_senior_23_df),
+  metro_senior_22_df = names(metro_senior_22_df))
+```
+
+```{r}
+# comparing df with diff # of column
+
+# get column names
+n18 <- names(state_18_df)
+n19 <- names(state_19_df)
+
+# find longest length
+max_len <- max(length(n18), length(n19))
+
+# pad the shorter one with NAs
+n18 <- c(n18, rep(NA, max_len - length(n18)))
+n19 <- c(n19, rep(NA, max_len - length(n19)))
+
+# build the comparison table
+compare2 <- tibble(
+  col_18 = n18,
+  col_19 = n19)
+```
+
+
+
+
