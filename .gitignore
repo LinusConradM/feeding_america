@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 .pdf
+README.html
+.DS_Store
+README_files/
