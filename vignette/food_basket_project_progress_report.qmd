@@ -1,0 +1,150 @@
+---
+title: "Investigating U.S. Food Insecurity Through Data"
+subtitle: "Progress Report"
+author:
+  - Conrad Linus Muhirwe
+  - Sharon Wanyana
+  - Ryann Tompkins
+  - Alex Arevalo
+date: "2025-11-11"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    embed-resources: true
+    theme: cosmo
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    colorlinks: true
+    geometry: 
+      - margin=0.75in
+    fontsize: 11pt
+    linestretch: 1.0
+bibliography: references.bib
+csl: apa.csl
+---
+
+\clearpage
+
+# 1. Administrative Information {.unnumbered}
+
+-   **Project:** Investigating U.S. Food Insecurity Through Data
+-   **Course:** DATA-613 (Fall 2025)
+-   **Instructor:** Professor Richard Ressler
+-   **Team:** Conrad Muhirwe, Sharon Wanyana, Ryann Tompkins, Alex Arevalo
+
+------------------------------------------------------------------------
+
+# 2. Topic and Data
+
+## 2.1 Project Focus
+
+Our project examines **household food insecurity** which is the economic inability to afford adequate food across U.S. counties and states. We link geographic patterns to socioeconomic conditions (income, poverty, unemployment, education) and demographic disparities affecting low-income households, minorities, and families with children.
+
+**Objectives:**
+
+1.  Quantify food insecurity prevalence and distribution,
+2.  Analyze socioeconomic relationships,
+3.  Visualize insights via interactive Shiny app for policymakers, researchers, and nonprofit practitioners.
+
+## 2.2 Literature Review
+
+Our analysis builds on four domains:
+
+1.  **National trends**—13.5% U.S. food insecurity in 2023 [@usda_ers_2024]
+2.  **Geographic disparities**—rural/southern counties show highest rates [@feeding_america_2024]
+3.  **Socioeconomic determinants**—strong links to income, race, family structure [@gundersen_ziliak_2015]
+4.  **Policy interventions**—SNAP reduces food insecurity \~6% [@gundersen_kreider_pepper_2017].
+
+## 2.3 Data Source
+
+Due to the change in project focus from access to insecurity, our data source was updated as well per the distinction below
+
+| Dimension | Food Insecurity (Current Focus) | Food Access (Previous Focus) |
+|-------------------|----------------------------|-------------------------|
+| **Definition** | Economic inability to afford food | Geographic proximity to retailers |
+| **Question** | *Can households afford to eat?* | *How far are stores?* |
+| **Data Source** | Feeding America (2009-2023 [@feeding_america_2024] | USDA Atlas (2019) |
+
+: **Bottom Line:** Communities may have nearby stores but still face high food insecurity due to poverty. We aim to measure affordability, not distance.
+
+## 2.4 Data Status (75% Complete)
+
+-   **Completed (2009-2019):** Downloaded 11 years of Feeding America county-level data; harmonized variable names across years; cleaned core variables (`food_insecurity_rate`, `child_food_insecurity_rate`, `cost_per_meal`, `food_budget_shortfall`); standardized FIPS codes.
+-   **In Progress (2020-2023):** Integrating recent data with COVID-19 methodology adjustments; adding racial/ethnic disparity measures (2019+); implementing two-dataset strategy for longitudinal trends (2009-2023) and equity analysis (2019-2023).
+
+------------------------------------------------------------------------
+
+# 3. Ethical Review
+
+We adhere to ASA guidelines: using only public, de-identified data (Feeding America, Census); maintaining secure GitHub repository with version control; documenting all transformations in R scripts; correcting data source ensures we measure actual food insecurity (economic capability) not just geographic access, critical for equitable analysis; visualizations will use accessible design and neutral language.
+
+------------------------------------------------------------------------
+
+# 4. Application Design
+
+-   **Overview**: National KPIs, definitions, trends;
+
+![Tab 1](images/OverviewPage.png)
+
+-   **Exploration**: Interactive maps (`leaflet`), temporal charts (`plotly`), demographic comparisons;
+
+![Tab 2](images/ExplorationMap.png)
+
+![Added **Data Table** tab (`DT` package) per peer review suggestion.](images/ExplorationDataView.png)
+
+-   **Analysis**: Correlation matrices, regression modeling, t-tests.
+
+![Tab 3](images/AnalysisRegression-2.png)
+
+-   **User Controls:** Geographic filters (state/county), temporal sliders (2009-2023), variable selection (socioeconomic indicators), demographic focus (rural/urban, race/ethnicity). Dynamic UI switches between state/county analysis.
+
+    ![User Controls](images/UserDataOptions_PlaceHolder-2.png)
+
+-   **Statistical Tools:** DATA-413—correlation, linear regression with diagnostics; DATA-613—classification modeling (high/low food insecurity), model comparison beyond linear regression per team expertise in DATA-427/627.
+
+------------------------------------------------------------------------
+
+# 5. Demonstration Plan
+
+![](images/paste-2.png){fig-align="center" width="605"}
+
+------------------------------------------------------------------------
+
+# 6. Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------------------|------------------|------------------|-------------------|
+| Variable harmonization errors | Medium | High | Documentation (`column_name_years.xlsx`), peer review |
+| COVID methodology changes | High | Medium | Two-dataset strategy with clear documentation |
+| App performance issues | Low | Medium | Data pre-aggregation, reactive filtering |
+
+------------------------------------------------------------------------
+
+# 7. Team Roles and Timeline
+
+| Member | Contributions to Date | Next Phase Responsibilities |
+|------------------------|------------------------|------------------------|
+| **Conrad** | Repository setup, app layout design | Statistical modeling, validation |
+| **Alex** | Data acquisition & cleaning scripts (2009-2019) | UI/UX design, data integration (2020-2023) |
+| **Ryann** | Literature & ethical review | Exploratory visualization & Interactive maps |
+| **Sharon** | Variable selection & harmonization strategy | Correlation and regression models |
+
+: Member Progress
+
+![Timeline](images/paste-1.png){fig-align="center" width="767"}
+
+------------------------------------------------------------------------
+
+# Conclusion {.unnumbered}
+
+Updated data source (USDA → Feeding America), harmonized 11+ years of food insecurity data (75% complete), addressed all feedback from the project plan submission & peer review, and established a clear path to an interactive, policy-relevant Shiny application. Our two-dataset strategy handles methodological evolution while maximizing temporal coverage. On track for December 9 delivery.
+
+------------------------------------------------------------------------
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
