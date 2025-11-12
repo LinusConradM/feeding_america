@@ -24,6 +24,8 @@ format:
     linestretch: 1.0
 bibliography: references.bib
 csl: apa.csl
+execute:
+  fig-dir: "../images"
 ---
 
 \clearpage
@@ -87,21 +89,21 @@ We adhere to ASA guidelines: using only public, de-identified data (Feeding Amer
 
 -   **Overview**: National KPIs, definitions, trends;
 
-![Tab 1](images/OverviewPage.png)
+![Tab 1](../images/OverviewPage.png)
 
 -   **Exploration**: Interactive maps (`leaflet`), temporal charts (`plotly`), demographic comparisons;
 
-![Tab 2](images/ExplorationMap.png)
+![Tab 2](../images/ExplorationMap.png)
 
-![Added **Data Table** tab (`DT` package) per peer review suggestion.](images/ExplorationDataView.png)
+![Added **Data Table** tab (`DT` package) per peer review suggestion.](../images/ExplorationDataView.png)
 
 -   **Analysis**: Correlation matrices, regression modeling, t-tests.
 
-![Tab 3](images/AnalysisRegression.png)
+![Tab 3](../images/AnalysisRegression.png)
 
 -   **User Controls:** Geographic filters (state/county), temporal sliders (2009-2023), variable selection (socioeconomic indicators), demographic focus (rural/urban, race/ethnicity). Dynamic UI switches between state/county analysis.
 
-    ![User Controls](images/UserDataOptions_PlaceHolder.png)
+    ![User Controls](../images/UserDataOptions_PlaceHolder.png)
 
 -   **Statistical Tools:** DATA-413—correlation, linear regression with diagnostics; DATA-613—classification modeling (high/low food insecurity), model comparison beyond linear regression per team expertise in DATA-427/627.
 
@@ -109,7 +111,7 @@ We adhere to ASA guidelines: using only public, de-identified data (Feeding Amer
 
 # 5. Demonstration Plan
 
-![](images/paste-2.png){fig-align="center" width="605"}
+![](../images/paste-2.png){fig-align="center" width="605"}
 
 ------------------------------------------------------------------------
 
@@ -134,7 +136,7 @@ We adhere to ASA guidelines: using only public, de-identified data (Feeding Amer
 
 : Member Progress
 
-![Timeline](images/paste-1.png){fig-align="center" width="767"}
+![Timeline](../images/paste-1.png){fig-align="center" width="767"}
 
 ------------------------------------------------------------------------
 
