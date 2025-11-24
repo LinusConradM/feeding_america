@@ -1448,6 +1448,42 @@ metro_senior_23_df <- metro_senior_23_df |>
                 ~ ifelse(abs(.x) >= 1, round(.x, 0), round(.x, 2))))
 ```
 
+### creating data lists for shiny app
+
+```{r}
+# list for county
+county_list <- list(
+  county_09 = county_09_df,
+  county_10 = county_10_df,
+  county_11 = county_11_df,
+  county_12 = county_12_df,
+  county_13 = county_13_df,
+  county_14 = county_14_df,
+  county_15 = county_15_df,
+  county_16 = county_16_df,
+  county_17 = county_17_df,
+  county_18 = county_18_df,
+  county_19 = county_19_df,
+  county_20 = county_20_df,
+  county_21 = county_21_df,
+  county_22 = county_22_df,
+  county_23 = county_23_df
+)
+```
+
+```{r}
+# list for state
+```
+
+```{r}
+# list for congressional
+```
+
+```{r}
+# list for metro
+```
+
+
 
 ```{r}
 # visual checks
@@ -1468,22 +1504,94 @@ compare <-tibble(
 # comparing df with diff # of column
 
 # get column names
-n18 <- names(state_18_df)
-n19 <- names(state_19_df)
+col_18 <- names(cong_17_df)
+col_19<- names(cong_20_df)
 
 # find longest length
-max_len <- max(length(n18), length(n19))
+max_len <- max(length(col_18 ), length(col_19))
 
 # pad the shorter one with NAs
-n18 <- c(n18, rep(NA, max_len - length(n18)))
-n19 <- c(n19, rep(NA, max_len - length(n19)))
+col_18 <- c(col_18 , rep(NA, max_len - length(col_18 )))
+col_19 <- c(col_19, rep(NA, max_len - length(col_19)))
 
 # build the comparison table
 compare2 <- tibble(
-  col_18 = n18,
-  col_19 = n19)
+ cong_17_df = col_18 ,
+  cong_20_df= col_19)
 ```
 
+```{r}
+library(tidyverse)
+library(patchwork)
+
+
+make_corr_plots_side <- function(df_list) {
+  
+  imap(df_list, ~{
+    
+    # 1. numeric columns only
+    df_num <- dplyr::select(.x, where(is.numeric))
+    var_names <- colnames(df_num)
+    k <- length(var_names)
+    
+    # 2. correlation matrix
+    cor_mat <- cor(df_num, use = "pairwise.complete.obs")
+    
+    # 3. assign numeric indices
+    idx <- seq_len(k)
+    rownames(cor_mat) <- idx
+    colnames(cor_mat) <- idx
+    
+    # 4. reshape for ggplot
+    cor_long <- as.data.frame(as.table(cor_mat)) |>
+      mutate(
+        Var1 = factor(Var1, levels = idx),
+        Var2 = factor(Var2, levels = idx)
+      )
+    
+    # 5. heatmap plot
+    p_heatmap <- ggplot(cor_long, aes(Var1, Var2, fill = Freq)) +
+      geom_tile() +
+      scale_fill_gradient2(limits = c(-1,1)) +
+      coord_equal() +
+      labs(
+        title = paste("Correlation Matrix:", .y),
+        x = "Index",
+        y = "Index",
+        fill = "Correlation"
+      ) +
+      theme_minimal() +
+      theme(
+        axis.text.x = element_text(size = 6),
+        axis.text.y = element_text(size = 6)
+      )
+    
+    # 6. lookup table as a ggplot table
+    lookup_tbl <- tibble(
+      index = idx,
+      variable = var_names
+    )
+    
+    p_table <- gridExtra::tableGrob(lookup_tbl, rows = NULL)
+    
+    # 7. Combine heatmap + table
+    p_combined <- p_heatmap + p_table + plot_layout(widths = c(2, 1))
+    
+    return(p_combined)
+  })
+}
+
+
+
+
+# view all---doesnt work
+corr_plots <- make_corr_plots_side(county_list)
+
+
+# view one
+corr_plots$county_19
+
+```
 
 
 
