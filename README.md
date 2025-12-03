@@ -1,9 +1,9 @@
 # Investigating U.S. Food Insecurity Through Data
 
-### Purpose of the App
-This interactive **R Shiny dashboard** analyzes and visualizes **household food-insecurity patterns** across U.S. states and demographic groups.  
-It links **socioeconomic drivers**—income, poverty, education, and employment—to food insecurity outcomes and program participation (e.g., **SNAP, WIC**).  
-The goal is to provide policymakers, researchers, and nonprofit practitioners with a **transparent, data-driven tool** to explore disparities and evaluate interventions that improve food affordability and access.
+## Purpose of the App
+This interactive R Shiny dashboard analyzes and visualizes household food-insecurity patterns across U.S. states and demographic groups.  
+It links socioeconomic drivers income, poverty, education, and employment to food insecurity outcomes and program participation (e.g., SNAP, WIC).  
+The goal is to provide policymakers, researchers, and nonprofit practitioners with a transparent, data-driven tool to explore disparities and evaluate interventions that improve food affordability and access.
 
 ---
 
@@ -24,15 +24,15 @@ The goal is to provide policymakers, researchers, and nonprofit practitioners wi
 
 ## Project Context
 
-Food insecurity—the **economic inability to consistently afford adequate food**—disproportionately affects low-income households, racial and ethnic minorities, and families with children.  
+Food insecurity the economic inability to consistently afford adequate food disproportionately affects low-income households, racial and ethnic minorities, and families with children.  
 It reflects broader structural inequities including income volatility, housing costs, and access to education and employment.
 
 This project:
-- Quantifies **food insecurity prevalence** and geographic distribution across states and demographic groups.  
-- Analyzes **relationships** with socioeconomic factors (poverty, unemployment, education, income).  
-- Visualizes **insights through a Shiny dashboard** supporting evidence-based policymaking.  
+- Quantifies food insecurity prevalence and geographic distribution across states and demographic groups.  
+- Analyzes relationships with socioeconomic factors (poverty, unemployment, education, income).  
+- Visualizes insights through a Shiny dashboard supporting evidence-based policymaking.  
 
-The app enables exploration of **trends, disparities, and intervention impacts** to guide more equitable food policy decisions.
+The app enables exploration of trends, disparities, and intervention impacts to guide more equitable food policy decisions.
 
 ---
 
@@ -42,7 +42,7 @@ The app enables exploration of **trends, disparities, and intervention impacts**
 2. **Exploration Tab** – Interactive choropleth maps, line charts, and demographic comparisons.  
 3. **Analysis Tab** – Correlation matrices, regression modeling, and group-comparison tests.  
 4. **Data Table (Planned)** – Interactive filtering and export tools using `{DT}`.  
-5. **Ethics & Reproducibility** – Uses only public, de-identified data consistent with **ASA ethical guidelines**.
+5. **Ethics & Reproducibility** – Uses only public, de-identified data consistent with ASA ethical guidelines.
 
 ---
 
@@ -50,9 +50,9 @@ The app enables exploration of **trends, disparities, and intervention impacts**
 
 **Primary Dataset:**  
 **Feeding America – Map the Meal Gap (2009–2023)**  
-➡️ [https://www.feedingamerica.org/research/map-the-meal-gap/by-county](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
+[https://www.feedingamerica.org/research/map-the-meal-gap/by-county](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
 
-### What It Measures
+## What It Measures
 - Food insecurity rate  
 - Child food insecurity rate  
 - Number of food insecure persons and children  
@@ -60,10 +60,10 @@ The app enables exploration of **trends, disparities, and intervention impacts**
 - Food budget shortfall  
 - Race/ethnicity-based food insecurity (Black, Hispanic, White non-Hispanic)
 
-### Geographic Levels
+## Geographic Levels
 - County, State, and Congressional District  
 
-### Methodological Note
+## Methodological Note
 Feeding America adjusted its estimation methods post-2020 due to COVID-19 impacts.  
 We harmonized variables across 15 years (2009–2023) and built a **dual-dataset strategy**:
 - **Longitudinal Trends (2009–2023)** – Core variables available all years  
@@ -94,7 +94,7 @@ We harmonized variables across 15 years (2009–2023) and built a **dual-dataset
 | **Analysis** | Regression and correlation tools with diagnostic plots |
 | **Data Table (Planned)** | Search, filter, and export functions via `{DT}` |
 
-### User Options
+## User Options
 - **Geographic Filters:** State/region and county dropdowns  
 - **Temporal Sliders:** Year range selection (2009–2023)  
 - **Variable Selection:** Income, poverty, education, unemployment  
@@ -125,9 +125,9 @@ We adhere to the **American Statistical Association’s Ethical Guidelines (2023
 To reproduce the app locally:
 
 ```bash
-# Clone the repository
 git clone https://github.com/LinusConradM/FoodInsecurityDashboard.git
 cd FoodInsecurityDashboard
+```
 
 ---
 
@@ -135,10 +135,12 @@ cd FoodInsecurityDashboard
 This work is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 
 You are free to:
+
 - Share — copy and redistribute the material in any medium or format.
 - Adapt — remix, transform, and build upon the material for any purpose, even commercially.
 
 Under the following terms:
+
 - Attribution — You must give appropriate credit and indicate if changes were made.
 
-Link to full license text: https://creativecommons.org/licenses/by/4.0/
+Link to full license text: `https://creativecommons.org/licenses/by/4.0/`
