@@ -2,7 +2,7 @@
 
 server_exploration <- function(input, output, session, data) {
 
-  # ---- Dynamic filter initialization ----
+  # Dynamic filter initialization 
   observe({
     updateSelectInput(
       session,
@@ -12,7 +12,7 @@ server_exploration <- function(input, output, session, data) {
     )
   })
 
-  # ---- Map (placeholder) ----
+  # Map (placeholder) 
   output$map_view <- leaflet::renderLeaflet({
   df <- data()
 
@@ -37,7 +37,7 @@ server_exploration <- function(input, output, session, data) {
 })
 
 
-  # ---- Trend plot ----
+  # Trend plot 
   output$trend_plot <- plotly::renderPlotly({
     df <- data()
     plotly::plot_ly(
@@ -47,12 +47,12 @@ server_exploration <- function(input, output, session, data) {
       plotly::layout(title = "Socioeconomic Trends (Placeholder)")
   })
 
-  # ---- Summary table ----
+  # Summary table 
   output$summary_table <- DT::renderDT({
     DT::datatable(data(), options = list(pageLength = 5))
   })
 
-  # ---- NEW: Data Viewer (full dataset) ----
+  # NEW: Data Viewer (full dataset) 
   output$data_viewer <- DT::renderDT({
     DT::datatable(
       data(),
