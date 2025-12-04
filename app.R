@@ -1,17 +1,19 @@
 ## 1. Business Logic Section 
 ##    U.S. Food Insecurity Dashboard
 
-# Load Core Libraries
+## 1. Business Logic Section 
 library(shiny)
 library(plotly)
 library(tidyverse)
 library(leaflet)
 library(DT)
 library(bslib)
+library(readxl)
+library(janitor)
 
-# NOTE:
-# Your real dataset (fd_basket) is loaded in global.R 
-# and becomes available globally when app starts.
+# dataset loads
+source("global.R", local = TRUE)
+
 
 # Helper Function
 percent_change <- function(current, previous) {
