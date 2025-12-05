@@ -12,168 +12,150 @@ server_exploration <- function(input, output, session, data) {
     )
   })
 
-  # 2. MAP VIEW (placeholder until spatial join is added)
+  # 2. STATE-SPECIFIC MAP VIEW
   output$map_view <- leaflet::renderLeaflet({
 
-    #  Your dataset does NOT contain lat/lng coordinates
-    # leaflet::leaflet() %>%
-    #   leaflet::addTiles() %>%
-    #   leaflet::setView(lng = -98.5795, lat = 39.8283, zoom = 4) %>%
-    #   leaflet::addPopups(
-    #     lng = -98.5795, lat = 39.8283,
-    #     popup = "A geographic map requires joining county FIPS to a shapefile."
-    #   )
-    
-    # state specific maps
     shiny::req(data(), input$state_select, input$year_select)
-    
+
     df <- data() %>%
       dplyr::filter(
         state %in% input$state_select,
-        year  == input$year_select)
-    
-    # safety check
-    validate(
-      need(nrow(df) > 0, "No data for these states in this year."))
-    
+        year == input$year_select
+      )
+
+    validate(need(nrow(df) > 0, "No data for these states in this year."))
+
     st_title <- tools::toTitleCase(input$state_select)
     st_abbr  <- state.abb[match(st_title, state.name)]
     st_arg   <- ifelse(is.na(st_abbr), st_title, st_abbr)
-    
+
     counties_sf <- tigris::counties(
       state = st_arg,
-      cb    = TRUE,
-      year  = 2022) %>%
+      cb = TRUE,
+      year = 2022
+    ) %>%
       sf::st_as_sf() %>%
       dplyr::left_join(df, by = c("GEOID" = "fips"))
-    
+
     pal <- leaflet::colorNumeric(
       palette = "plasma",
-      domain  = counties_sf$overall_food_insecurity_rate,
-      na.color = "transparent")
-    
+      domain = counties_sf$overall_food_insecurity_rate,
+      na.color = "transparent"
+    )
+
     leaflet::leaflet(counties_sf) %>%
-      leaflet::addProviderTiles("CartoDB.Positron") %>% #leaflet::addTiles() %>%
+      leaflet::addProviderTiles("CartoDB.Positron") %>%
       leaflet::addPolygons(
         fillColor   = ~pal(overall_food_insecurity_rate),
         color       = "#444",
         weight      = 0.5,
-        fillOpacity = 0.6, #fillOpacity = 0.8, 
+        fillOpacity = 0.6,
         popup = ~paste0(
           "<b>", NAME, "</b><br>",
           "Overall FI Rate: ",
-          round(overall_food_insecurity_rate, 2))) %>%
+          round(overall_food_insecurity_rate, 2)
+        )
+      ) %>%
       leaflet::addLegend(
         pal    = pal,
         values = ~overall_food_insecurity_rate,
-        title  = "Overall Food Insecurity Rate")
-   
-  # Warn user if cost trends include 2023 (methodology change)
-observe({
-  if (input$year_range[2] >= 2023) {
-    showNotification(
-      "Reminder: 2023 cost estimates are not directly comparable to prior years due to methodology changes.",
-      type = "warning",
-      duration = 5
-    )
-  }
-})
-  
-# Dynamically update YEAR RANGE slider based on dataset
-observe({
-  years <- sort(unique(data()$year))
-
-  updateSliderInput(
-    session,
-    "year_range",
-    min = min(years, na.rm = TRUE),
-    max = max(years, na.rm = TRUE),
-    value = c(min(years), max(years))
-  )
-})
-
-
-# Warn user about race/ethnicity uncertainty
-observe({
-  if ("trend_race" %in% input$tabs) {
-    showNotification(
-      "Race/ethnicity estimates have wide uncertainty and should be interpreted directionally.",
-      type = "message",
-      duration = 5
-    )
-  }
-})
-
-
-  # 2. MAP VIEW (placeholder)
-  output$map_view <- leaflet::renderLeaflet({
-    leaflet::leaflet() %>%
-      leaflet::addTiles() %>%
-      leaflet::setView(lng = -98.5795, lat = 39.8283, zoom = 4) %>%
-      leaflet::addPopups(
-        lng = -98.5795, lat = 39.8283,
-        popup = "A geographic map requires joining county FIPS to a shapefile."
+        title  = "Overall Food Insecurity Rate"
       )
+  })  # <-- FIX: properly closed renderLeaflet
+
+
+  # Warn user if cost trends include 2023
+  observe({
+    if (input$year_range[2] >= 2023) {
+      showNotification(
+        "Reminder: 2023 cost estimates are not directly comparable to prior years due to methodology changes.",
+        type = "warning",
+        duration = 5
+      )
+    }
   })
-  
 
-  # 3. ALL TREND PLOTS
-  # Set a Global Font Size for ALL Plotly Plots
-# Apply consistent axis + title font sizes to all Plotly charts
-plotly_style <- function(p) {
-  p %>% layout(
-    font = list(size = 14, family = "Inter"),
-    title = list(font = list(size = 20)),
-    xaxis = list(
-      tickfont = list(size = 14),
-      titlefont = list(size = 16)
-    ),
-    yaxis = list(
-      tickfont = list(size = 14),
-      titlefont = list(size = 16)
+  # Dynamically update YEAR RANGE slider
+  observe({
+    years <- sort(unique(data()$year))
+    updateSliderInput(
+      session,
+      "year_range",
+      min = min(years, na.rm = TRUE),
+      max = max(years, na.rm = TRUE),
+      value = c(min(years), max(years))
     )
-  )
-}
+  })
+
+  # Warn user about race/ethnicity uncertainty
+  observe({
+    if ("trend_race" %in% input$tabs) {
+      showNotification(
+        "Race/ethnicity estimates have wide uncertainty and should be interpreted directionally.",
+        type = "message",
+        duration = 5
+      )
+    }
+  })
 
 
-  # STATE-LEVEL TREND
-  # STATE-LEVEL TREND
-output$trend_state <- plotly::renderPlotly({
-
-  req(input$state_select)
-  req(input$variables)
-
-  df <- data() %>%
-    filter(
-      state %in% input$state_select,
-      year >= input$year_range[1],
-      year <= input$year_range[2]
+  # --- PLOTLY STYLE FUNCTION ---
+  plotly_style <- function(p) {
+    p %>% layout(
+      font = list(size = 14, family = "Inter"),
+      title = list(font = list(size = 20)),
+      xaxis = list(
+        tickfont = list(size = 14),
+        titlefont = list(size = 16)
+      ),
+      yaxis = list(
+        tickfont = list(size = 14),
+        titlefont = list(size = 16)
+      )
     )
+  }
 
-  df_agg <- df %>%
-    group_by(state, year) %>%
-    summarise(across(all_of(input$variables), mean, na.rm = TRUE)) %>%
-    pivot_longer(cols = input$variables,
-                 names_to = "indicator",
-                 values_to = "value")
 
-  # Create plot ----
-  p <- plot_ly(
-    df_agg,
-    x = ~year, y = ~value,
-    color = ~state,
-    linetype = ~indicator,
-    type = "scatter", mode = "lines+markers"
-  ) %>%
-    layout(
-      title = "State-Level Food Insecurity Trends",
-      xaxis = list(tickformat = ".0f")
-    )
+  # ===============================
+  # 3. TREND PLOTS
+  # ===============================
 
-  # Apply global plot style ----
-  plotly_style(p)
-})
+  # STATE TREND
+  output$trend_state <- plotly::renderPlotly({
 
+    req(input$state_select)
+    req(input$variables)
+
+    df <- data() %>%
+      filter(
+        state %in% input$state_select,
+        year >= input$year_range[1],
+        year <= input$year_range[2]
+      )
+
+    df_agg <- df %>%
+      group_by(state, year) %>%
+      summarise(across(all_of(input$variables), mean, na.rm = TRUE)) %>%
+      pivot_longer(
+        cols = input$variables,
+        names_to = "indicator",
+        values_to = "value"
+      )
+
+    p <- plot_ly(
+      df_agg,
+      x = ~year, y = ~value,
+      color = ~state,
+      linetype = ~indicator,
+      type = "scatter", mode = "lines+markers"
+    ) %>%
+      layout(
+        title = "State-Level Food Insecurity Trends",
+        xaxis = list(tickformat = ".0f")
+      )
+
+    plotly_style(p)
+  })
 
 
   # RACIAL DISPARITY TREND
@@ -187,12 +169,15 @@ output$trend_state <- plotly::renderPlotly({
       ) %>%
       group_by(state, year) %>%
       summarise(
-        black = mean(food_insecurity_rate_among_black_persons_all_ethnicities, na.rm = TRUE),
+        black    = mean(food_insecurity_rate_among_black_persons_all_ethnicities, na.rm = TRUE),
         hispanic = mean(food_insecurity_rate_among_hispanic_persons_any_race, na.rm = TRUE),
-        white = mean(food_insecurity_rate_among_white_non_hispanic_persons, na.rm = TRUE)
+        white    = mean(food_insecurity_rate_among_white_non_hispanic_persons, na.rm = TRUE)
       ) %>%
-      pivot_longer(cols = c(black, hispanic, white),
-                   names_to = "group", values_to = "value")
+      pivot_longer(
+        cols = c(black, hispanic, white),
+        names_to = "group",
+        values_to = "value"
+      )
 
     plot_ly(
       df,
@@ -200,13 +185,15 @@ output$trend_state <- plotly::renderPlotly({
       color = ~group,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "Racial Disparity in Food Insecurity (State-Level)",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "Racial Disparity in Food Insecurity (State-Level)",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
   # CHILD FOOD INSECURITY TREND
-  output$trend_child <- renderPlotly({
+  output$trend_child <- plotly::renderPlotly({
 
     df <- data() %>%
       filter(
@@ -220,8 +207,11 @@ output$trend_state <- plotly::renderPlotly({
         below_185 = mean(percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl, na.rm = TRUE),
         above_185 = mean(percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl, na.rm = TRUE)
       ) %>%
-      pivot_longer(cols = c(child_fi, below_185, above_185),
-                   names_to = "indicator", values_to = "value")
+      pivot_longer(
+        cols = c(child_fi, below_185, above_185),
+        names_to = "indicator",
+        values_to = "value"
+      )
 
     plot_ly(
       df,
@@ -229,13 +219,15 @@ output$trend_state <- plotly::renderPlotly({
       color = ~indicator,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "Child Food Insecurity Trends",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "Child Food Insecurity Trends",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
   # COST BURDEN TREND
-  output$trend_cost <- renderPlotly({
+  output$trend_cost <- plotly::renderPlotly({
 
     df <- data() %>%
       filter(
@@ -248,8 +240,11 @@ output$trend_state <- plotly::renderPlotly({
         cost_per_meal = mean(cost_per_meal, na.rm = TRUE),
         shortfall = mean(weighted_annual_food_budget_shortfall, na.rm = TRUE)
       ) %>%
-      pivot_longer(cols = c(cost_per_meal, shortfall),
-                   names_to = "indicator", values_to = "value")
+      pivot_longer(
+        cols = c(cost_per_meal, shortfall),
+        names_to = "indicator",
+        values_to = "value"
+      )
 
     plot_ly(
       df,
@@ -257,13 +252,15 @@ output$trend_state <- plotly::renderPlotly({
       color = ~indicator,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "Food Cost & Budget Shortfall Trends",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "Food Cost & Budget Shortfall Trends",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
   # RURAL vs URBAN TREND
-  output$trend_rural <- renderPlotly({
+  output$trend_rural <- plotly::renderPlotly({
 
     df <- data() %>%
       mutate(
@@ -287,13 +284,15 @@ output$trend_state <- plotly::renderPlotly({
       color = ~rural_group,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "Rural vs Urban Food Insecurity Trends",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "Rural vs Urban Food Insecurity Trends",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
   # REGIONAL TREND
-  output$trend_region <- renderPlotly({
+  output$trend_region <- plotly::renderPlotly({
 
     df <- data() %>%
       filter(
@@ -309,13 +308,15 @@ output$trend_state <- plotly::renderPlotly({
       color = ~census_region,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "FI Trends Across Census Regions",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "FI Trends Across Census Regions",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
   # INEQUALITY GAP TREND
-  output$trend_gap <- renderPlotly({
+  output$trend_gap <- plotly::renderPlotly({
 
     df <- data() %>%
       mutate(
@@ -337,8 +338,11 @@ output$trend_state <- plotly::renderPlotly({
         black_white_gap = mean(black_white_gap, na.rm = TRUE),
         child_income_gap = mean(child_income_gap, na.rm = TRUE)
       ) %>%
-      pivot_longer(cols = c(black_white_gap, child_income_gap),
-                   names_to = "gap", values_to = "value")
+      pivot_longer(
+        cols = c(black_white_gap, child_income_gap),
+        names_to = "gap",
+        values_to = "value"
+      )
 
     plot_ly(
       df,
@@ -346,8 +350,10 @@ output$trend_state <- plotly::renderPlotly({
       color = ~gap,
       type = "scatter", mode = "lines+markers"
     ) %>%
-      layout(title = "Food Insecurity Inequality Gap Trends",
-             xaxis = list(tickformat = ".0f"))
+      layout(
+        title = "Food Insecurity Inequality Gap Trends",
+        xaxis = list(tickformat = ".0f")
+      )
   })
 
 
@@ -356,6 +362,7 @@ output$trend_state <- plotly::renderPlotly({
     df <- data() %>% filter(state == input$state_select)
     DT::datatable(df, options = list(pageLength = 10, scrollX = TRUE))
   })
+
 
   # 5. FULL DATA VIEWER
   output$data_viewer <- DT::renderDT({
