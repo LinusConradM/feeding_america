@@ -18,6 +18,15 @@ ui_exploration <- sidebarLayout(
       multiple = TRUE,
       options = list(placeholder = "Select one or more states")
     ),
+    
+    # Multi-county filter
+    selectizeInput(
+      inputId = "county_select",
+      label = "Select County:",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(placeholder = "Select one or more counties")
+    ),
 
     # Single year select
     selectInput(

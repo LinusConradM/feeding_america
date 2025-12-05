@@ -17,6 +17,26 @@ server_exploration <- function(input, output, session, data) {
     )
   })
 
+  # dynamic county filter
+  observeEvent(input$state_select, {
+
+  req(input$state_select)
+
+  county_choices <- data() %>%
+    filter(state %in% input$state_select) %>%
+    arrange(county_state) %>%
+    pull(county_state) %>%
+    unique()
+
+  updateSelectInput(
+    session,
+    "county_select",
+    choices = county_choices,
+    selected = NULL
+  )
+})
+
+
   # -------------------------------------------------------
   # 2. Dynamic County Filter (updates when state changes)
   # -------------------------------------------------------
@@ -42,62 +62,74 @@ server_exploration <- function(input, output, session, data) {
   # Helper: Uniform filtering by state + optional county
   # -------------------------------------------------------
   filter_state_county <- function(df) {
-    df %>%
-      filter(
-        state %in% input$state_select,
-        if (!is.null(input$county_select) && length(input$county_select) > 0)
-          county_state %in% input$county_select
-        else TRUE
-      )
+
+  df <- df %>%
+    filter(state %in% input$state_select)
+
+  # Only apply county filter when counties are selected
+  if (!is.null(input$county_select) && length(input$county_select) > 0) {
+    df <- df %>% filter(county_state %in% input$county_select)
   }
 
-  # -------------------------------------------------------
-  # 3. STATE-SPECIFIC LEAFLET MAP
-  # -------------------------------------------------------
-  output$map_view <- leaflet::renderLeaflet({
+  return(df)
+}
 
-    shiny::req(data(), input$state_select, input$year_select)
 
-    df <- data() %>%
-      filter(
-        state %in% input$state_select,
-        year == input$year_select
+  # -------------------------------------------------------
+# 3. STATE + COUNTY DYNAMIC LEAFLET MAP
+# -------------------------------------------------------
+output$map_view <- leaflet::renderLeaflet({
+
+  req(data(), input$state_select, input$year_select)
+
+  # Filter dataset by state, county, and year
+  df <- data() %>%
+    filter_state_county() %>%     # ← apply BOTH filters
+    filter(year == input$year_select)
+
+  validate(need(nrow(df) > 0,
+                "No data available for this state/year/county selection."))
+
+  # Use selected state abbreviations (AL, GA, etc.)
+  st_arg <- input$state_select
+
+  # Load county shapes for selected states
+  counties_sf <- tigris::counties(state = st_arg, cb = TRUE, year = 2022) %>%
+    sf::st_as_sf() %>%
+    left_join(df, by = c("GEOID" = "fips"))
+
+  # If counties are selected, filter the shapefile too
+  if (!is.null(input$county_select) && length(input$county_select) > 0) {
+    counties_sf <- counties_sf %>%
+      filter(NAME %in% input$county_select |
+               county_state %in% input$county_select)
+  }
+
+  pal <- leaflet::colorNumeric(
+    palette = "plasma",
+    domain  = counties_sf$overall_food_insecurity_rate,
+    na.color = "transparent"
+  )
+
+  leaflet(counties_sf) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(
+      fillColor   = ~pal(overall_food_insecurity_rate),
+      color       = "#444",
+      weight      = 0.5,
+      fillOpacity = 0.6,
+      popup = ~paste0(
+        "<b>", NAME, "</b><br>",
+        "Overall FI Rate: ", round(overall_food_insecurity_rate, 2)
       )
-
-    validate(need(nrow(df) > 0, "No data for this state and year."))
-
-    st_title <- tools::toTitleCase(input$state_select)
-    st_abbr  <- state.abb[match(st_title, state.name)]
-    st_arg   <- ifelse(is.na(st_abbr), st_title, st_abbr)
-
-    counties_sf <- tigris::counties(state = st_arg, cb = TRUE, year = 2022) %>%
-      sf::st_as_sf() %>%
-      left_join(df, by = c("GEOID" = "fips"))
-
-    pal <- leaflet::colorNumeric(
-      palette = "plasma",
-      domain  = counties_sf$overall_food_insecurity_rate,
-      na.color = "transparent"
+    ) %>%
+    addLegend(
+      pal    = pal,
+      values = ~overall_food_insecurity_rate,
+      title  = "Overall Food Insecurity Rate"
     )
+})
 
-    leaflet(counties_sf) %>%
-      addProviderTiles("CartoDB.Positron") %>%
-      addPolygons(
-        fillColor   = ~pal(overall_food_insecurity_rate),
-        color       = "#444",
-        weight      = 0.5,
-        fillOpacity = 0.6,
-        popup = ~paste0(
-          "<b>", NAME, "</b><br>",
-          "Overall FI Rate: ", round(overall_food_insecurity_rate, 2)
-        )
-      ) %>%
-      addLegend(
-        pal    = pal,
-        values = ~overall_food_insecurity_rate,
-        title  = "Overall Food Insecurity Rate"
-      )
-  })
 
   # -------------------------------------------------------
   # 4. WARNING ABOUT 2023 COST METHODOLOGY CHANGE
