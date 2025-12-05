@@ -254,3 +254,26 @@ input:focus, select:focus, textarea:focus {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+
+/* ===============================================================
+   Sub-tabs (Trends → State Trends, Racial Disparities, etc.)
+   =============================================================== */
+.nav-tabs .nav-link {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: #0a8a6a !important;   /* teal text for inactive tabs */
+  padding: 12px 20px !important;
+  border-radius: 10px !important; /* smooth rounded corners */
+  transition: all 0.25s ease;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #e6e6ff !important;   /* light purple highlight */
+  color: #220BED !important;              /* active tab text color */
+  font-weight: 800 !important;
+  border: 2px solid #220BED !important;   /* strong border accent */
+  border-bottom: none !important;         /* removes bootstrap underline */
+  box-shadow: 0 2px 6px rgba(34, 11, 237, 0.2); /* subtle glow */
+}
+
