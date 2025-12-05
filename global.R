@@ -22,4 +22,5 @@ fd_basket <- read_excel(
   mutate(across(where(is.character), ~ trimws(.)))
 
 # Inspect structure (optional)
-glimpse(fd_basket)
+#glimpse(fd_basket)
+#unique(fd_basket$year)

@@ -15,9 +15,9 @@ ui_exploration <- sidebarLayout(
     ),
 
     sliderInput(
-      "year_range", "Select Year Range:",
-      min = 2010,
-      max = 2025,
+      "year_range", "Select Period",
+      min = 2000,
+      max = 2050,
       value = c(2019, 2023),
       sep = ""
     ),
