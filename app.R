@@ -60,7 +60,6 @@ theme_modern <- bs_theme(
   bg = "#F5F8FC",
   fg = "#212529"
 )
-
 # UI Layout
 
 ui <- tagList(
@@ -79,6 +78,41 @@ ui <- tagList(
     theme = theme_modern,
 
     tabPanel("Overview",    ui_overview),
+
+# Define UI with separate title and navbar
+ui <- fluidPage(
+
+  # --- Title Bar (Header) ---
+  div(
+    class = "app-header",
+    style = "display: flex; align-items: center; gap: 12px; padding-left: 40px;",
+    
+    # Logo (optional: only if file exists)
+    if (file.exists("www/AU-Logo-on-white-small.png")) {
+      tags$img(
+        src = "AU-Logo-on-white-small.png",
+        height = "38px",
+        style = "margin-right:10px;"
+      )
+    },
+    
+    # Title Text
+    span(
+      "Investigating U.S. Food Insecurity Through Data",
+      style = "font-weight:700; font-size:1.6rem; color:#fff;"
+    )
+  ),
+
+  # --- Navigation Tabs (Below Header) ---
+  navbarPage(
+    title = NULL,
+    theme = theme_modern,
+    
+    header = tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+    ),
+    
+    tabPanel("Overview", ui_overview),
     tabPanel("Exploration", ui_exploration),
     tabPanel("Analysis",    ui_analysis)
   )
@@ -112,6 +146,7 @@ server <- function(input, output, session) {
   server_analysis(input, output, session, data)
 }
 
-
 ## 4. Launch Shiny Application
 shinyApp(ui, server)
+## 4. Launch Shiny Application
+shinyApp(ui = ui, server = server)
