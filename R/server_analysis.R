@@ -88,22 +88,18 @@ server_analysis <- function(input, output, session, data) {
     # ======================================================
     # 3. PLOT: Boxplot by group
     # ======================================================
-    output$group_comp_plot <- plotly::renderPlotly({
+    output$group_comp_plot <- renderPlot({
 
-      plot_ly(
-        df,
-        x = ~grp,
-        y = df[[target_var]],
-        type = "box",
-        color = ~grp,
-        colors = "Set2"
-      ) %>%
-        layout(
+      df %>%
+        ggplot(aes(x = grp, y = .data[[target_var]], fill = grp)) +
+        geom_boxplot(alpha = 0.7) +
+        labs(
           title = paste("Group Comparison:", input$group_var),
-          xaxis = list(title = input$group_var),
-          yaxis = list(title = target_var)
+          x = input$group_var,
+          y = target_var
         )
     })
+
 
     # ======================================================
     # 4. STATISTICAL TEST (t-test or ANOVA)

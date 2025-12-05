@@ -150,7 +150,7 @@ ui_analysis <- tabPanel(
         # -------------------------------
         tabPanel(
           "Group Comparison",
-          plotly::plotlyOutput("group_comp_plot"),
+          plotOutput("group_comp_plot"),
           verbatimTextOutput("group_stats")
         )
       )
