@@ -2,37 +2,45 @@
 
 ui_exploration <- sidebarLayout(
 
-  # Sidebar Filters 
+  ############################
+  # SIDEBAR
+  ############################
   sidebarPanel(
     width = 3,
     h4("Filters"),
     hr(),
 
-    selectInput(
+    # Multi-state filter
+    selectizeInput(
       inputId = "state_select",
-      label = "Select State",
-      choices = c("All States", state.name),
-      selected = "All States",
-      multiple = TRUE
-    ),
-    
-    selectInput(
-      inputId = "county_select",
-      label = "Select County(ies)",
+      label = "Select State(s):",
       choices = NULL,
-      multiple = TRUE
+      multiple = TRUE,
+      options = list(placeholder = "Select one or more states")
     ),
 
+    # Single year select
+    selectInput(
+      inputId = "year_select",
+      label = "Select Year:",
+      choices = 2010:2025,
+      selected = 2020
+    ),
+
+    # Year range slider
     sliderInput(
-      "year_range", "Select Period",
+      inputId = "year_range",
+      label = "Select Period:",
       min = 2000,
       max = 2050,
-      value = c(2019, 2023),
+      value = c(2010, 2025),
       sep = ""
     ),
 
+    # Indicator selection
     checkboxGroupInput(
-      "variables", "Food Insecurity Indicators:",
+      inputId = "variables",
+      label = "Food Insecurity Indicators:",
       choices = c(
         "Overall FI Rate" = "overall_food_insecurity_rate",
         "# Food Insecure Persons" = "number_of_food_insecure_persons_overall",
@@ -60,7 +68,9 @@ ui_exploration <- sidebarLayout(
     actionButton("update_map", "Update Map", class = "btn-primary")
   ),
 
-  # Main Panel 
+  ############################
+  # MAIN PANEL
+  ############################
   mainPanel(
     tabsetPanel(
 
@@ -69,77 +79,83 @@ ui_exploration <- sidebarLayout(
         leaflet::leafletOutput("map_view", height = "550px")
       ),
 
+      ############################
       # TRENDS TAB
+      ############################
       tabPanel("Trends",
         tabsetPanel(
 
-          # STATE TRENDS
           tabPanel("State Trends",
-            tags$div(
-              style="color:#AA0000; font-size:12px; margin-bottom:10px;",
-              "Note: All food insecurity estimates shown here are modeled approximations from Feeding America's Map the Meal Gap dataset."
+            htmltools::tags$div(
+              style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+              "Note: All food insecurity estimates shown are modeled approximations from Feeding America's Map the Meal Gap dataset."
             ),
-            plotOutput("trend_state", height = "450px")
+            plotly::plotlyOutput("trend_state", height = "450px")
           ),
 
-          # RACIAL DISPARITIES
           tabPanel("Racial Disparities",
-            tags$div(
-              style="color:#AA5500; font-size:12px; margin-bottom:10px;",
-              "Caution: Race/ethnicity estimates have wide uncertainty due to small sample sizes. Feeding America recommends interpreting these values directionally, not as precise measurements."
+            htmltools::tags$div(
+              style = "color:#AA5500; font-size:12px; margin-bottom:10px;",
+              "Caution: Race/ethnicity estimates have wide uncertainty due to small sample sizes."
             ),
-            plotOutput("trend_race", height = "450px")
+            plotly::plotlyOutput("trend_race", height = "450px")
           ),
 
-          # CHILD FOOD INSECURITY
           tabPanel("Child Food Insecurity",
-            tags$div(
-              style="color:#AA0000; font-size:12px; margin-bottom:10px;",
-              "Note: Child food insecurity estimates are modeled values. Small geographic areas may have additional estimation uncertainty."
+            htmltools::tags$div(
+              style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+              "Note: Child food insecurity estimates are modeled values."
             ),
-            plotOutput("trend_child", height = "450px")
+            plotly::plotlyOutput("trend_child", height = "450px")
           ),
 
-          # COST BURDEN
           tabPanel("Cost Burden",
-            tags$div(
-              style="color:#D95F0E; font-size:12px; margin-bottom:10px;",
-              "Warning: Feeding America changed its methodology for calculating meal cost and food budget shortfall in 2023. Estimates in 2023 are NOT directly comparable to earlier years."
+            htmltools::tags$div(
+              style = "color:#D95F0E; font-size:12px; margin-bottom:10px;",
+              "Warning: Feeding America changed cost methodology in 2023 — values are not directly comparable."
             ),
-            plotOutput("trend_cost", height = "450px")
+            plotly::plotlyOutput("trend_cost", height = "450px")
           ),
 
-          # RURAL VS URBAN
           tabPanel("Rural vs Urban",
-            tags$div(
-              style="color:#444444; font-size:12px; margin-bottom:10px;",
-              "Note: Rural–Urban Continuum Codes reflect county classifications that may differ in interpretation across states."
+            htmltools::tags$div(
+              style = "color:#444444; font-size:12px; margin-bottom:10px;",
+              "Rural–Urban Continuum Codes vary by state."
             ),
-            plotOutput("trend_rural", height = "450px")
+            plotly::plotlyOutput("trend_rural", height = "450px")
           ),
 
-          # REGIONAL TRENDS
           tabPanel("Regional Trends",
-            tags$div(
-              style="color:#4444AA; font-size:12px; margin-bottom:10px;",
-              "Note: Regional averages combine modeled county estimates."
+            htmltools::tags$div(
+              style = "color:#4444AA; font-size:12px; margin-bottom:10px;",
+              "Regional averages combine modeled county estimates."
             ),
-            plotOutput("trend_region", height = "450px")
+            plotly::plotlyOutput("trend_region", height = "450px")
           ),
 
-          # INEQUALITY GAPS
           tabPanel("Inequality Gaps",
-            tags$div(
-              style="color:#AA0000; font-size:12px; margin-bottom:10px;",
-              "Important: Inequality gap metrics should be interpreted cautiously."
+            htmltools::tags$div(
+              style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+              "Gap metrics should be interpreted cautiously."
             ),
-            plotOutput("trend_gap", height = "450px")
+            plotly::plotlyOutput("trend_gap", height = "450px")
           )
         )
       ),
 
-      tabPanel("Summary Table", DT::DTOutput("summary_table")),
-      tabPanel("Data Viewer",   DT::DTOutput("data_viewer"))
+      ############################
+      # SUMMARY TABLE TAB
+      ############################
+      tabPanel("Summary Table",
+        DT::DTOutput("summary_table")
+      ),
+
+      ############################
+      # DATA VIEWER TAB
+      ############################
+      tabPanel("Data Viewer",
+        DT::DTOutput("data_viewer")
+      )
     )
   )
 )
