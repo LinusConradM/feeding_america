@@ -9,10 +9,19 @@ ui_exploration <- sidebarLayout(
     hr(),
 
     selectInput(
-      "state_select", "Select State(s):",
-      choices = NULL,
+      inputId = "state_select",
+      label = "Select State",
+      choices = c("All States", state.name),
+      selected = "All States",
       multiple = TRUE
     ),
+    
+    selectInput(
+  inputId = "county_select",
+  label = "Select County(ies)",
+  choices = NULL,
+  multiple = TRUE
+),
 
     sliderInput(
       "year_range", "Select Period",
