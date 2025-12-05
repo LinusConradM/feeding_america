@@ -1,23 +1,50 @@
 # R/ui_exploration.R
 
 ui_exploration <- sidebarLayout(
+
+  # Sidebar Filters ----------------------------------------------------
   sidebarPanel(
     h4("Filters"),
-    selectInput(
+
+    # Multi-state filter
+    selectizeInput(
       "state_select", "Select State(s):",
-      choices = NULL, multiple = TRUE
+      choices = NULL, 
+      multiple = TRUE,
+      options = list(placeholder = "Select one or more states")
     ),
-    sliderInput(
-      "year_range", "Select Year Range:",
-      min = 2010, max = 2025, value = c(2020, 2025), sep = ""
+
+    # single year select
+    selectInput(
+      "year_select", "Select Year:",
+      choices = 2010:2025,
+      selected = 2020
     ),
+    
+    # # Year range filter
+    # sliderInput(
+    #   "year_range", "Select Year Range:",
+    #   min = 2010, max = 2025,
+    #   value = c(2019, 2023), sep = ""
+    # ),
+
+    # Actual variables from fd_basket
     checkboxGroupInput(
-      "variables", "Socioeconomic Indicators:",
-      choices = c("PovertyRate", "MedianIncome", "UnemploymentRate"),
-      selected = "PovertyRate"
+      "variables", "Food Insecurity Indicators:",
+      choices = c(
+        "Overall Food Insecurity Rate"   = "overall_food_insecurity_rate",
+        "Child Food Insecurity Rate"     = "child_food_insecurity_rate",
+        "Cost per Meal"                  = "cost_per_meal",
+        "SNAP Threshold"                 = "snap_threshold",
+        "Rural/Urban Code (2013)"        = "rural_urban_continuum_code_2013"
+      ),
+      selected = "overall_food_insecurity_rate"
     ),
+
     actionButton("update_map", "Update Map", class = "btn-primary")
   ),
+
+  # Main Panel ---------------------------------------------------------
   mainPanel(
     tabsetPanel(
       tabPanel("Map", leaflet::leafletOutput("map_view", height = "550px")),
@@ -27,3 +54,5 @@ ui_exploration <- sidebarLayout(
     )
   )
 )
+
+### last thing
