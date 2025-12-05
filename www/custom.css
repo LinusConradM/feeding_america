@@ -1,4 +1,6 @@
-/* Global Theme - U.S. Food Insecurity Dashboard */
+/* ===============================================================
+   Global Theme - U.S. Food Insecurity Dashboard
+   =============================================================== */
 
 /* Base Layout */
 body {
@@ -20,57 +22,68 @@ p, li {
   color: #444;
 }
 
-/* App Header Styling - Reusable across dashboards */
+/* ===============================================================
+   App Header
+   =============================================================== */
 .app-header {
   background-color: #220BED;
   color: #ffffff;
   padding: 26px 48px;
-  font-size: 1.85rem;
-  font-weight: 700;
+  font-size: 3.2rem;
+  font-weight: 1000;
   letter-spacing: 0.5px;
   text-align: left;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;                /* creates vertical space */
+  margin-bottom: 20px;
   position: relative;
   z-index: 2;
+  text-align: center;
 }
 
 /* ===============================================================
-   Navbar Styling (merged and optimized)
+   Navbar
    =============================================================== */
+/* NAVBAR CONTAINER */
 .navbar {
   background-color: #220BED !important;
-  border: none !important;
-  border-top: 3px solid #F5F8FC !important; /* distinct white strip */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  border-radius: 0;
-  z-index: 1;
-  margin-top: -5px; /* subtle overlap for polished transition */
+  border-top: 3px solid #F5F8FC !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  margin-top: -5px;
 }
-.navbar-brand, .navbar-nav > li > a {
+
+/* NAVBAR TEXT (Bootstrap 5 uses .nav-link, NOT li > a) */
+.navbar-nav .nav-link {
   color: white !important;
-  font-weight: 600;
-  transition: color 0.2s ease;
+  font-weight: 600 !important;
+  font-size: 30px !important;    /* ← Increase tab text size */
+  padding: 14px 22px !important; /* ← Optional: make tabs larger */
 }
-.navbar-nav > li > a:hover {
-  color: #FFDD57 !important;
+
+/* HOVER STATE */
+.navbar-nav .nav-link:hover {
+  color: #909b17ff !important;
 }
-.navbar .nav-link.active {
+
+/* ACTIVE TAB */
+.navbar-nav .nav-link.active {
   background-color: rgba(255,255,255,0.15);
   border-radius: 8px;
   color: #fff !important;
+  font-weight: 700 !important;   /* Make active tab bolder */
+  font-size: 20px !important;    /* Ensure same size */
 }
 
-/* Buttons */
+
+/* ===============================================================
+   Buttons
+   =============================================================== */
 .btn {
   font-weight: 600;
   border-radius: 12px;
   padding: 10px 20px;
-  transition: all 0.2s ease-in-out;
 }
-
 .btn-primary {
   background-color: #FF6433 !important;
   border: none;
@@ -78,7 +91,6 @@ p, li {
 .btn-primary:hover {
   background-color: #e25528 !important;
 }
-
 .btn-success {
   background-color: #00B884 !important;
   border: none;
@@ -87,16 +99,9 @@ p, li {
   background-color: #009b6f !important;
 }
 
-.btn-outline-light {
-  color: #fff !important;
-  border-color: #fff !important;
-}
-.btn-outline-light:hover {
-  background-color: #fff !important;
-  color: #220BED !important;
-}
-
-/* Cards & Metric Cards */
+/* ===============================================================
+   Cards (Insights + Trend)
+   =============================================================== */
 .card {
   background-color: #fff;
   border-radius: 16px;
@@ -104,47 +109,6 @@ p, li {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   margin-bottom: 20px;
 }
-
-.metric-card {
-  background-color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  padding: 20px 24px;
-  margin-bottom: 20px;
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.metric-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-}
-.metric-card.primary h2 { color: #220BED; }
-.metric-card.success h2 { color: #00B884; }
-.metric-card.warning h2 { color: #FF6433; }
-.metric-card.info h2 { color: #1E90FF; }
-
-.metric-value {
-  font-weight: 700;
-  font-size: 2rem;
-  margin: 8px 0 4px 0;
-}
-.metric-change {
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-/* Section Headers */
-.section-header {
-  padding: 10px 5px 0 5px;
-}
-.section-header h3 {
-  color: #212529;
-}
-.section-header p {
-  color: #6c757d;
-}
-
-/* Insights & Trend Cards */
 .insights-card ul {
   margin: 0;
   padding-left: 18px;
@@ -157,10 +121,82 @@ p, li {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 10px;
 }
 
-/* Tables */
-.dataTable, .table {
+/* ===============================================================
+   KPI CARDS — SF-425 Style
+   =============================================================== */
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px 26px;
+  border-left: 6px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 140px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.25s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* --- FIXED KPI TITLE (Bold + dark) --- */
+.kpi-title {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #1a1a1a !important;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* --- KPI VALUE (big dark numbers) --- */
+.kpi-card .kpi-value {
+  font-size: 42px !important;
+  font-weight: 700 !important;
+  color: #111 !important;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Trend text */
+.kpi-change {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Accent borders */
+.kpi-blue   { border-color: #3A5AFE; }
+.kpi-green  { border-color: #00B884; }
+.kpi-orange { border-color: #FFA940; }
+.kpi-purple { border-color: #8A5BFF; }
+.kpi-red    { border-color: #FF4D4F; }
+
+/* Reduce spacing between columns (tighten KPI grid) */
+.row > [class*='col-'] {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Mobile */
+@media (max-width: 992px) {
+  .kpi-card {
+    height: auto;
+    padding: 18px 22px;
+  }
+}
+
+/* ===============================================================
+   Tables
+   =============================================================== */
+.dataTable,
+.table {
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -171,14 +207,13 @@ p, li {
   color: white;
   font-weight: 600;
 }
-.table td {
-  color: #333;
-}
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: #f9fafc;
 }
 
-/* Plot Containers */
+/* ===============================================================
+   Plot Containers
+   =============================================================== */
 .plotly, .shiny-plot-output {
   border-radius: 12px;
   background-color: #fff;
@@ -186,64 +221,36 @@ p, li {
   padding: 10px;
 }
 
-/* Footer */
-.footer {
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.85rem;
-  padding: 20px;
-}
-
-/* Links */
-a, a:visited {
-  color: #220BED;
-  text-decoration: none;
-}
-a:hover {
-  color: #FF6433;
-  text-decoration: underline;
-}
-
-/* Form Inputs */
+/* ===============================================================
+   Form Inputs
+   =============================================================== */
 input, select, textarea {
   border-radius: 10px !important;
   border: 1px solid #d0d5dd !important;
-  box-shadow: none !important;
 }
 input:focus, select:focus, textarea:focus {
   border-color: #220BED !important;
   box-shadow: 0 0 0 0.2rem rgba(34,11,237,0.25) !important;
 }
 
-/* Alerts */
-.alert {
-  border-radius: 12px;
-  padding: 15px 20px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+/* ===============================================================
+   Footer
+   =============================================================== */
+.footer {
+  text-align: center;
+  color: #6c757d;
+  padding: 20px;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 992px) {
-  .metric-card {
-    margin-bottom: 15px;
-  }
-  .navbar {
-    border-radius: 0;
-  }
-  h3 {
-    font-size: 1.4rem;
-  }
-}
+/* Utility + Animation */
+.text-muted { color: #6c757d !important; }
+.fw-bold { font-weight: 700 !important; }
+.text-center { text-align: center !important; }
 
-/* Animations & Utilities */
 .fade-in {
   animation: fadeIn 0.6s ease-in-out;
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-.text-muted { color: #6c757d !important; }
-.fw-bold { font-weight: 700 !important; }
-.text-center { text-align: center !important; }
