@@ -7,17 +7,26 @@ ui_exploration <- sidebarLayout(
     h4("Filters"),
 
     # Multi-state filter
-    selectInput(
+    selectizeInput(
       "state_select", "Select State(s):",
-      choices = NULL, multiple = TRUE
+      choices = NULL, 
+      multiple = TRUE,
+      options = list(placeholder = "Select one or more states")
     ),
 
-    # Year range filter
-    sliderInput(
-      "year_range", "Select Year Range:",
-      min = 2010, max = 2025,
-      value = c(2019, 2023), sep = ""
+    # single year select
+    selectInput(
+      "year_select", "Select Year:",
+      choices = 2010:2025,
+      selected = 2020
     ),
+    
+    # # Year range filter
+    # sliderInput(
+    #   "year_range", "Select Year Range:",
+    #   min = 2010, max = 2025,
+    #   value = c(2019, 2023), sep = ""
+    # ),
 
     # Actual variables from fd_basket
     checkboxGroupInput(
@@ -45,3 +54,5 @@ ui_exploration <- sidebarLayout(
     )
   )
 )
+
+### last thing
