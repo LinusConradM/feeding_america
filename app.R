@@ -43,47 +43,58 @@ theme_modern <- bs_theme(
   fg = "#212529"
 )
 
-## 2. User Interface Section (now AFTER theme is defined)
+# UI Layout
 source("R/ui_overview.R", local = TRUE)
 source("R/ui_exploration.R", local = TRUE)
 source("R/ui_analysis.R", local = TRUE)
 
-# Build UI
-ui <- tagList(
+# ------------------------------
+# FINAL / CORRECT UI DEFINITION
+# ------------------------------
+ui <- fluidPage(
 
-  # MUST COME FIRST — load CSS
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
-  ),
-
-  # App header
+  # Title Bar Header
   div(
     class = "app-header",
-    "Investigating U.S. Food Insecurity Through Data"
+    style = "display: flex; align-items: center; gap: 12px; padding-left: 40px; background-color:#220BED; color:white; padding:12px;",
+
+    if (file.exists("www/AU-Logo-on-white-small.png")) {
+      tags$img(
+        src = "AU-Logo-on-white-small.png",
+        height = "38px",
+        style = "margin-right:10px;"
+      )
+    },
+
+    span(
+      "Investigating U.S. Food Insecurity Through Data",
+      style = "font-weight:700; font-size:1.6rem;"
+    )
   ),
 
+  # Navigation Tabs
   navbarPage(
     title = NULL,
     theme = theme_modern,
-    tabPanel("Overview", ui_overview),
+
+    header = tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+    ),
+
+    tabPanel("Overview",    ui_overview),
     tabPanel("Exploration", ui_exploration),
-    tabPanel("Analysis", ui_analysis)
+    tabPanel("Analysis",    ui_analysis)
   )
 )
 
 ## 3. Server Section
 
-# load helper functions
 source("R/kpi_helpers.R", local = TRUE)
-
-# load server modules
 source("R/server_overview.R", local = TRUE)
 source("R/server_exploration.R", local = TRUE)
 source("R/server_analysis.R", local = TRUE)
 
-
 server <- function(input, output, session) {
-
   dataset <- reactive({ fd_basket })
 
   server_overview(input, output, session, dataset)
@@ -92,4 +103,4 @@ server <- function(input, output, session) {
 }
 
 ## 4. Launch Shiny App
-shinyApp(ui, server)
+shinyApp(ui = ui, server = server)
