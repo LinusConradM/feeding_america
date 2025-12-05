@@ -27,12 +27,7 @@ my_theme <- theme_minimal() +
     panel.grid.major = element_line(color = "grey85")
   )
 
-## 2. User Interface Section
-source("R/ui_overview.R", local = TRUE)
-source("R/ui_exploration.R", local = TRUE)
-source("R/ui_analysis.R", local = TRUE)
-
-# Theme
+# ---- IMPORTANT: Theme must come BEFORE UI files ----
 theme_modern <- bs_theme(
   version = 5,
   bootswatch = "flatly",
@@ -48,35 +43,49 @@ theme_modern <- bs_theme(
   fg = "#212529"
 )
 
+## 2. User Interface Section (now AFTER theme is defined)
+source("R/ui_overview.R", local = TRUE)
+source("R/ui_exploration.R", local = TRUE)
+source("R/ui_analysis.R", local = TRUE)
+
+# Build UI
 ui <- tagList(
+
+  # MUST COME FIRST — load CSS
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+  ),
+
+  # App header
   div(
     class = "app-header",
-    style = "padding: 12px; font-size: 22px; font-weight: bold; 
-             background-color: #220BED; color: white; text-align: center;",
     "Investigating U.S. Food Insecurity Through Data"
   ),
+
   navbarPage(
     title = NULL,
     theme = theme_modern,
-    tabPanel("Overview",    ui_overview),
+    tabPanel("Overview", ui_overview),
     tabPanel("Exploration", ui_exploration),
-    tabPanel("Analysis",    ui_analysis)
+    tabPanel("Analysis", ui_analysis)
   )
 )
 
 ## 3. Server Section
+
+# load helper functions
+source("R/kpi_helpers.R", local = TRUE)
+
+# load server modules
 source("R/server_overview.R", local = TRUE)
 source("R/server_exploration.R", local = TRUE)
 source("R/server_analysis.R", local = TRUE)
 
+
 server <- function(input, output, session) {
 
-  # Correct reactive dataset
-  dataset <- reactive({
-    fd_basket
-  })
+  dataset <- reactive({ fd_basket })
 
-  # Correct module calls (each ONLY once)
   server_overview(input, output, session, dataset)
   server_exploration(input, output, session, dataset)
   server_analysis(input, output, session, dataset)

@@ -22,6 +22,20 @@ observe({
     )
   }
 })
+  
+# Dynamically update YEAR RANGE slider based on dataset
+observe({
+  years <- sort(unique(data()$year))
+
+  updateSliderInput(
+    session,
+    "year_range",
+    min = min(years, na.rm = TRUE),
+    max = max(years, na.rm = TRUE),
+    value = c(min(years), max(years))
+  )
+})
+
 
 # Warn user about race/ethnicity uncertainty
 observe({
