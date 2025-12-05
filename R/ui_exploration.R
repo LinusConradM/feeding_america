@@ -8,6 +8,19 @@ ui_exploration <- sidebarLayout(
     h4("Filters"),
     hr(),
 
+    # Multi-state filter
+    selectizeInput(
+      "state_select", "Select State(s):",
+      choices = NULL, 
+      multiple = TRUE,
+      options = list(placeholder = "Select one or more states")
+    ),
+
+    # single year select
+    selectInput(
+      "year_select", "Select Year:",
+      choices = 2010:2025,
+      selected = 2020
     selectInput(
       "state_select", "Select State(s):",
       choices = NULL,
@@ -18,9 +31,16 @@ ui_exploration <- sidebarLayout(
       "year_range", "Select Period",
       min = 2000,
       max = 2050,
-      value = c(2019, 2023),
+      value = c(2010, 2025),
       sep = ""
     ),
+    
+    # # Year range filter
+    # sliderInput(
+    #   "year_range", "Select Year Range:",
+    #   min = 2010, max = 2025,
+    #   value = c(2019, 2023), sep = ""
+    # ),
 
     checkboxGroupInput(
   "variables", "Food Insecurity Indicators:",
@@ -137,3 +157,5 @@ tabPanel("Trends",
     )
   )
 )
+
+### last thing
