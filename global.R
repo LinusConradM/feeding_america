@@ -31,6 +31,7 @@ fd_basket <- read_excel(
     county_state = county_state
   )
 
+colnames(fd_basket)
 # ================================================================
 # GLOBAL GGPLOT THEME (Auto-applied to ALL ggplots)
 # ================================================================
