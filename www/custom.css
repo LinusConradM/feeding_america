@@ -1,0 +1,279 @@
+/* ===============================================================
+   Global Theme - U.S. Food Insecurity Dashboard
+   =============================================================== */
+
+/* Base Layout */
+body {
+  background-color: #F5F8FC;
+  font-family: 'Inter', sans-serif;
+  color: #212529;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: #212529;
+}
+p, li {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* ===============================================================
+   App Header
+   =============================================================== */
+.app-header {
+  background-color: #220BED;
+  color: #ffffff;
+  padding: 26px 48px;
+  font-size: 3.2rem;
+  font-weight: 1000;
+  letter-spacing: 0.5px;
+  text-align: left;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+/* ===============================================================
+   Navbar
+   =============================================================== */
+/* NAVBAR CONTAINER */
+.navbar {
+  background-color: #220BED !important;
+  border-top: 3px solid #F5F8FC !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  margin-top: -5px;
+}
+
+/* NAVBAR TEXT (Bootstrap 5 uses .nav-link, NOT li > a) */
+.navbar-nav .nav-link {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 30px !important;    /* ← Increase tab text size */
+  padding: 14px 22px !important; /* ← Optional: make tabs larger */
+}
+
+/* HOVER STATE */
+.navbar-nav .nav-link:hover {
+  color: #909b17ff !important;
+}
+
+/* ACTIVE TAB */
+.navbar-nav .nav-link.active {
+  background-color: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff !important;
+  font-weight: 700 !important;   /* Make active tab bolder */
+  font-size: 20px !important;    /* Ensure same size */
+}
+
+
+/* ===============================================================
+   Buttons
+   =============================================================== */
+.btn {
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 20px;
+}
+.btn-primary {
+  background-color: #FF6433 !important;
+  border: none;
+}
+.btn-primary:hover {
+  background-color: #e25528 !important;
+}
+.btn-success {
+  background-color: #00B884 !important;
+  border: none;
+}
+.btn-success:hover {
+  background-color: #009b6f !important;
+}
+
+/* ===============================================================
+   Cards (Insights + Trend)
+   =============================================================== */
+.card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 22px 26px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+.insights-card ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.insights-card li {
+  margin-bottom: 8px;
+  color: #444;
+}
+.trend-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 10px;
+}
+
+/* ===============================================================
+   KPI CARDS — SF-425 Style
+   =============================================================== */
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px 26px;
+  border-left: 6px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 140px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.25s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* --- FIXED KPI TITLE (Bold + dark) --- */
+.kpi-title {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #1a1a1a !important;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* --- KPI VALUE (big dark numbers) --- */
+.kpi-card .kpi-value {
+  font-size: 42px !important;
+  font-weight: 700 !important;
+  color: #111 !important;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Trend text */
+.kpi-change {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Accent borders */
+.kpi-blue   { border-color: #3A5AFE; }
+.kpi-green  { border-color: #00B884; }
+.kpi-orange { border-color: #FFA940; }
+.kpi-purple { border-color: #8A5BFF; }
+.kpi-red    { border-color: #FF4D4F; }
+
+/* Reduce spacing between columns (tighten KPI grid) */
+.row > [class*='col-'] {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Mobile */
+@media (max-width: 992px) {
+  .kpi-card {
+    height: auto;
+    padding: 18px 22px;
+  }
+}
+
+/* ===============================================================
+   Tables
+   =============================================================== */
+.dataTable,
+.table {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.table th {
+  background-color: #220BED;
+  color: white;
+  font-weight: 600;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f9fafc;
+}
+
+/* ===============================================================
+   Plot Containers
+   =============================================================== */
+.plotly, .shiny-plot-output {
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 10px;
+}
+
+/* ===============================================================
+   Form Inputs
+   =============================================================== */
+input, select, textarea {
+  border-radius: 10px !important;
+  border: 1px solid #d0d5dd !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #220BED !important;
+  box-shadow: 0 0 0 0.2rem rgba(34,11,237,0.25) !important;
+}
+
+/* ===============================================================
+   Footer
+   =============================================================== */
+.footer {
+  text-align: center;
+  color: #6c757d;
+  padding: 20px;
+}
+
+/* Utility + Animation */
+.text-muted { color: #6c757d !important; }
+.fw-bold { font-weight: 700 !important; }
+.text-center { text-align: center !important; }
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ===============================================================
+   Sub-tabs (Trends → State Trends, Racial Disparities, etc.)
+   =============================================================== */
+.nav-tabs .nav-link {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: #0a8a6a !important;   /* teal text for inactive tabs */
+  padding: 12px 20px !important;
+  border-radius: 10px !important; /* smooth rounded corners */
+  transition: all 0.25s ease;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #e6e6ff !important;   /* light purple highlight */
+  color: #220BED !important;              /* active tab text color */
+  font-weight: 800 !important;
+  border: 2px solid #220BED !important;   /* strong border accent */
+  border-bottom: none !important;         /* removes bootstrap underline */
+  box-shadow: 0 2px 6px rgba(34, 11, 237, 0.2); /* subtle glow */
+}
+

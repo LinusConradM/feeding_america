@@ -1,0 +1,163 @@
+---
+title: "Misc Functions"
+author: "Ryann Tompkins"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Year over year change plot
+```{r}
+mmg_list <- list(
+  "2009" = MMG_2009,
+  "2010" = MMG_2010,
+  "2011" = MMG_2011,
+  "2012" = MMG_2012,
+  "2013" = MMG_2013,
+  "2014" = MMG_2014,
+  "2015" = MMG_2015,
+  "2016" = MMG_2016,
+  "2017" = MMG_2017,
+  "2018" = MMG_2018,
+  "2019" = MMG_2019,
+  "2020" = MMG_2020,
+  "2021" = MMG_2021,
+  "2022" = MMG_2022,
+  "2023" = MMG_2023
+)
+
+
+fi_change_plot <- function(
+  year_start, year_end,
+  variable,
+  plot_type = "Slope",
+  data_list = mmg_list
+) {
+
+  df_start <- data_list[[as.character(year_start)]] |> 
+    select(FIPS, value_start = all_of(variable))
+
+  df_end <- data_list[[as.character(year_end)]] |> 
+    select(FIPS, value_end = all_of(variable))
+
+  df <- df_start |> 
+    inner_join(df_end, by = "FIPS") |> 
+    mutate(change = value_end - value_start)
+
+  if (plot_type == "Slope") {
+    p <- df %>%
+      slice_max(abs(change), n = 30) |> 
+      tidyr::pivot_longer(cols = c(value_start, value_end),
+                          names_to = "year", values_to = "value") |> 
+      mutate(year = recode(year,
+                           "value_start" = year_start,
+                           "value_end" = year_end)) |> 
+      ggplot(aes(x = year, y = value, group = FIPS)) +
+      geom_line(alpha = 0.5) +
+      geom_point(size = 2) +
+      labs(
+        title = paste(variable, "Change:", year_start, "→", year_end),
+        y = "Value",
+        x = "Year"
+      )
+
+  } else if (plot_type == "Histogram") {
+    p <- ggplot(df, aes(x = change)) +
+      geom_histogram(bins = 30, fill = "steelblue") +
+      labs(
+        title = paste("Distribution of Change", year_start, "→", year_end),
+        x = "Change"
+      )
+
+  } else if (plot_type == "Bar Top N") {
+    p <- df |> 
+      slice_max(abs(change), n = 20) |> 
+      ggplot(aes(x = reorder(FIPS, change), y = change)) +
+      geom_col(fill = "darkgreen") +
+      coord_flip() +
+      labs(
+        title = paste("Largest Changes in", variable),
+        y = "Change"
+      )
+  }
+
+  return(p + theme_minimal())
+}
+```
+
+
+Potential UI
+```{r}
+ui <- fluidPage(
+
+  titlePanel("Year-over-Year Food Insecurity Change"),
+
+  sidebarLayout(
+
+    sidebarPanel(
+
+      selectInput(
+        "year_start",
+        "Start Year:",
+        choices = names(mmg_list),
+        selected = "2018"
+      ),
+
+      selectInput(
+        "year_end",
+        "End Year:",
+        choices = names(mmg_list),
+        selected = "2023"
+      ),
+
+      selectInput(
+        "variable",
+        "Variable:",
+        choices = c(
+          "Overall Food Insecurity Rate",
+          "Child Food Insecurity Rate",
+          "Food Insecurity Rate among Black Persons (all ethnicities)",
+          "Food Insecurity Rate among Hispanic Persons (any race)",
+          "Food Insecurity Rate among White, non-Hispanic Persons"
+        ),
+        selected = "Overall Food Insecurity Rate"
+      ),
+
+      selectInput(
+        "plot_type",
+        "Plot Type:",
+        choices = c("Slope", "Histogram", "Bar Top N"),
+        selected = "Slope"
+      )
+    ),
+
+
+    mainPanel(
+      plotOutput("change_plot")
+    )
+  )
+)
+```
+
+
+Potantial Server
+```{r}
+server <- function(input, output, session) {
+
+  output$change_plot <- renderPlot({
+
+    fi_change_plot(
+      year_start = input$year_start,
+      year_end   = input$year_end,
+      variable   = input$variable,
+      plot_type  = input$plot_type,
+      data_list  = mmg_list
+    )
+
+  })
+
+}
+```
