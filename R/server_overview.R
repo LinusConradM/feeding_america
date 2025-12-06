@@ -14,9 +14,8 @@ server_overview <- function(input, output, session, data) {
 
   df <- reactive({ data() })
 
-  # ================================
+
   # EXECUTIVE KPI CALCULATIONS
-  # ================================
   kpis <- reactive({
     compute_kpis(df())
   })
@@ -31,9 +30,7 @@ server_overview <- function(input, output, session, data) {
   output$kpi_shortfall     <- renderText(scales::dollar(kpis()$budget_shortfall))
   output$kpi_rural_gap     <- renderText(sprintf("%.1f%%", kpis()$rural_metro_gap * 100))
 
-  # ================================
   # NATIONAL FI TREND PLOT
-  # ================================
   output$national_trend_plot <- renderPlotly({
 
     df_trend <- df() %>%
