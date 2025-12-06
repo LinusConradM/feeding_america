@@ -1,26 +1,120 @@
 # R/server_analysis.R
+
 server_analysis <- function(input, output, session, data) {
-  observeEvent(input$run_model, {
+
+  # ------------------------------------------
+  # 1. Populate numeric variables for outcome
+  # ------------------------------------------
+  observe({
     df <- data()
 
-    if (input$model_type == "Correlation") {
-      corr_matrix <- cor(select(df, -State))
-      output$corr_plot <- plotly::renderPlotly({
-        plotly::plot_ly(z = corr_matrix, type = "heatmap", colors = "RdBu") %>%
-          plotly::layout(title = "Correlation Matrix (Placeholder)")
-      })
+    numeric_vars <- df %>%
+      select(where(is.numeric)) %>%
+      names()
+
+    updateSelectInput(
+      session, "group_target",
+      choices = numeric_vars,
+      selected = "overall_food_insecurity_rate"
+    )
+  })
+
+  # ------------------------------------------------
+  # 2. Run GROUP COMPARISON when button is clicked
+  # ------------------------------------------------
+  observeEvent(input$run_model, {
+
+    req(input$model_type == "Group Comparison")
+
+    df <- data()
+
+    # --------------------------
+    # build grouping variable
+    # --------------------------
+    if (input$group_var == "Census Region") {
+      df$grp <- df$census_region
     }
 
-    if (input$model_type == "Regression") {
-      formula <- as.formula(paste(input$dep_var, "~", paste(input$indep_vars, collapse = "+")))
-      model <- lm(formula, data = df)
-      output$reg_summary <- renderPrint({ summary(model) })
+    if (input$group_var == "Census Division") {
+      df$grp <- df$census_division
     }
 
-    if (input$model_type == "Group Comparison") {
-      output$group_plot <- plotly::renderPlotly({
-        plotly::plot_ly(df, x = ~State, y = ~FoodInsecurity, type = "box", color = ~State)
-      })
+    if (input$group_var == "Rural/Urban") {
+      df$grp <- case_when(
+        df$rural_urban_continuum_code_2013 <= 3 ~ "Metro",
+        df$rural_urban_continuum_code_2013 <= 6 ~ "Non-Metro",
+        TRUE ~ "Rural"
+      )
     }
+
+    if (input$group_var == "Income Category (≤185% vs >185%)") {
+      df$grp <- case_when(
+        df$percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl >= 0.5 ~ "Low Income",
+        TRUE ~ "Higher Income"
+      )
+    }
+
+    # --------------------------
+    # Special handling for Race
+    # --------------------------
+    if (input$group_var == "Race") {
+
+      df <- df %>%
+        select(
+          county_state, year,
+          black = food_insecurity_rate_among_black_persons_all_ethnicities,
+          hispanic = food_insecurity_rate_among_hispanic_persons_any_race,
+          white = food_insecurity_rate_among_white_non_hispanic_persons
+        ) %>%
+        pivot_longer(cols = c(black, hispanic, white),
+                     names_to = "grp",
+                     values_to = "value")
+
+      target_var <- "value"
+
+      updateSelectInput(
+        session,
+        "group_target",
+        choices = "value",
+        selected = "value"
+      )
+
+    } else {
+      target_var <- input$group_target
+    }
+
+    req(target_var)
+
+    # ======================================================
+    # 3. PLOT: Boxplot by group
+    # ======================================================
+    output$group_comp_plot <- renderPlot({
+
+      df %>%
+        ggplot(aes(x = grp, y = .data[[target_var]], fill = grp)) +
+        geom_boxplot(alpha = 0.7) +
+        labs(
+          title = paste("Group Comparison:", input$group_var),
+          x = input$group_var,
+          y = target_var
+        )
+    })
+
+
+    # ======================================================
+    # 4. STATISTICAL TEST (t-test or ANOVA)
+    # ======================================================
+    output$group_stats <- renderPrint({
+
+      grp_count <- df %>% pull(grp) %>% unique() %>% length()
+
+      if (grp_count == 2) {
+        cat("Two-group comparison → t-test\n\n")
+        print(t.test(df[[target_var]] ~ df$grp))
+      } else {
+        cat("Multiple-group comparison → ANOVA\n\n")
+        print(summary(aov(df[[target_var]] ~ df$grp)))
+      }
+    })
   })
 }
