@@ -6,6 +6,23 @@ options(tigris_use_cache = TRUE)
 server_exploration <- function(input, output, session, data) {
 
   # -------------------------------------------------------
+# 0. Dataset selector (PRE vs POST)
+# -------------------------------------------------------
+selected_data <- reactive({
+  req(input$dataset_period)
+
+  if (input$dataset_period == "pre") {
+    fa_pre %>%
+      mutate(state_abbr = state)
+  } else {
+    fa_post %>%
+      mutate(state_abbr = fa_state)
+  }
+})
+
+
+
+  # -------------------------------------------------------
   # 1. Dynamic State Filter
   # -------------------------------------------------------
   observe({
@@ -163,24 +180,46 @@ output$map_view <- leaflet::renderLeaflet({
   # -------------------------------------------------------
   output$trend_state <- renderPlot({
 
-    df <- data() %>%
-      filter_state_county() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(state, year) %>%
-      summarise(across(all_of(input$variables),
-                       mean, na.rm = TRUE), .groups = "drop") %>%
-      pivot_longer(cols = input$variables,
-                   names_to = "indicator",
-                   values_to = "value")
+  df <- selected_data() %>%
+    filter_state_county() %>%
+    filter(
+      year >= input$year_range[1],
+      year <= input$year_range[2]
+    ) %>%
+    group_by(state, year) %>%
+    summarise(
+      across(
+        all_of(input$variables),
+        ~ mean(.x, na.rm = TRUE)
+      ),
+      .groups = "drop"
+    ) %>%
+    pivot_longer(
+      cols = all_of(input$variables),
+      names_to = "indicator",
+      values_to = "value"
+    ) %>%
+    filter(!is.na(value))
 
-    ggplot(df, aes(year, value, color = indicator, group = state)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "State-Level Food Insecurity Trends",
-           x = "Year", y = "Value") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
+  validate(
+    need(nrow(df) > 0, "No data available for selected period.")
+  )
+
+  ggplot(df, aes(year, value, color = indicator, group = state)) +
+    geom_line(linewidth = 1.2, alpha = 0.8) +
+    geom_point(size = 2) +
+    labs(
+      title = paste(
+        "State-Level Food Insecurity Trends",
+        ifelse(input$dataset_period == "pre", "(2009–2018)", "(2019–2023)")
+      ),
+      x = "Year",
+      y = "Value"
+    ) +
+    scale_x_continuous(breaks = sort(unique(df$year)))
+})
+
+
 
 
   # -------------------------------------------------------
