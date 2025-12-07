@@ -5,28 +5,6 @@
 # Load global environment (data + theme)
 source("global.R", local = TRUE)
 
-# Required packages not in global
-library(shiny)
-library(bslib)
-library(broom)  # regression output
-library(car)    # VIF
-
-# ==============================================================================
-# LOAD HELPERS
-# ==============================================================================
-
-# Core Shiny packages
-library(shiny)
-library(bslib)
-
-# Visualization packages
-library(leaflet)
-library(plotly)
-library(DT)
-
-# Analysis packages
-library(broom)
-library(car)
 
 cat("✓ All app packages loaded\n")
 
