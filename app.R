@@ -5,6 +5,8 @@
 # Load global environment (data + theme)
 source("global.R", local = TRUE)
 
+library(shiny)
+library(bslib)
 
 cat("✓ All app packages loaded\n")
 
@@ -25,7 +27,7 @@ source("R/server_exploration.R")
 source("R/server_analysis.R")
 
 # ==============================================================================
-# UI DEFINITION  ✅ SINGLE HEADER / WORKING STYLE
+# UI DEFINITION SINGLE HEADER / WORKING STYLE
 # ==============================================================================
 
 ui <- fluidPage(
