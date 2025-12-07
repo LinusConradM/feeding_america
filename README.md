@@ -131,17 +131,13 @@ https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u
 *Map the Meal Gap 2024: Overall Food Insecurity in the United States.* 
 https://www.feedingamerica.org/research/map-the-meal-gap/by-county
 
-**Academic Literature:**
-
 **Gundersen, C., & Ziliak, J. P. (2015).** 
 *Food Insecurity and Health Outcomes.* 
-Health Affairs, 34(11), 1830-1839.
-https://doi.org/10.1377/hlthaff.2015.0645
+Health Affairs, 34(11), 1830-1839. https://doi.org/10.1377/hlthaff.2015.0645
 
 **Gundersen, C., Kreider, B., & Pepper, J. (2017).** 
 *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* 
-RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.
-https://doi.org/10.7758/rsf.2017.3.2.06
+RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130. https://doi.org/10.7758/rsf.2017.3.2.06
 
 **For Policy Analysis:**
 - Gregory, C. A., & Coleman-Jensen, A. (2017). *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
