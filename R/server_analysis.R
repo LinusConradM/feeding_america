@@ -32,6 +32,16 @@ server_analysis <- function(input, output, session, data) {
                       selected = "overall_food_insecurity_rate")
   })
 
+  # Update PCA variable selector
+observe({
+  updateSelectInput(
+    session,
+    "pca_vars",
+    choices = numeric_vars()
+  )
+})
+
+
   observe({
   updateSelectInput(
     session,
@@ -115,6 +125,142 @@ server_analysis <- function(input, output, session, data) {
         coord_flip()
     })
   })
+
+  # ============================================================================
+# PCA ANALYSIS
+# ============================================================================
+
+observeEvent(input$run_pca, {
+  
+  req(input$pca_vars)
+  req(length(input$pca_vars) >= 2)
+  
+  df <- data()
+  
+  # -------------------------
+  # Prepare data
+  # -------------------------
+  pca_data <- df %>%
+    select(all_of(input$pca_vars)) %>%
+    drop_na()
+  
+  if (nrow(pca_data) < 20) {
+    output$pca_interpretation <- renderUI({
+      HTML("<p style='color:red;'>Not enough data for PCA (need ≥ 20 observations).</p>")
+    })
+    return()
+  }
+  
+  # -------------------------
+  # Run PCA
+  # -------------------------
+  pca_model <- prcomp(
+    pca_data,
+    scale. = input$pca_scale,
+    center = TRUE
+  )
+  
+  # Variance explained
+  var_explained <- (pca_model$sdev^2) / sum(pca_model$sdev^2)
+  
+  # -------------------------
+  # SCREE PLOT
+  # -------------------------
+  output$pca_scree <- renderPlot({
+    
+    scree_df <- data.frame(
+      PC = factor(seq_along(var_explained)),
+      Variance = var_explained
+    )
+    
+    ggplot(scree_df, aes(x = PC, y = Variance)) +
+      geom_col(fill = "#2C7FB8") +
+      geom_line(aes(group = 1), color = "black") +
+      geom_point(size = 2) +
+      scale_y_continuous(labels = scales::percent_format()) +
+      labs(
+        title = "Scree Plot: Variance Explained by Principal Components",
+        x = "Principal Component",
+        y = "Proportion of Variance Explained"
+      )
+  })
+  
+  # -------------------------
+  # BIPLOT (PC1 vs PC2)
+  # -------------------------
+  output$pca_biplot <- renderPlot({
+    
+    scores <- as.data.frame(pca_model$x[, 1:2])
+    scores$obs <- rownames(scores)
+    
+    loadings <- as.data.frame(pca_model$rotation[, 1:2])
+    loadings$var <- rownames(loadings)
+    
+    ggplot(scores, aes(PC1, PC2)) +
+      geom_point(alpha = 0.4) +
+      geom_segment(
+        data = loadings,
+        aes(x = 0, y = 0, xend = PC1 * 5, yend = PC2 * 5),
+        arrow = arrow(length = unit(0.2, "cm")),
+        color = "red"
+      ) +
+      geom_text(
+        data = loadings,
+        aes(x = PC1 * 5, y = PC2 * 5, label = var),
+        color = "red",
+        size = 4,
+        hjust = 1
+      ) +
+      labs(
+        title = "PCA Biplot (PC1 vs PC2)",
+        x = "PC1",
+        y = "PC2"
+      )
+  })
+  
+  # -------------------------
+  # LOADINGS TABLE
+  # -------------------------
+  output$pca_loadings <- renderDT({
+    
+    loadings_df <- as.data.frame(pca_model$rotation) %>%
+      rownames_to_column("Variable")
+    
+    datatable(
+      loadings_df,
+      options = list(pageLength = 10),
+      rownames = FALSE
+    ) %>%
+      formatRound(columns = -1, digits = 3)
+  })
+  
+  # -------------------------
+  # INTERPRETATION
+  # -------------------------
+  output$pca_interpretation <- renderUI({
+    
+    pc1_vars <- sort(abs(pca_model$rotation[, 1]), decreasing = TRUE)[1:3]
+    pc2_vars <- sort(abs(pca_model$rotation[, 2]), decreasing = TRUE)[1:3]
+    
+    HTML(paste0(
+      "<h4>PCA Interpretation</h4>",
+      "<ul>",
+      "<li><strong>PC1</strong> explains ",
+      round(var_explained[1] * 100, 1),
+      "% of total variance and is mainly driven by: ",
+      paste(names(pc1_vars), collapse = ", "),
+      ".</li>",
+      "<li><strong>PC2</strong> explains ",
+      round(var_explained[2] * 100, 1),
+      "% of total variance and reflects variation in: ",
+      paste(names(pc2_vars), collapse = ", "),
+      ".</li>",
+      "</ul>",
+      "<p>PCA reveals the major dimensions of food insecurity variation across counties.</p>"
+    ))
+  })
+})
+
 
   # ============================================================================
   # K-MEANS CLUSTERING
