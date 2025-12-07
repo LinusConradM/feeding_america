@@ -115,7 +115,42 @@ We adhere to the **American Statistical Association’s Ethical Guidelines (2023
 - All data are **public and de-identified**.  
 - Transparent R scripts with version control and commit documentation.  
 - Neutral and accessible visualization choices.  
-- Repository structure supports full reproducibility.  
+- Repository structure supports full reproducibility.
+
+## References
+**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** 
+*Household Food Security in the United States in 2022.* 
+U.S. Department of Agriculture, Economic Research Service, ERR-325.
+https://www.ers.usda.gov/publications/pub-details/?pubid=107703
+
+**U.S. Department of Agriculture, Economic Research Service (2024).** 
+*Food Security in the U.S.*
+https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u-s/
+
+**Feeding America (2024).** 
+*Map the Meal Gap 2024: Overall Food Insecurity in the United States.* 
+https://www.feedingamerica.org/research/map-the-meal-gap/by-county
+
+### Academic Literature
+
+**Gundersen, C., & Ziliak, J. P. (2015).** 
+*Food Insecurity and Health Outcomes.* 
+Health Affairs, 34(11), 1830-1839.
+https://doi.org/10.1377/hlthaff.2015.0645
+
+**Gundersen, C., Kreider, B., & Pepper, J. (2017).** 
+*Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* 
+RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.
+https://doi.org/10.7758/rsf.2017.3.2.06
+
+**For Policy Analysis:**
+- Gregory, C. A., & Coleman-Jensen, A. (2017). *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
+
+**For Geographic Analysis:**
+- Gundersen, C., Dewey, A., Crumbaugh, A., Kato, M., & Engelhard, E. (2024). *Map the Meal Gap 2024: An Analysis of County and Congressional District Food Insecurity and County Food Cost in the United States.* Feeding America.
+
+**For Racial Equity:**
+- Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020). *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
 
 ---
 
