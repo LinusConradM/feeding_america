@@ -4,13 +4,30 @@
 server_analysis <- function(input, output, session, data) {
   
   # ============================================================================
-  # REACTIVE: Get numeric variables
+  # REACTIVE: Get numeric and Categorical variables
   # ============================================================================
   
   numeric_vars <- reactive({
     df <- data()
     df %>% select(where(is.numeric)) %>% names() %>% sort()
   })
+
+  categorical_vars <- reactive({
+  df <- data()
+  df %>%
+    select(where(~ is.character(.) || is.factor(.))) %>%
+    names() %>%
+    sort()
+  })
+
+  # ============================================================================
+  # REACTIVE: Decision tree target / predictor choices
+  # ============================================================================
+
+  tree_target_choices <- reactive({
+    sort(unique(c(numeric_vars(), categorical_vars())))
+  })
+
   
   # ============================================================================
   # POPULATE DROPDOWNS
@@ -32,24 +49,29 @@ server_analysis <- function(input, output, session, data) {
                       selected = "overall_food_insecurity_rate")
   })
 
-  # Decision Tree target variable
+# ============================================================================
+# DECISION TREE DROPDOWNS ✅ FIXED
+# ============================================================================
+
 observe({
   updateSelectInput(
     session,
     "tree_target",
-    choices = numeric_vars(),
+    choices  = tree_target_choices(),
     selected = "overall_food_insecurity_rate"
   )
 })
 
-# Decision Tree predictor variables
 observe({
+  req(input$tree_target)
   updateSelectInput(
     session,
     "tree_predictors",
-    choices = numeric_vars()
+    choices = setdiff(tree_target_choices(), input$tree_target)
   )
 })
+
+
 
 
   # Update PCA variable selector
@@ -175,6 +197,7 @@ td <- df %>%
 
 tree_data(td)
 
+
 # -------------------------
 # SAFETY CHECK ✅ FIXED
 # -------------------------
@@ -201,6 +224,11 @@ target <- td[[input$tree_target]]
 is_binary_numeric <- is.numeric(target) && all(unique(target) %in% c(0, 1))
 is_categorical    <- is.factor(target) || is.character(target)
 is_classification <- is_binary_numeric || is_categorical
+
+# ENSURE proper classification target
+if (is_classification && !is.factor(td[[input$tree_target]])) {
+  td[[input$tree_target]] <- factor(td[[input$tree_target]])
+}
 
 
   
@@ -231,6 +259,44 @@ is_classification <- is_binary_numeric || is_categorical
 }
 
 tree_model(model)
+
+  # -------------------------
+# MODEL DATA (WHAT THE TREE USED)
+# -------------------------
+
+output$tree_model_data_summary <- renderTable({
+
+  req(tree_data())
+
+  data.frame(
+    Item = c(
+      "Target variable",
+      "Predictor variables",
+      "Observations used"
+    ),
+    Value = c(
+      input$tree_target,
+      paste(input$tree_predictors, collapse = ", "),
+      nrow(tree_data())
+    )
+  )
+})
+
+output$tree_model_data_table <- renderDT({
+
+  req(tree_data())
+
+  datatable(
+    tree_data(),
+    options = list(
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    rownames = FALSE
+  )
+})
+
+  
   
   # -------------------------
   # TREE PLOT
@@ -276,7 +342,7 @@ tree_model(model)
     
     if (!is_classification) return(NULL)
     
-    preds <- predict(tree_model, type = "class")
+    preds <- predict(tree_model(), newdata = td, type = "class")
     table(Predicted = preds, Actual = target)
   }, rownames = TRUE)
   
