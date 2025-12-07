@@ -112,7 +112,7 @@ ui_exploration <- tabPanel(
             "Map",
             
             # THIS IS WHERE THE MAP GOES!
-            leafletOutput("us_county_map", height = "700px")
+            leaflet::leafletOutput("us_county_map", height = "700px")
           ),
           
           # ==================================================================
@@ -121,7 +121,7 @@ ui_exploration <- tabPanel(
           tabPanel(
             "Trends",
             
-            plotlyOutput("trends_plot", height = "600px")
+            plotly::plotlyOutput("trends_plot", height = "600px")
           ),
           
           # ==================================================================
