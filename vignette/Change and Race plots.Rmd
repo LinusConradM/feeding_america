@@ -7,41 +7,36 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
 ```
 
 Year over year change plot
 ```{r}
-mmg_list <- list(
-  "2009" = MMG_2009,
-  "2010" = MMG_2010,
-  "2011" = MMG_2011,
-  "2012" = MMG_2012,
-  "2013" = MMG_2013,
-  "2014" = MMG_2014,
-  "2015" = MMG_2015,
-  "2016" = MMG_2016,
-  "2017" = MMG_2017,
-  "2018" = MMG_2018,
-  "2019" = MMG_2019,
-  "2020" = MMG_2020,
-  "2021" = MMG_2021,
-  "2022" = MMG_2022,
-  "2023" = MMG_2023
-)
-
 
 fi_change_plot <- function(
   year_start, year_end,
   variable,
-  plot_type = "Slope",
-  data_list = mmg_list
+  plot_type = "Slope"
 ) {
+  if (year_start>=2019){
+    df_start<-fa_post |> 
+      select(FIPS, value_start = all_of(variable))
+  }
+  else  {
+     df_start<-fa_pre |> 
+      select(FIPS, value_start = all_of(variable))
+  }
 
-  df_start <- data_list[[as.character(year_start)]] |> 
-    select(FIPS, value_start = all_of(variable))
-
-  df_end <- data_list[[as.character(year_end)]] |> 
-    select(FIPS, value_end = all_of(variable))
+  if (year_end>=2019){
+    df_end<-fa_post |> 
+      select(FIPS, value_end = all_of(variable))
+  }
+  else  {
+     df_end<-fa_pre |> 
+      select(FIPS, value_end = all_of(variable))
+  }
+  
 
   df <- df_start |> 
     inner_join(df_end, by = "FIPS") |> 
@@ -102,14 +97,14 @@ ui <- fluidPage(
       selectInput(
         "year_start",
         "Start Year:",
-        choices = names(mmg_list),
+        choices = 2009:2023,
         selected = "2018"
       ),
 
       selectInput(
         "year_end",
         "End Year:",
-        choices = names(mmg_list),
+        choices = 2009:2023,
         selected = "2023"
       ),
 
