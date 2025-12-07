@@ -131,7 +131,7 @@ https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u
 *Map the Meal Gap 2024: Overall Food Insecurity in the United States.* 
 https://www.feedingamerica.org/research/map-the-meal-gap/by-county
 
-### Academic Literature
+**Academic Literature:**
 
 **Gundersen, C., & Ziliak, J. P. (2015).** 
 *Food Insecurity and Health Outcomes.* 
