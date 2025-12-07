@@ -1,61 +1,396 @@
-# R/server_overview.R
+# ==============================================================================
+# SERVER: OVERVIEW TAB - Clean Version (No Trend Plot)
+# ==============================================================================
 
 server_overview <- function(input, output, session, data) {
-
-  # Shared styling for all plotly charts
-  plotly_style <- function(p) {
-    p %>% layout(
-      font = list(size = 14, family = "Inter"),
-      title = list(font = list(size = 20)),
-      xaxis = list(tickfont = list(size = 14), titlefont = list(size = 16)),
-      yaxis = list(tickfont = list(size = 14), titlefont = list(size = 16))
-    )
-  }
-
-  df <- reactive({ data() })
-
-
-  # EXECUTIVE KPI CALCULATIONS
-  kpis <- reactive({
-    compute_kpis(df())
+  
+  # Get current year (latest year in data)
+  current_year <- reactive({
+    max(data()$year, na.rm = TRUE)
   })
-
-  # Apply to UI
-  output$kpi_fi_rate       <- renderText(sprintf("%.1f%%", kpis()$national_fi_rate * 100))
-  output$kpi_fi_persons    <- renderText(scales::comma(kpis()$fi_persons))
-  output$kpi_child_fi_rate <- renderText(sprintf("%.1f%%", kpis()$child_fi_rate * 100))
-  output$kpi_cost_per_meal <- renderText(sprintf("$%.2f", kpis()$cost_per_meal))
-  output$kpi_gap_black     <- renderText(sprintf("%.1f%%", kpis()$racial_gap_black * 100))
-  output$kpi_gap_hisp      <- renderText(sprintf("%.1f%%", kpis()$racial_gap_hisp * 100))
-  output$kpi_shortfall     <- renderText(scales::dollar(kpis()$budget_shortfall))
-  output$kpi_rural_gap     <- renderText(sprintf("%.1f%%", kpis()$rural_metro_gap * 100))
-
-  # NATIONAL FI TREND PLOT
-  output$national_trend_plot <- renderPlotly({
-
-    df_trend <- df() %>%
-      group_by(year) %>%
-      summarise(national_fi_rate = mean(overall_food_insecurity_rate, na.rm = TRUE), .groups = "drop") %>%
-      mutate(year = as.numeric(year))
-
-    p <- plot_ly(
-      df_trend,
-      x = ~year,
-      y = ~national_fi_rate * 100,
-      type = "scatter",
-      mode = "lines+markers",
-      line = list(color = "#220BED")
-    ) %>% 
-      layout(
-        title = "National Food Insecurity Trends",
-        xaxis = list(
-          type = "linear",
-          tickvals = df_trend$year,
-          ticktext = df_trend$year
-        ),
-        yaxis = list(title = "Food Insecurity Rate (%)")
-      )
-
-    plotly_style(p)
+  
+  # Get previous year
+  previous_year <- reactive({
+    current_year() - 1
   })
+  
+  # ==========================================================================
+  # KPI: NATIONAL FOOD INSECURITY RATE
+  # ==========================================================================
+  
+  output$kpi_national_fi_rate <- renderText({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(overall_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || length(current_rate) == 0) {
+      return("N/A")
+    }
+    
+    paste0(round(current_rate * 100, 1), "%")
+  })
+  
+  output$kpi_fi_rate_change <- renderUI({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(overall_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    previous_rate <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(rate = mean(overall_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || is.na(previous_rate)) {
+      return("")
+    }
+    
+    change <- current_rate - previous_rate
+    pct_change <- (change / previous_rate) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: TOTAL FOOD INSECURE PERSONS
+  # ==========================================================================
+  
+  output$kpi_total_food_insecure <- renderText({
+    
+    total <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(total = sum(no_of_food_insecure_persons_overall, na.rm = TRUE)) %>%
+      pull(total)
+    
+    if (is.na(total) || length(total) == 0) {
+      return("N/A")
+    }
+    
+    # Format in millions
+    paste0(round(total / 1e6, 1), "M")
+  })
+  
+  output$kpi_fi_persons_change <- renderUI({
+    
+    current_total <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(total = sum(no_of_food_insecure_persons_overall, na.rm = TRUE)) %>%
+      pull(total)
+    
+    previous_total <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(total = sum(no_of_food_insecure_persons_overall, na.rm = TRUE)) %>%
+      pull(total)
+    
+    if (is.na(current_total) || is.na(previous_total)) {
+      return("")
+    }
+    
+    change <- current_total - previous_total
+    pct_change <- (change / previous_total) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: CHILD FOOD INSECURITY RATE
+  # ==========================================================================
+  
+  output$kpi_child_fi_rate <- renderText({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(child_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || length(current_rate) == 0) {
+      return("N/A")
+    }
+    
+    paste0(round(current_rate * 100, 1), "%")
+  })
+  
+  output$kpi_child_fi_change <- renderUI({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(child_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    previous_rate <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(rate = mean(child_food_insecurity_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || is.na(previous_rate)) {
+      return("")
+    }
+    
+    change <- current_rate - previous_rate
+    pct_change <- (change / previous_rate) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: AVERAGE COST PER MEAL
+  # ==========================================================================
+  
+  output$kpi_avg_cost_per_meal <- renderText({
+    
+    avg_cost <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(cost = mean(cost_per_meal, na.rm = TRUE)) %>%
+      pull(cost)
+    
+    if (is.na(avg_cost) || length(avg_cost) == 0) {
+      return("N/A")
+    }
+    
+    paste0("$", round(avg_cost, 2))
+  })
+  
+  output$kpi_cost_change <- renderUI({
+    
+    current_cost <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(cost = mean(cost_per_meal, na.rm = TRUE)) %>%
+      pull(cost)
+    
+    previous_cost <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(cost = mean(cost_per_meal, na.rm = TRUE)) %>%
+      pull(cost)
+    
+    if (is.na(current_cost) || is.na(previous_cost)) {
+      return("")
+    }
+    
+    change <- current_cost - previous_cost
+    pct_change <- (change / previous_cost) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: POVERTY RATE
+  # ==========================================================================
+  
+  output$kpi_poverty_rate <- renderText({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(poverty_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || length(current_rate) == 0) {
+      return("N/A")
+    }
+    
+    paste0(round(current_rate * 100, 1), "%")
+  })
+  
+  output$kpi_poverty_change <- renderUI({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(poverty_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    previous_rate <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(rate = mean(poverty_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || is.na(previous_rate)) {
+      return("")
+    }
+    
+    change <- current_rate - previous_rate
+    pct_change <- (change / previous_rate) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: MEDIAN INCOME
+  # ==========================================================================
+  
+  output$kpi_median_income <- renderText({
+    
+    median_inc <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(income = mean(median_income, na.rm = TRUE)) %>%
+      pull(income)
+    
+    if (is.na(median_inc) || length(median_inc) == 0) {
+      return("N/A")
+    }
+    
+    paste0("$", format(round(median_inc), big.mark = ","))
+  })
+  
+  output$kpi_income_change <- renderUI({
+    
+    current_income <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(income = mean(median_income, na.rm = TRUE)) %>%
+      pull(income)
+    
+    previous_income <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(income = mean(median_income, na.rm = TRUE)) %>%
+      pull(income)
+    
+    if (is.na(current_income) || is.na(previous_income)) {
+      return("")
+    }
+    
+    change <- current_income - previous_income
+    pct_change <- (change / previous_income) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#28a745" else "#dc3545"  # Reversed: higher income is good
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: UNEMPLOYMENT RATE
+  # ==========================================================================
+  
+  output$kpi_unemployment_rate <- renderText({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(unemployment_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || length(current_rate) == 0) {
+      return("N/A")
+    }
+    
+    paste0(round(current_rate * 100, 1), "%")
+  })
+  
+  output$kpi_unemployment_change <- renderUI({
+    
+    current_rate <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(rate = mean(unemployment_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    previous_rate <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(rate = mean(unemployment_rate, na.rm = TRUE)) %>%
+      pull(rate)
+    
+    if (is.na(current_rate) || is.na(previous_rate)) {
+      return("")
+    }
+    
+    change <- current_rate - previous_rate
+    pct_change <- (change / previous_rate) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # ==========================================================================
+  # KPI: BUDGET SHORTFALL
+  # ==========================================================================
+  
+  output$kpi_budget_shortfall <- renderText({
+    
+    total_shortfall <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(shortfall = sum(weighted_annual_food_budget_shortfall, na.rm = TRUE)) %>%
+      pull(shortfall)
+    
+    if (is.na(total_shortfall) || length(total_shortfall) == 0) {
+      return("N/A")
+    }
+    
+    # Format in billions
+    paste0("$", round(total_shortfall / 1e9, 1), "B")
+  })
+  
+  output$kpi_shortfall_change <- renderUI({
+    
+    current_shortfall <- data() %>%
+      filter(year == current_year()) %>%
+      summarise(shortfall = sum(weighted_annual_food_budget_shortfall, na.rm = TRUE)) %>%
+      pull(shortfall)
+    
+    previous_shortfall <- data() %>%
+      filter(year == previous_year()) %>%
+      summarise(shortfall = sum(weighted_annual_food_budget_shortfall, na.rm = TRUE)) %>%
+      pull(shortfall)
+    
+    if (is.na(current_shortfall) || is.na(previous_shortfall)) {
+      return("")
+    }
+    
+    change <- current_shortfall - previous_shortfall
+    pct_change <- (change / previous_shortfall) * 100
+    
+    arrow <- if(change > 0) "↑" else "↓"
+    color <- if(change > 0) "#dc3545" else "#28a745"
+    
+    HTML(paste0(
+      "<span style='color: ", color, "; font-weight: 600;'>",
+      arrow, " ", abs(round(pct_change, 1)), "% vs ", previous_year(),
+      "</span>"
+    ))
+  })
+  
+  # Note: Trend plot removed - it's in the Exploration tab
 }
