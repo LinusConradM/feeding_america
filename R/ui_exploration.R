@@ -1,169 +1,147 @@
-# R/ui_exploration.R
+# ==============================================================================
+# UI: EXPLORATION TAB - COMPLETE WORKING VERSION
+# ==============================================================================
 
-ui_exploration <- sidebarLayout(
-
-  ############################
-  # SIDEBAR
-  ############################
-  sidebarPanel(
-    width = 3,
-    h4("Filters"),
-    hr(),
-
-    # Multi-state filter
-    selectizeInput(
-      inputId = "state_select",
-      label = "Select State(s):",
-      choices = NULL,
-      multiple = TRUE,
-      options = list(placeholder = "Select one or more states")
-    ),
+ui_exploration <- tabPanel(
+  "Exploration",
+  
+  fluidPage(
     
-    # Multi-county filter
-    selectizeInput(
-      inputId = "county_select",
-      label = "Select County:",
-      choices = NULL,
-      multiple = TRUE,
-      options = list(placeholder = "Select one or more counties")
-    ),
-
-    # Single year select
-    selectInput(
-      inputId = "year_select",
-      label = "Select Year:",
-      choices = 2010:2025,
-      selected = 2020
-    ),
-
-    # Year range slider
-    sliderInput(
-      inputId = "year_range",
-      label = "Select Period:",
-      min = 2000,
-      max = 2050,
-      value = c(2010, 2025),
-      sep = ""
-    ),
-
-    # Indicator selection
-    checkboxGroupInput(
-      inputId = "variables",
-      label = "Food Insecurity Indicators:",
-      choices = c(
-        "Overall FI Rate" = "overall_food_insecurity_rate",
-        "# Food Insecure Persons" = "number_of_food_insecure_persons_overall",
-
-        "Black FI Rate" = "food_insecurity_rate_among_black_persons_all_ethnicities",
-        "Hispanic FI Rate" = "food_insecurity_rate_among_hispanic_persons_any_race",
-        "White FI Rate" = "food_insecurity_rate_among_white_non_hispanic_persons",
-
-        "SNAP Threshold" = "snap_threshold",
-        "% FI ≤ SNAP" = "percent_fi_snap_threshold",
-        "% FI > SNAP" = "percent_fi_snap_threshold_2",
-
-        "Child FI Rate" = "child_food_insecurity_rate",
-        "# Food Insecure Children" = "number_of_food_insecure_children",
-        "% FI Children ≤185% FPL" = "percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl",
-        "% FI Children >185% FPL" = "percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl",
-
-        "Cost Per Meal" = "cost_per_meal",
-        "Weekly $ Needed" = "weighted_weekly_needed_by_fi",
-        "Annual Shortfall" = "weighted_annual_food_budget_shortfall"
+    sidebarLayout(
+      
+      # ========================================================================
+      # LEFT SIDEBAR - FILTERS
+      # ========================================================================
+      
+      sidebarPanel(
+        width = 3,
+        
+        h4("Filters", style = "margin-top: 0;"),
+        
+        # State Selector (FIXED - explicit state list)
+        selectInput(
+          "state_filter",
+          "Select State(s):",
+          choices = c(
+            "All States" = "ALL",
+            "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+            "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+            "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+            "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+            "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+          ),
+          selected = "ALL",
+          multiple = TRUE
+        ),
+        
+        # County Selector (will populate based on state)
+        selectInput(
+          "county_filter",
+          "Select County:",
+          choices = "Select one or more counties",
+          multiple = TRUE
+        ),
+        
+        # Year Selector
+        selectInput(
+          "year_filter",
+          "Select Year:",
+          choices = 2009:2023,
+          selected = 2023
+        ),
+        
+        # Period Slider
+        sliderInput(
+          "period_filter",
+          "Select Period:",
+          min = 2009,
+          max = 2023,
+          value = c(2009, 2023),
+          step = 1,
+          sep = ""
+        ),
+        
+        # Indicator Radio Buttons
+        radioButtons(
+          "indicator_filter",
+          "Food Insecurity Indicators:",
+          choices = c(
+            "Overall FI Rate",
+            "# Food Insecure Persons",
+            "Black FI Rate",
+            "Hispanic FI Rate",
+            "White FI Rate",
+            "SNAP Threshold",
+            "% FI < SNAP",
+            "% FI > SNAP",
+            "Child FI Rate",
+            "# Food Insecure Children",
+            "% FI Children <185% FPL",
+            "% FI Children >185% FPL",
+            "Cost Per Meal",
+            "Weekly $ Needed",
+            "Annual Shortfall"
+          ),
+          selected = "Overall FI Rate"
+        ),
+        
+        # Update Map Button
+        actionButton(
+          "update_map",
+          "Update Map",
+          icon = icon("refresh"),
+          class = "btn-primary",
+          style = "width: 100%; margin-top: 20px;"
+        )
       ),
-      selected = "overall_food_insecurity_rate"
-    ),
-
-    actionButton("update_map", "Update Map", class = "btn-primary")
-  ),
-
-  ############################
-  # MAIN PANEL
-  ############################
-  mainPanel(
-    tabsetPanel(
-
-      # MAP TAB
-      tabPanel("Map",
-        leaflet::leafletOutput("map_view", height = "550px")
-      ),
-
-      ############################
-      # TRENDS TAB
-      ############################
-      tabPanel("Trends",
-  tabsetPanel(
-
-    tabPanel("State Trends",
-      htmltools::tags$div(
-        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-        "Note: All food insecurity estimates shown are modeled approximations from Feeding America's Map the Meal Gap dataset."
-      ),
-      plotOutput("trend_state", height = "450px")
-    ),
-
-    tabPanel("Racial Disparities",
-      htmltools::tags$div(
-        style = "color:#AA5500; font-size:12px; margin-bottom:10px;",
-        "Caution: Race/ethnicity estimates have wide uncertainty due to small sample sizes."
-      ),
-      plotOutput("trend_race", height = "450px")
-    ),
-
-    tabPanel("Child Food Insecurity",
-      htmltools::tags$div(
-        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-        "Note: Child food insecurity estimates are modeled values."
-      ),
-      plotOutput("trend_child", height = "450px")
-    ),
-
-    tabPanel("Cost Burden",
-      htmltools::tags$div(
-        style = "color:#D95F0E; font-size:12px; margin-bottom:10px;",
-        "Warning: Feeding America changed cost methodology in 2023 — values are not comparable."
-      ),
-      plotOutput("trend_cost", height = "450px")
-    ),
-
-    tabPanel("Rural vs Urban",
-      htmltools::tags$div(
-        style = "color:#444444; font-size:12px; margin-bottom:10px;",
-        "Rural–Urban Continuum Codes vary by state."
-      ),
-      plotOutput("trend_rural", height = "450px")
-    ),
-
-    tabPanel("Regional Trends",
-      htmltools::tags$div(
-        style = "color:#4444AA; font-size:12px; margin-bottom:10px;",
-        "Regional averages combine modeled county estimates."
-      ),
-      plotOutput("trend_region", height = "450px")
-    ),
-
-    tabPanel("Inequality Gaps",
-      htmltools::tags$div(
-        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-        "Gap metrics should be interpreted cautiously."
-      ),
-      plotOutput("trend_gap", height = "450px")
-    )
-  )
-),
-
-      ############################
-      # SUMMARY TABLE TAB
-      ############################
-      tabPanel("Summary Table",
-        DT::DTOutput("summary_table")
-      ),
-
-      ############################
-      # DATA VIEWER TAB
-      ############################
-      tabPanel("Data Viewer",
-        DT::DTOutput("data_viewer")
+      
+      # ========================================================================
+      # RIGHT MAIN PANEL - TABS
+      # ========================================================================
+      
+      mainPanel(
+        width = 9,
+        
+        tabsetPanel(
+          id = "exploration_tabs",
+          
+          # ==================================================================
+          # TAB 1: MAP
+          # ==================================================================
+          tabPanel(
+            "Map",
+            
+            # THIS IS WHERE THE MAP GOES!
+            leafletOutput("us_county_map", height = "700px")
+          ),
+          
+          # ==================================================================
+          # TAB 2: TRENDS
+          # ==================================================================
+          tabPanel(
+            "Trends",
+            
+            plotlyOutput("trends_plot", height = "600px")
+          ),
+          
+          # ==================================================================
+          # TAB 3: SUMMARY TABLE
+          # ==================================================================
+          tabPanel(
+            "Summary Table",
+            
+            DT::DTOutput("summary_table")  # Use explicit namespace
+          ),
+          
+          # ==================================================================
+          # TAB 4: DATA VIEWER
+          # ==================================================================
+          tabPanel(
+            "Data Viewer",
+            
+            DT::DTOutput("data_viewer")  # Use explicit namespace
+          )
+        )
       )
     )
   )
