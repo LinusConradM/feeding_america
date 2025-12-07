@@ -1,416 +1,387 @@
-# R/server_exploration.R
-library(sf)
-library(tigris)
-options(tigris_use_cache = TRUE)
+# ==============================================================================
+# SERVER: EXPLORATION TAB - AUTO-UPDATING VERSION
+# ==============================================================================
 
 server_exploration <- function(input, output, session, data) {
-
-  # -------------------------------------------------------
-# 0. Dataset selector (PRE vs POST)
-# -------------------------------------------------------
-selected_data <- reactive({
-  req(input$dataset_period)
-
-  if (input$dataset_period == "pre") {
-    fa_pre %>%
-      mutate(state_abbr = state)
-  } else {
-    fa_post %>%
-      mutate(state_abbr = fa_state)
-  }
-})
-
-
-
-  # -------------------------------------------------------
-  # 1. Dynamic State Filter
-  # -------------------------------------------------------
-  observe({
-    updateSelectInput(
-      session,
-      "state_select",
-      choices = sort(unique(data()$state)),
-      selected = "AL"
-    )
+  
+  # ==========================================================================
+  # REACTIVE: FILTERED DATA (UPDATES AUTOMATICALLY)
+  # ==========================================================================
+  
+  filtered_data <- reactive({
+    
+    # Start with full dataset
+    result <- data()
+    
+    # Apply state filter
+    if (!is.null(input$state_filter) && !identical(input$state_filter, "ALL")) {
+      # Remove "ALL" if it's in the selection with other states
+      states_to_filter <- setdiff(input$state_filter, "ALL")
+      
+      if (length(states_to_filter) > 0) {
+        result <- result %>%
+          filter(state %in% states_to_filter)
+      }
+    }
+    
+    # Apply year filter
+    if (!is.null(input$year_filter)) {
+      result <- result %>%
+        filter(year == input$year_filter)
+    }
+    
+    # Apply county filter (if state is selected)
+    if (!is.null(input$county_filter) && !identical(input$county_filter, "ALL")) {
+      counties_to_filter <- setdiff(input$county_filter, "ALL")
+      
+      if (length(counties_to_filter) > 0) {
+        result <- result %>%
+          filter(county_state %in% counties_to_filter)
+      }
+    }
+    
+    # Remove NA coordinates
+    result <- result %>%
+      filter(!is.na(lon), !is.na(lat))
+    
+    # Debug: Print what we're filtering
+    cat("\n=== FILTER DEBUG ===\n")
+    cat("State filter:", paste(input$state_filter, collapse = ", "), "\n")
+    cat("Year filter:", input$year_filter, "\n")
+    cat("Rows after filtering:", nrow(result), "\n")
+    
+    return(result)
   })
-
-  # dynamic county filter
-  observeEvent(input$state_select, {
-
-  req(input$state_select)
-
-  county_choices <- data() %>%
-    filter(state %in% input$state_select) %>%
-    arrange(county_state) %>%
-    pull(county_state) %>%
-    unique()
-
-  updateSelectInput(
-    session,
-    "county_select",
-    choices = county_choices,
-    selected = NULL
-  )
-})
-
-
-  # -------------------------------------------------------
-  # 2. Dynamic County Filter (updates when state changes)
-  # -------------------------------------------------------
-  observeEvent(input$state_select, {
-
-    req(input$state_select)
-
-    county_choices <- data() %>%
-      filter(state %in% input$state_select) %>%
-      arrange(county_state) %>%
-      pull(county_state) %>%
-      unique()
-
-    updateSelectInput(
-      session,
-      "county_select",
-      choices = county_choices,
-      selected = NULL
+  
+  # ==========================================================================
+  # REACTIVE: SELECTED INDICATOR COLUMN
+  # ==========================================================================
+  
+  indicator_column <- reactive({
+    
+    selected <- input$indicator_filter
+    
+    column_name <- case_when(
+      selected == "Overall FI Rate" ~ "overall_food_insecurity_rate",
+      selected == "# Food Insecure Persons" ~ "no_of_food_insecure_persons_overall",
+      selected == "Black FI Rate" ~ "food_insecurity_rate_among_black_persons_all_ethnicities",
+      selected == "Hispanic FI Rate" ~ "food_insecurity_rate_among_hispanic_persons_any_race",
+      selected == "White FI Rate" ~ "food_insecurity_rate_among_white_non_hispanic_persons",
+      selected == "Child FI Rate" ~ "child_food_insecurity_rate",
+      selected == "Cost Per Meal" ~ "cost_per_meal",
+      selected == "Annual Shortfall" ~ "weighted_annual_food_budget_shortfall",
+      TRUE ~ "overall_food_insecurity_rate"
     )
+    
+    return(column_name)
   })
-
-  # -------------------------------------------------------
-  # Helper: Uniform filtering by state + optional county
-  # -------------------------------------------------------
-  filter_state_county <- function(df) {
-
-  df <- df %>%
-    filter(state %in% input$state_select)
-
-  # Only apply county filter when counties are selected
-  if (!is.null(input$county_select) && length(input$county_select) > 0) {
-    df <- df %>% filter(county_state %in% input$county_select)
-  }
-
-  return(df)
-}
-
-
-  # -------------------------------------------------------
-# 3. STATE + COUNTY DYNAMIC LEAFLET MAP
-# -------------------------------------------------------
-output$map_view <- leaflet::renderLeaflet({
-
-  req(data(), input$state_select, input$year_select)
-
-  # Filter dataset by state, county, and year
-  df <- data() %>%
-    filter_state_county() %>%     # ← apply BOTH filters
-    filter(year == input$year_select)
-
-  validate(need(nrow(df) > 0,
-                "No data available for this state/year/county selection."))
-
-  # Use selected state abbreviations (AL, GA, etc.)
-  st_arg <- input$state_select
-
-  # Load county shapes for selected states
-  counties_sf <- tigris::counties(state = st_arg, cb = TRUE, year = 2022) %>%
-    sf::st_as_sf() %>%
-    left_join(df, by = c("GEOID" = "fips"))
-
-  # If counties are selected, filter the shapefile too
-  if (!is.null(input$county_select) && length(input$county_select) > 0) {
-    counties_sf <- counties_sf %>%
-      filter(NAME %in% input$county_select |
-               county_state %in% input$county_select)
-  }
-
-  pal <- leaflet::colorNumeric(
-    palette = "plasma",
-    domain  = counties_sf$overall_food_insecurity_rate,
-    na.color = "transparent"
-  )
-
-  leaflet(counties_sf) %>%
-    addProviderTiles("CartoDB.Positron") %>%
-    addPolygons(
-      fillColor   = ~pal(overall_food_insecurity_rate),
-      color       = "#444",
-      weight      = 0.5,
-      fillOpacity = 0.6,
-      popup = ~paste0(
-        "<b>", NAME, "</b><br>",
-        "Overall FI Rate: ", round(overall_food_insecurity_rate, 2)
+  
+  # ==========================================================================
+  # RENDER MAP (AUTO-UPDATES WHEN FILTERS CHANGE)
+  # ==========================================================================
+  
+  output$us_county_map <- renderLeaflet({
+    
+    # Get filtered data
+    map_data <- filtered_data()
+    
+    # Get indicator column name
+    ind_col <- indicator_column()
+    
+    # Remove NA values for selected indicator
+    # Use !!sym() for proper column reference
+    map_data <- map_data %>%
+      filter(!is.na(!!sym(ind_col)))
+    
+    # Check if data exists
+    if (nrow(map_data) == 0) {
+      # Create empty map with message
+      return(
+        leaflet() %>%
+          addTiles() %>%
+          setView(lng = -98.5, lat = 39.5, zoom = 4) %>%
+          addControl(
+            html = "<div style='background: white; padding: 10px; border-radius: 5px; font-size: 14px;'>
+                    <strong>No data available for this selection</strong><br/>
+                    Try different filters or select 'All States'
+                    </div>",
+            position = "topright"
+          )
       )
-    ) %>%
-    addLegend(
-      pal    = pal,
-      values = ~overall_food_insecurity_rate,
-      title  = "Overall Food Insecurity Rate"
+    }
+    
+    # Create color palette using the column values
+    col_values <- map_data[[ind_col]]
+    
+    pal <- colorNumeric(
+      palette = "YlOrRd",
+      domain = col_values,
+      na.color = "#808080"
     )
-})
-
-
-  # -------------------------------------------------------
-  # 4. WARNING ABOUT 2023 COST METHODOLOGY CHANGE
-  # -------------------------------------------------------
+    
+    # Determine if indicator is a rate (for formatting)
+    is_rate <- grepl("rate|Rate", input$indicator_filter)
+    
+    # Create map
+    map <- leaflet(map_data) %>%
+      addTiles() %>%
+      setView(lng = -98.5, lat = 39.5, zoom = 4)
+    
+    # Add markers - build popup text separately
+    map_data$popup_text <- paste0(
+      "<div style='font-family: Arial; font-size: 13px; min-width: 200px;'>",
+      "<strong style='font-size: 15px;'>", map_data$county_state, "</strong><br/>",
+      "<hr style='margin: 8px 0; border: none; border-top: 1px solid #ccc;'/>",
+      "<strong>", input$indicator_filter, ":</strong> ",
+      if (is_rate) {
+        paste0(round(map_data[[ind_col]] * 100, 1), "%")
+      } else {
+        format(round(map_data[[ind_col]]), big.mark = ",")
+      },
+      "<br/>",
+      "<strong>Year:</strong> ", map_data$year, "<br/>",
+      "<strong>Population:</strong> ", format(map_data$population, big.mark = ","),
+      "</div>"
+    )
+    
+    # Build hover label
+    map_data$label_text <- paste0(
+      map_data$county_state, ": ",
+      if (is_rate) {
+        paste0(round(map_data[[ind_col]] * 100, 1), "%")
+      } else {
+        format(round(map_data[[ind_col]]), big.mark = ",")
+      }
+    )
+    
+    # Add circle markers
+    map <- map %>%
+      addCircleMarkers(
+        data = map_data,
+        lng = ~lon,
+        lat = ~lat,
+        radius = 3,
+        fillColor = ~pal(map_data[[ind_col]]),
+        fillOpacity = 0.8,
+        stroke = TRUE,
+        weight = 0.5,
+        color = "white",
+        popup = ~popup_text,
+        label = ~label_text
+      ) %>%
+      
+      # Add legend
+      addLegend(
+        position = "bottomright",
+        pal = pal,
+        values = col_values,
+        title = input$indicator_filter,
+        labFormat = labelFormat(
+          suffix = if (is_rate) "%" else "",
+          transform = function(x) {
+            if (is_rate) {
+              round(x * 100, 1)
+            } else {
+              round(x, 0)
+            }
+          }
+        ),
+        opacity = 1
+      )
+    
+    return(map)
+  })
+  
+  # ==========================================================================
+  # AUTO-ZOOM TO STATE WHEN SELECTED
+  # ==========================================================================
+  
   observe({
-    if (input$year_range[2] >= 2023) {
-      showNotification(
-        "Note: Feeding America updated cost methodology in 2023; values are not directly comparable.",
-        type = "warning", duration = 5
+    
+    # Only zoom if exactly one state selected (not "ALL")
+    if (!is.null(input$state_filter) && 
+        length(input$state_filter) == 1 && 
+        input$state_filter != "ALL") {
+      
+      # Get state center
+      state_data <- data() %>%
+        filter(state == input$state_filter) %>%
+        filter(!is.na(lon), !is.na(lat)) %>%
+        slice(1)
+      
+      if (nrow(state_data) > 0) {
+        leafletProxy("us_county_map") %>%
+          setView(
+            lng = state_data$lon,
+            lat = state_data$lat,
+            zoom = 6
+          )
+      }
+    } else {
+      # Reset to US view for multiple states or "ALL"
+      leafletProxy("us_county_map") %>%
+        setView(lng = -98.5, lat = 39.5, zoom = 4)
+    }
+  })
+  
+  # ==========================================================================
+  # DYNAMIC COUNTY SELECTOR
+  # ==========================================================================
+  
+  observe({
+    
+    selected_state <- input$state_filter
+    
+    if (!is.null(selected_state) && 
+        length(selected_state) == 1 && 
+        selected_state != "ALL") {
+      
+      # Get counties for selected state
+      counties <- data() %>%
+        filter(state == selected_state) %>%
+        select(county_state) %>%
+        distinct() %>%
+        arrange(county_state) %>%
+        pull(county_state)
+      
+      updateSelectInput(
+        session,
+        "county_filter",
+        choices = c("All Counties" = "ALL", counties),
+        selected = "ALL"
+      )
+    } else {
+      updateSelectInput(
+        session,
+        "county_filter",
+        choices = "Select a state first"
       )
     }
   })
-
-  # -------------------------------------------------------
-  # 5. Auto-update year slider based on dataset
-  # -------------------------------------------------------
-  observe({
-    years <- sort(unique(data()$year))
-    updateSliderInput(
-      session,
-      "year_range",
-      min = min(years),
-      max = max(years),
-      value = c(min(years), max(years))
-    )
+  
+  # ==========================================================================
+  # TRENDS PLOT
+  # ==========================================================================
+  
+  output$trends_plot <- renderPlotly({
+    
+    # Get filtered data
+    trend_data <- filtered_data()
+    
+    if (nrow(trend_data) == 0) {
+      return(
+        plot_ly() %>%
+          layout(
+            title = "No data available for this selection",
+            xaxis = list(title = ""),
+            yaxis = list(title = "")
+          )
+      )
+    }
+    
+    # Aggregate by year
+    trend_summary <- trend_data %>%
+      group_by(year) %>%
+      summarise(
+        fi_rate = mean(overall_food_insecurity_rate, na.rm = TRUE) * 100,
+        child_fi_rate = mean(child_food_insecurity_rate, na.rm = TRUE) * 100,
+        .groups = "drop"
+      )
+    
+    # Create plot
+    plot_ly(trend_summary) %>%
+      add_trace(
+        x = ~year, 
+        y = ~fi_rate, 
+        type = 'scatter', 
+        mode = 'lines+markers',
+        name = "Overall FI Rate",
+        line = list(color = '#e74c3c', width = 2),
+        marker = list(size = 6)
+      ) %>%
+      add_trace(
+        x = ~year,
+        y = ~child_fi_rate,
+        type = 'scatter',
+        mode = 'lines+markers',
+        name = "Child FI Rate",
+        line = list(color = '#3498db', width = 2),
+        marker = list(size = 6)
+      ) %>%
+      layout(
+        title = "Food Insecurity Trend Over Time",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Food Insecurity Rate (%)"),
+        hovermode = "x unified"
+      )
   })
-
-
-  # -------------------------------------------------------
-  # 6. GGPlot Trend: State-Level Trends
-  # -------------------------------------------------------
-  output$trend_state <- renderPlot({
-
-  df <- selected_data() %>%
-    filter_state_county() %>%
-    filter(
-      year >= input$year_range[1],
-      year <= input$year_range[2]
-    ) %>%
-    group_by(state, year) %>%
-    summarise(
-      across(
-        all_of(input$variables),
-        ~ mean(.x, na.rm = TRUE)
+  
+  # ==========================================================================
+  # SUMMARY TABLE
+  # ==========================================================================
+  
+  output$summary_table <- renderDT({
+    
+    # Get filtered data
+    summary_data <- filtered_data()
+    
+    if (nrow(summary_data) == 0) {
+      return(datatable(data.frame(Message = "No data available for this selection")))
+    }
+    
+    # Create summary by state (avoid .data syntax)
+    summary_by_state <- summary_data %>%
+      group_by(state) %>%
+      summarise(
+        Counties = n_distinct(fips),
+        `Avg FI Rate (%)` = round(mean(overall_food_insecurity_rate, na.rm = TRUE) * 100, 1),
+        `Total Food Insecure` = sum(no_of_food_insecure_persons_overall, na.rm = TRUE),
+        `Avg Poverty Rate (%)` = round(mean(poverty_rate, na.rm = TRUE) * 100, 1),
+        `Median Income` = round(mean(median_income, na.rm = TRUE)),
+        .groups = "drop"
+      ) %>%
+      arrange(desc(`Avg FI Rate (%)`))
+    
+    datatable(
+      summary_by_state,
+      options = list(
+        pageLength = 15, 
+        scrollX = TRUE
       ),
-      .groups = "drop"
-    ) %>%
-    pivot_longer(
-      cols = all_of(input$variables),
-      names_to = "indicator",
-      values_to = "value"
-    ) %>%
-    filter(!is.na(value))
-
-  validate(
-    need(nrow(df) > 0, "No data available for selected period.")
-  )
-
-  ggplot(df, aes(year, value, color = indicator, group = state)) +
-    geom_line(linewidth = 1.2, alpha = 0.8) +
-    geom_point(size = 2) +
-    labs(
-      title = paste(
-        "State-Level Food Insecurity Trends",
-        ifelse(input$dataset_period == "pre", "(2009–2018)", "(2019–2023)")
-      ),
-      x = "Year",
-      y = "Value"
-    ) +
-    scale_x_continuous(breaks = sort(unique(df$year)))
-})
-
-
-
-
-  # -------------------------------------------------------
-  # 7. GGPlot: Racial Disparity Trends
-  # -------------------------------------------------------
-  output$trend_race <- renderPlot({
-
-    df <- data() %>%
-      filter_state_county() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(state, year) %>%
-      summarise(
-        black    = mean(food_insecurity_rate_among_black_persons_all_ethnicities, na.rm = TRUE),
-        hispanic = mean(food_insecurity_rate_among_hispanic_persons_any_race, na.rm = TRUE),
-        white    = mean(food_insecurity_rate_among_white_non_hispanic_persons, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      pivot_longer(cols = c(black, hispanic, white),
-                   names_to = "group",
-                   values_to = "value")
-
-    ggplot(df, aes(year, value, color = group)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Racial Disparity in Food Insecurity",
-           x = "Year", y = "Rate") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 8. GGPlot: Child Food Insecurity Trends
-  # -------------------------------------------------------
-  output$trend_child <- renderPlot({
-
-    df <- data() %>%
-      filter_state_county() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(state, year) %>%
-      summarise(
-        child_fi  = mean(child_food_insecurity_rate, na.rm = TRUE),
-        below_185 = mean(percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl, na.rm = TRUE),
-        above_185 = mean(percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      pivot_longer(cols = c(child_fi, below_185, above_185),
-                   names_to = "indicator",
-                   values_to = "value")
-
-    ggplot(df, aes(year, value, color = indicator)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Child Food Insecurity Trends",
-           x = "Year", y = "Rate") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 9. GGPlot: Cost Burden Trends
-  # -------------------------------------------------------
-  output$trend_cost <- renderPlot({
-
-    df <- data() %>%
-      filter_state_county() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(state, year) %>%
-      summarise(
-        cost_per_meal = mean(cost_per_meal, na.rm = TRUE),
-        shortfall     = mean(weighted_annual_food_budget_shortfall, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      pivot_longer(cols = c(cost_per_meal, shortfall),
-                   names_to = "indicator",
-                   values_to = "value")
-
-    ggplot(df, aes(year, value, color = indicator)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Food Cost & Budget Shortfall Trends",
-           x = "Year", y = "Value") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 10. GGPlot: Rural vs Urban Trends
-  # -------------------------------------------------------
-  output$trend_rural <- renderPlot({
-
-    df <- data() %>%
-      filter_state_county() %>%
-      mutate(
-        rural_group = case_when(
-          rural_urban_continuum_code_2013 <= 3 ~ "Metro",
-          rural_urban_continuum_code_2013 <= 6 ~ "Non-Metro",
-          TRUE ~ "Rural"
-        )
-      ) %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(rural_group, year) %>%
-      summarise(fi = mean(overall_food_insecurity_rate, na.rm = TRUE),
-                .groups = "drop")
-
-    ggplot(df, aes(year, fi, color = rural_group)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Rural vs Urban Food Insecurity Trends",
-           x = "Year", y = "Rate") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 11. GGPlot: Regional Trends
-  # -------------------------------------------------------
-  output$trend_region <- renderPlot({
-
-    df <- data() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(census_region, year) %>%
-      summarise(fi = mean(overall_food_insecurity_rate, na.rm = TRUE),
-                .groups = "drop")
-
-    ggplot(df, aes(year, fi, color = census_region)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Food Insecurity Across Census Regions",
-           x = "Year", y = "Rate") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 12. GGPlot: Inequality Gap Trends
-  # -------------------------------------------------------
-  output$trend_gap <- renderPlot({
-
-    df <- data() %>%
-      mutate(
-        black_white_gap =
-          food_insecurity_rate_among_black_persons_all_ethnicities -
-          food_insecurity_rate_among_white_non_hispanic_persons,
-        child_income_gap =
-          percent_food_insecure_children_in_hh_w_hh_incomes_below_185_fpl -
-          percent_food_insecure_children_in_hh_w_hh_incomes_above_185_fpl
-      ) %>%
-      filter_state_county() %>%
-      filter(year >= input$year_range[1],
-             year <= input$year_range[2]) %>%
-      group_by(state, year) %>%
-      summarise(
-        black_white_gap = mean(black_white_gap, na.rm = TRUE),
-        child_income_gap = mean(child_income_gap, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      pivot_longer(cols = c(black_white_gap, child_income_gap),
-                   names_to = "gap",
-                   values_to = "value")
-
-    ggplot(df, aes(year, value, color = gap)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 2) +
-      labs(title = "Food Insecurity Inequality Gaps",
-           x = "Year", y = "Gap") +
-      scale_x_continuous(breaks = sort(unique(df$year)))
-  })
-
-
-  # -------------------------------------------------------
-  # 13. Summary Table
-  # -------------------------------------------------------
-  output$summary_table <- DT::renderDT({
-    df <- data() %>% filter_state_county()
-    DT::datatable(df, options = list(pageLength = 10, scrollX = TRUE))
-  })
-
-  # -------------------------------------------------------
-  # 14. Full Data Viewer
-  # -------------------------------------------------------
-  output$data_viewer <- DT::renderDT({
-    DT::datatable(
-      data(),
-      options = list(pageLength = 10, scrollX = TRUE),
       rownames = FALSE
     )
   })
-
-}
+  
+  # ==========================================================================
+  # DATA VIEWER
+  # ==========================================================================
+  
+  output$data_viewer <- renderDT({
+    
+    # Get filtered data
+    view_data <- filtered_data() %>%
+      select(
+        year, state, county_state, 
+        overall_food_insecurity_rate,
+        child_food_insecurity_rate,
+        poverty_rate, median_income, unemployment_rate,
+        cost_per_meal, population
+      ) %>%
+      arrange(desc(year), state, county_state)
+    
+    if (nrow(view_data) == 0) {
+      return(datatable(data.frame(Message = "No data available for this selection")))
+    }
+    
+    datatable(
+      view_data,
+      options = list(
+        pageLength = 25, 
+        scrollX = TRUE
+      ),
+      rownames = FALSE,
+      filter = "top"
+    )
+  })
+  
+} # ← CLOSING BRACE

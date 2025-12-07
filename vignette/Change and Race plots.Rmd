@@ -7,44 +7,47 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
 ```
+
+```{r}
+fa_pre <- read_excel("../data/feeding_america(2009-2018).xlsx")
+fa_post<- read_excel("../data/feeding_america(2019-2023).xlsx")
+
+intersect(names(fa_pre),names(fa_post))
+```
+
 
 Year over year change plot
 ```{r}
-mmg_list <- list(
-  "2009" = MMG_2009,
-  "2010" = MMG_2010,
-  "2011" = MMG_2011,
-  "2012" = MMG_2012,
-  "2013" = MMG_2013,
-  "2014" = MMG_2014,
-  "2015" = MMG_2015,
-  "2016" = MMG_2016,
-  "2017" = MMG_2017,
-  "2018" = MMG_2018,
-  "2019" = MMG_2019,
-  "2020" = MMG_2020,
-  "2021" = MMG_2021,
-  "2022" = MMG_2022,
-  "2023" = MMG_2023
-)
-
 
 fi_change_plot <- function(
   year_start, year_end,
   variable,
-  plot_type = "Slope",
-  data_list = mmg_list
+  plot_type = "Slope"
 ) {
+  if (year_start>=2019){
+    df_start<-fa_post |> 
+      select(fips, value_start = all_of(variable))
+  }
+  else  {
+     df_start<-fa_pre |> 
+      select(fips, value_start = all_of(variable))
+  }
 
-  df_start <- data_list[[as.character(year_start)]] |> 
-    select(FIPS, value_start = all_of(variable))
-
-  df_end <- data_list[[as.character(year_end)]] |> 
-    select(FIPS, value_end = all_of(variable))
+  if (year_end>=2019){
+    df_end<-fa_post |> 
+      select(fips, value_end = all_of(variable))
+  }
+  else  {
+     df_end<-fa_pre |> 
+      select(fips, value_end = all_of(variable))
+  }
+  
 
   df <- df_start |> 
-    inner_join(df_end, by = "FIPS") |> 
+    inner_join(df_end, by = "fips") |> 
     mutate(change = value_end - value_start)
 
   if (plot_type == "Slope") {
@@ -55,7 +58,7 @@ fi_change_plot <- function(
       mutate(year = recode(year,
                            "value_start" = year_start,
                            "value_end" = year_end)) |> 
-      ggplot(aes(x = year, y = value, group = FIPS)) +
+      ggplot(aes(x = year, y = value, group = fips)) +
       geom_line(alpha = 0.5) +
       geom_point(size = 2) +
       labs(
@@ -102,14 +105,14 @@ ui <- fluidPage(
       selectInput(
         "year_start",
         "Start Year:",
-        choices = names(mmg_list),
+        choices = 2009:2023,
         selected = "2018"
       ),
 
       selectInput(
         "year_end",
         "End Year:",
-        choices = names(mmg_list),
+        choices = 2009:2023,
         selected = "2023"
       ),
 
@@ -119,9 +122,9 @@ ui <- fluidPage(
         choices = c(
           "Overall Food Insecurity Rate",
           "Child Food Insecurity Rate",
-          "Food Insecurity Rate among Black Persons (all ethnicities)",
-          "Food Insecurity Rate among Hispanic Persons (any race)",
-          "Food Insecurity Rate among White, non-Hispanic Persons"
+          "povert_rate",
+          "No of Food Insecure Persons Overall",
+          "Cost Per Meal"
         ),
         selected = "Overall Food Insecurity Rate"
       ),
@@ -153,8 +156,7 @@ server <- function(input, output, session) {
       year_start = input$year_start,
       year_end   = input$year_end,
       variable   = input$variable,
-      plot_type  = input$plot_type,
-      data_list  = mmg_list
+      plot_type  = input$plot_type
     )
 
   })
