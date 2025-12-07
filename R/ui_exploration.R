@@ -36,15 +36,28 @@ ui_exploration <- sidebarLayout(
       selected = 2020
     ),
 
+    # Add radio buttons for pre/post COVID dataset
+  radioButtons(
+    inputId = "dataset_period",
+    label   = "Data Period:",
+    choices = c(
+      "2009–2018 (Pre-COVID)"  = "pre",
+      "2019–2023 (Post-COVID)" = "post"
+    ),
+    selected = "post"
+  ),
+
+  hr(),
+
     # Year range slider
     sliderInput(
-      inputId = "year_range",
-      label = "Select Period:",
-      min = 2000,
-      max = 2050,
-      value = c(2010, 2025),
-      sep = ""
-    ),
+  inputId = "year_range",
+  label = "Select Period:",
+  min = 2009,
+  max = 2023,
+  value = c(2009, 2023),
+  sep = ""
+),
 
     # Indicator selection
     checkboxGroupInput(

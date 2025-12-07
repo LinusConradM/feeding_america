@@ -11,6 +11,7 @@ library(readxl)
 library(janitor)
 library(stringr)
 
+
 cat("========================================\n")
 cat("LOADING FOOD INSECURITY DATA\n")
 cat("========================================\n\n")
@@ -142,6 +143,9 @@ food_data <- bind_rows(fa_pre, fa_post) %>%
   )
 
 cat("✓ Datasets combined successfully!\n\n")
+
+glimpse(fa_post)
+glimpse(fa_pre)
 
 # Summary
 cat("========================================\n")
