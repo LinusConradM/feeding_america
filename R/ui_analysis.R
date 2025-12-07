@@ -100,45 +100,18 @@ ui_analysis <- tabPanel(
         ),
         
         # ==================================================================
-        # ENHANCED GROUP COMPARISON INPUTS ✅
+        # GROUP COMPARISON INPUTS
         # ==================================================================
         conditionalPanel(
           condition = "input.analysis_type == 'group_comparison'",
-          
           h4("Group Comparison"),
-          
-          selectInput("group_var","Grouping Variable:",
-                      choices=c("Census Region","Census Division","Rural/Urban",
-                                "Poverty Category","Income Category","FI Category","Race")),
-          
-          selectInput("group_target","Outcome Variable:",choices=NULL),
-          
           selectInput(
-            "group_test",
-            "Statistical Test:",
-            choices = c(
-              "Auto (Recommended)" = "auto",
-              "t-test (2 groups)"  = "ttest",
-              "ANOVA (3+ groups)"  = "anova",
-              "Nonparametric"      = "nonparametric"
-            ),
-            selected = "auto"
+            "group_var","Grouping Variable:",
+            choices=c("Census Region","Census Division","Rural/Urban",
+                      "Poverty Category","Income Category","FI Category","Race")
           ),
-          
-          sliderInput(
-            "group_conf_level",
-            "Confidence Level:",
-            min = 0.90,
-            max = 0.99,
-            value = 0.95,
-            step = 0.01
-          ),
-          
-          actionButton(
-            "run_group_comparison",
-            "Run Group Comparison",
-            class="btn-primary btn-block"
-          )
+          selectInput("group_target","Outcome Variable:",choices=NULL),
+          actionButton("run_group_comparison","Run Group Comparison",class="btn-primary btn-block")
         )
       ),
       
@@ -149,36 +122,81 @@ ui_analysis <- tabPanel(
         width = 9,
         
         conditionalPanel(
-          condition="input.analysis_type=='group_comparison'",
-          
-          h3("Group Comparison Results"),
-          
+          condition="input.analysis_type=='correlation'",
+          h3("Correlation Analysis Results"),
           tabsetPanel(
-            
-            tabPanel(
-              "Visualization",
-              plotOutput("group_comp_plot",height="600px")
-            ),
-            
-            tabPanel(
-              "Summary Statistics",
-              DT::DTOutput("group_summary")
-            ),
-            
-            tabPanel(
-              "Statistical Test",
-              verbatimTextOutput("group_stats")
-            ),
-            
-            tabPanel(
-              "Effect Size",
-              verbatimTextOutput("group_effect_size")
-            ),
-            
-            tabPanel(
-              "Interpretation",
-              uiOutput("group_interpretation")
-            )
+            tabPanel("Correlation Matrix",plotOutput("corr_plot",height="600px")),
+            tabPanel("Correlation Table",DT::DTOutput("corr_table")),
+            tabPanel("Interpretation",uiOutput("corr_interpretation"))
+          )
+        ),
+        
+        conditionalPanel(
+          condition="input.analysis_type=='regression'",
+          h3("Regression Analysis Results"),
+          tabsetPanel(
+            tabPanel("Model Summary",verbatimTextOutput("reg_summary")),
+            tabPanel("Diagnostics",plotOutput("reg_diagnostics",height="600px")),
+            tabPanel("Predictions",plotOutput("reg_predictions",height="500px")),
+            tabPanel("Coefficients",plotOutput("reg_coefficients",height="500px"))
+          )
+        ),
+        
+        conditionalPanel(
+          condition="input.analysis_type=='logistic'",
+          h3("Logistic Regression Results"),
+          tabsetPanel(
+            tabPanel("Model Summary",verbatimTextOutput("logit_summary")),
+            tabPanel("Odds Ratios",plotOutput("logit_odds",height="500px")),
+            tabPanel("Confusion Matrix",tableOutput("logit_confusion")),
+            tabPanel("ROC Curve",plotOutput("logit_roc",height="500px")),
+            tabPanel("Interpretation",uiOutput("logit_interpretation"))
+          )
+        ),
+        
+        conditionalPanel(
+          condition="input.analysis_type=='decision_tree'",
+          h3("Decision Tree Results"),
+          tabsetPanel(
+            tabPanel("Tree Plot",plotOutput("tree_plot",height="600px")),
+            tabPanel("Variable Importance",plotOutput("tree_importance",height="500px")),
+            tabPanel("Confusion Matrix",tableOutput("tree_confusion")),
+            tabPanel("Interpretation",uiOutput("tree_interpretation"))
+          )
+        ),
+        
+        conditionalPanel(
+          condition="input.analysis_type=='pca'",
+          h3("PCA Results"),
+          tabsetPanel(
+            tabPanel("Scree Plot",plotOutput("pca_scree")),
+            tabPanel("Biplot",plotOutput("pca_biplot")),
+            tabPanel("Loadings",DT::DTOutput("pca_loadings")),
+            tabPanel("Interpretation",uiOutput("pca_interpretation"))
+          )
+        ),
+        
+        conditionalPanel(
+          condition="input.analysis_type=='kmeans'",
+          h3("K-Means Results"),
+          tabsetPanel(
+            tabPanel("Cluster Plot",plotOutput("kmeans_plot",height="600px")),
+            tabPanel("Cluster Summary",DT::DTOutput("kmeans_summary")),
+            tabPanel("Interpretation",uiOutput("kmeans_interpretation"))
+          )
+        ),
+        
+        # ✅ ENHANCED GROUP COMPARISON (ONLY CHANGE)
+        conditionalPanel(
+          condition="input.analysis_type=='group_comparison'",
+          h3("Group Comparison Results"),
+          tabsetPanel(
+            tabPanel("Visualization",plotOutput("group_comp_plot",height="600px")),
+            tabPanel("Statistical Test",verbatimTextOutput("group_stats")),
+            tabPanel("Group Means",DT::DTOutput("group_means_table")),
+            tabPanel("Effect Size",verbatimTextOutput("group_effect_size")),
+            tabPanel("Distribution Plot",plotOutput("group_distribution_plot",height="600px")),
+            tabPanel("Interpretation",uiOutput("group_interpretation"))
           )
         )
       )

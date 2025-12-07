@@ -30,6 +30,7 @@ library(janitor)
 
 cat("✓ All packages loaded\n")
 
+
 cat("========================================\n")
 cat("LOADING FOOD INSECURITY DATA\n")
 cat("========================================\n\n")
@@ -161,6 +162,9 @@ food_data <- bind_rows(fa_pre, fa_post) %>%
   )
 
 cat("✓ Datasets combined successfully!\n\n")
+
+glimpse(fa_post)
+glimpse(fa_pre)
 
 # Summary
 cat("========================================\n")
