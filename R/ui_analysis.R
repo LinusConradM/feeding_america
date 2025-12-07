@@ -164,7 +164,7 @@ ui_analysis <- tabPanel(
             
             tabPanel(
               "Correlation Table",
-              DTOutput("corr_table")
+              DT::DTOutput("corr_table")
             ),
             
             tabPanel(
