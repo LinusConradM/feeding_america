@@ -32,6 +32,26 @@ server_analysis <- function(input, output, session, data) {
                       selected = "overall_food_insecurity_rate")
   })
 
+  # Decision Tree target variable
+observe({
+  updateSelectInput(
+    session,
+    "tree_target",
+    choices = numeric_vars(),
+    selected = "overall_food_insecurity_rate"
+  )
+})
+
+# Decision Tree predictor variables
+observe({
+  updateSelectInput(
+    session,
+    "tree_predictors",
+    choices = numeric_vars()
+  )
+})
+
+
   # Update PCA variable selector
 observe({
   updateSelectInput(
@@ -125,6 +145,203 @@ observe({
         coord_flip()
     })
   })
+
+# ============================================================================
+# DECISION TREE ANALYSIS
+# ============================================================================
+
+# Store fitted decision tree model
+tree_model <- reactiveVal(NULL)
+
+# Store tree training data (needed for interpretation)
+tree_data <- reactiveVal(NULL)
+  
+observeEvent(input$run_tree, {
+  
+  req(input$tree_target)
+  req(input$tree_predictors)
+  req(length(input$tree_predictors) >= 1)
+  
+  df <- data()
+  
+  # -------------------------
+# Prepare data
+# -------------------------
+tree_vars <- c(input$tree_target, input$tree_predictors)
+
+td <- df %>%
+  select(all_of(tree_vars)) %>%
+  drop_na()
+
+tree_data(td)
+
+# -------------------------
+# SAFETY CHECK ✅ FIXED
+# -------------------------
+if (
+  nrow(td) == 0 ||
+  length(unique(td[[input$tree_target]])) < 2
+) {
+  output$tree_interpretation <- renderUI({
+    HTML(
+      "<p style='color:red;'>
+      Selected target variable has insufficient non-missing
+      or unique values to build a decision tree.
+      </p>"
+    )
+  })
+  return()
+}
+
+# -------------------------
+# Identify model type
+# -------------------------
+target <- td[[input$tree_target]]
+
+is_binary_numeric <- is.numeric(target) && all(unique(target) %in% c(0, 1))
+is_categorical    <- is.factor(target) || is.character(target)
+is_classification <- is_binary_numeric || is_categorical
+
+
+  
+  # Build formula
+  formula_str <- paste(input$tree_target, "~",
+                       paste(input$tree_predictors, collapse = " + "))
+  tree_formula <- as.formula(formula_str)
+  
+  # -------------------------
+  # Fit tree
+  # -------------------------
+  set.seed(123)
+  
+  if (is_classification) {
+  model <- rpart::rpart(
+    tree_formula,
+    data = td,
+    method = "class",
+    control = rpart::rpart.control(cp = 0.01)
+  )
+} else {
+  model <- rpart::rpart(
+    tree_formula,
+    data = td,
+    method = "anova",
+    control = rpart::rpart.control(cp = 0.01)
+  )
+}
+
+tree_model(model)
+  
+  # -------------------------
+  # TREE PLOT
+  # -------------------------
+  output$tree_plot <- renderPlot({
+    rpart.plot::rpart.plot(
+      tree_model(),
+      type = 2,
+      extra = ifelse(is_classification, 104, 101),
+      fallen.leaves = TRUE,
+      main = "Decision Tree"
+    )
+  })
+  
+  # -------------------------
+  # VARIABLE IMPORTANCE
+  # -------------------------
+  output$tree_importance <- renderPlot({
+    
+    model <- tree_model()   
+    req(model)
+
+    imp <- data.frame(
+      Variable = names(model$variable.importance),
+      Importance = model$variable.importance
+    )
+
+    
+    ggplot(imp, aes(x = reorder(Variable, Importance), y = Importance)) +
+      geom_col(fill = "#2C7FB8") +
+      coord_flip() +
+      labs(
+        title = "Variable Importance",
+        x = "Predictor",
+        y = "Importance"
+      )
+  })
+  
+  # -------------------------
+  # CONFUSION MATRIX (classification only)
+  # -------------------------
+  output$tree_confusion <- renderTable({
+    
+    if (!is_classification) return(NULL)
+    
+    preds <- predict(tree_model, type = "class")
+    table(Predicted = preds, Actual = target)
+  }, rownames = TRUE)
+  
+
+# -------------------------
+# INTERPRETATION BLOCK
+# -------------------------
+output$tree_interpretation <- renderUI({
+
+  req(tree_model())
+  model <- tree_model()
+
+  # Variable importance
+  importance <- model$variable.importance
+  top_vars <- names(sort(importance, decreasing = TRUE))[1:min(3, length(importance))]
+
+  # Detect model type
+  target <- input$tree_target
+  df <- tree_data()
+
+  is_classification <-
+    is.factor(df[[target]]) ||
+    (is.numeric(df[[target]]) &&
+     all(unique(df[[target]]) %in% c(0, 1)))
+
+  # Tree complexity
+  n_splits <- nrow(model$splits)
+  depth <- if (!is.null(model$frame$depth)) {
+  max(model$frame$depth, na.rm = TRUE)
+  } else {
+    0
+  }
+
+
+  tagList(
+    h4("Decision Tree Interpretation"),
+
+    tags$ul(
+      tags$li(
+        strong("Model type: "),
+        if (is_classification) "Classification tree" else "Regression tree"
+      ),
+
+      tags$li(
+        strong("Most important predictors: "),
+        paste(top_vars, collapse = ", ")
+      ),
+
+      tags$li(
+        strong("Tree structure: "),
+        paste("The tree contains", n_splits,
+              "splits with a maximum depth of", depth, ".")
+      ),
+
+      tags$li(
+        "The decision tree captures non-linear relationships and interactions ",
+        "between predictors, making it suitable for exploratory and policy analysis."
+      )
+    )
+  )
+})
+
+
+})
+
 
   # ============================================================================
 # PCA ANALYSIS
