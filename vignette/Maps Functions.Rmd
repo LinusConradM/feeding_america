@@ -1,0 +1,180 @@
+---
+title: "Food Insecurity Maps"
+author: "Ryann Tompkins"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tigris)
+library(sf)
+library(viridis)
+library(readxl)
+library(shiny)
+library(plotly)
+library(leaflet)
+```
+
+
+Map by County Function 
+```{r}
+county_map <- function(year_input, 
+                       metric, 
+                       map_type = "National",
+                       state_input = NULL,
+                       fa_pre,
+                       fa_post) {
+  if (year_input>=2019){
+    df<-fa_post 
+  }
+  else  {
+     df<-fa_pre 
+  }
+  
+  if(map_type == "National"){  
+    df <- df %>%
+      filter(year == year_input) |> 
+      select(year,fips,metric)
+    
+    counties_sf <- counties(cb = TRUE, resolution = "5m", year = 2022) %>%  
+      st_as_sf() %>%
+      mutate(fips = GEOID)
+    
+    counties_sf <- counties_sf %>%
+      left_join(df, by = "fips")
+    
+    pal <- colorNumeric("plasma", counties_sf$metric)
+  
+    leaflet(counties_sf) %>%
+      addTiles() %>%
+      addPolygons(
+        fillColor = ~pal(metric),
+        color = "#444",
+        weight = 0.5,
+        fillOpacity = 0.8,
+        popup = ~paste0("<b>", NAME, "</b><br>",
+                        metric, " FI Rate: ", round(FI_Rate, 2))
+      ) %>%
+      addLegend(
+        pal = pal,
+        values = ~FI_Rate
+      )
+  }
+  else{
+    df <- df %>%
+      filter(year == year_input,
+             state == state_input) |> 
+      select(year,fips,metric,state)
+    
+    counties_sf <- counties(
+      state = state_input,
+      cb = TRUE,
+      year = 2022) %>%
+      st_as_sf() %>%
+      mutate(fips = GEOID) %>%
+      left_join(df, by = "fips")
+
+  pal <- colorNumeric("plasma", counties_sf$metric)
+
+  leaflet(counties_sf) %>%
+    addTiles() %>%
+    addPolygons(
+      fillColor = ~pal(metric),
+      color = "#444",
+      weight = 0.5,
+      fillOpacity = 0.8,
+      popup = ~paste0("<b>", NAME, "</b><br>",
+                      metric, " FI Rate: ", round(FI_Rate, 2))
+    ) %>%
+    addLegend(
+      pal = pal,
+      values = ~metric
+    )
+  }
+}
+
+
+```
+
+
+Potential UI
+```{r}
+ui <- fluidPage(
+
+  titlePanel("County Food Insecurity Map"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      
+      selectInput(
+        "year", "Select Year:",
+        choices = 2009:2023,
+        selected = 2020
+      ),
+      
+      selectInput(
+        "map_type", "Map Type:",
+        choices = c("National", "State"),
+        selected = "National"
+      ),
+      
+      conditionalPanel(
+        "input.map_type == 'State'",
+        selectInput(
+          "state", "Select State:",
+          choices = state.abb,
+          selected = "CO"
+        )
+      ),
+      
+      uiOutput("metric_ui")
+      
+    ),
+    
+    mainPanel(
+      leafletOutput("county_map", height = "750px")
+    )
+  )
+)
+```
+
+Server
+```{r}
+server <- function(input, output, session) {
+  
+  mmg_data <- reactive({
+    if (input$year >= 2019) fa_post else fa_pre
+  })
+  
+  output$metric_ui <- renderUI({
+    df <- mmg_data()
+    numeric_vars <- names(df)[sapply(df, is.numeric)]
+    
+    selectInput("metric", "Select Metric:",
+                choices = numeric_vars,
+                selected = numeric_vars[1])
+  })
+  
+  output$county_map <- renderLeaflet({
+    req(input$metric)
+    
+    county_map(
+      year_input  = input$year,
+      metric      = input$metric,
+      map_type    = input$map_type,
+      state_input = input$state,
+      fa_pre      = fa_pre,
+      fa_post     = fa_post
+    )
+  })
+}
+```
+
+
+
+
+
+
+

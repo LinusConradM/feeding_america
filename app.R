@@ -15,24 +15,36 @@ library(car)    # VIF
 # LOAD HELPERS
 # ==============================================================================
 
-source("R/helpers.R", local = TRUE)
-source("R/kpi_helpers.R", local = TRUE)
+# Core Shiny packages
+library(shiny)
+library(bslib)
+
+# Visualization packages
+library(leaflet)
+library(plotly)
+library(DT)
+
+# Analysis packages
+library(broom)
+library(car)
+
+cat("✓ All app packages loaded\n")
 
 # ==============================================================================
 # LOAD UI MODULES
 # ==============================================================================
 
-source("R/ui_overview.R", local = TRUE)
-source("R/ui_exploration.R", local = TRUE)
-source("R/ui_analysis.R", local = TRUE)
+source("R/ui_overview.R")
+source("R/ui_exploration.R")
+source("R/ui_analysis.R")
 
 # ==============================================================================
 # LOAD SERVER MODULES
 # ==============================================================================
 
-source("R/server_overview.R", local = TRUE)
-source("R/server_exploration.R", local = TRUE)
-source("R/server_analysis.R", local = TRUE)
+source("R/server_overview.R")
+source("R/server_exploration.R")
+source("R/server_analysis.R")
 
 # ==============================================================================
 # UI DEFINITION  ✅ SINGLE HEADER / WORKING STYLE
@@ -42,7 +54,43 @@ ui <- fluidPage(
 
   # Custom CSS (KPI cards, typography, shadows)
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+    tags$style(HTML("
+      .app-header {
+        background-color: #34495e;
+        color: white;
+        padding: 15px 20px;
+        margin-bottom: 0;
+      }
+      .app-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .app-header img {
+        vertical-align: middle;
+        margin-right: 15px;
+      }
+      .nav-tabs {
+        background-color: #2c3e50;
+        margin-bottom: 20px;
+        border-bottom: none;
+      }
+      .nav-tabs > li > a {
+        color: #ecf0f1;
+        background-color: #2c3e50;
+        border: none;
+        margin-right: 2px;
+      }
+      .nav-tabs > li > a:hover {
+        background-color: #34495e;
+        color: white;
+      }
+      .nav-tabs > li.active > a {
+        background-color: #18bc9c !important;
+        color: white !important;
+        border: none !important;
+      }
+    "))
   ),
 
   navbarPage(
@@ -82,7 +130,7 @@ ui <- fluidPage(
 )
 
 # ==============================================================================
-# SERVER DEFINITION
+# DEFINE SERVER
 # ==============================================================================
 
 server <- function(input, output, session) {
@@ -98,7 +146,7 @@ server <- function(input, output, session) {
 }
 
 # ==============================================================================
-# LAUNCH APP
+# RUN APP
 # ==============================================================================
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
