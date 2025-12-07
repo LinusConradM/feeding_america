@@ -158,12 +158,17 @@ ui_analysis <- tabPanel(
           condition="input.analysis_type=='decision_tree'",
           h3("Decision Tree Results"),
           tabsetPanel(
-            tabPanel("Tree Plot",plotOutput("tree_plot",height="600px")),
-            tabPanel("Variable Importance",plotOutput("tree_importance",height="500px")),
-            tabPanel("Confusion Matrix",tableOutput("tree_confusion")),
-            tabPanel("Interpretation",uiOutput("tree_interpretation")),
-            tabPanel("Model Data",br(),h4("Decision Tree Model Data Summary"),tableOutput("tree_model_data_summary"),
-            br(),h4("Decision Tree Training Data"),DT::DTOutput("tree_model_data_table"))
+            tabPanel("Tree Plot", plotOutput("tree_plot", height = "600px")),
+            tabPanel("Variable Importance", plotOutput("tree_importance", height = "500px")),
+
+          conditionalPanel(
+            condition = "output.is_tree_binary",
+            tabPanel("ROC Curve", plotOutput("tree_roc", height = "500px")),
+            tabPanel("AUC", verbatimTextOutput("tree_auc")),
+            tabPanel("Confusion Matrix", tableOutput("tree_confusion"))),
+          tabPanel("Interpretation", uiOutput("tree_interpretation")),
+          tabPanel("Model Data", DT::DTOutput("tree_model_data"))
+
 
           )
         ),

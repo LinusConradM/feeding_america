@@ -177,6 +177,27 @@ tree_model <- reactiveVal(NULL)
 
 # Store tree training data (needed for interpretation)
 tree_data <- reactiveVal(NULL)
+
+
+# -------------------------------------------------
+# ✅ Reactive flag: is the decision tree BINARY?
+# -------------------------------------------------
+is_tree_binary <- reactive({
+  req(tree_data(), input$tree_target)
+
+  target <- tree_data()[[input$tree_target]]
+
+  is.factor(target) && length(levels(target)) == 2
+})
+
+# Expose to UI (for conditionalPanel)
+output$is_tree_binary <- reactive({
+  is_tree_binary()
+})
+
+outputOptions(output, "is_tree_binary", suspendWhenHidden = FALSE)
+  
+
   
 observeEvent(input$run_tree, {
   
@@ -185,6 +206,8 @@ observeEvent(input$run_tree, {
   req(length(input$tree_predictors) >= 1)
   
   df <- data()
+
+
   
   # -------------------------
 # Prepare data
@@ -282,7 +305,7 @@ output$tree_model_data_summary <- renderTable({
   )
 })
 
-output$tree_model_data_table <- renderDT({
+output$tree_model_data <- renderDT({
 
   req(tree_data())
 
@@ -345,7 +368,77 @@ output$tree_model_data_table <- renderDT({
     preds <- predict(tree_model(), newdata = td, type = "class")
     table(Predicted = preds, Actual = target)
   }, rownames = TRUE)
-  
+
+
+  # -------------------------
+  # ROC CURVE & AUC (classification only)
+  # -------------------------
+
+  output$tree_roc <- renderPlot({
+
+  req(tree_model())
+  req(is_classification)
+
+  if (!is_classification) return(NULL)
+
+  model <- tree_model()
+  df    <- tree_data()
+
+  probs <- predict(model, newdata = df, type = "prob")
+  response <- df[[input$tree_target]]
+
+  positive_class <- levels(response)[2]
+
+  roc_obj <- pROC::roc(
+    response = response,
+    predictor = probs[, positive_class],
+    quiet = TRUE
+  )
+
+  plot(
+    roc_obj,
+    col = "#2C7FB8",
+    lwd = 3,
+    main = "ROC Curve (Decision Tree Classification)"
+  )
+  abline(a = 0, b = 1, lty = 2, col = "gray")
+})
+
+
+# -------------------------
+# AUC OUTPUT
+# -------------------------
+
+output$tree_auc <- renderPrint({
+
+  req(tree_model())
+  req(is_classification)
+
+  if (!is_classification) {
+    cat("AUC is only available for classification trees.")
+    return()
+  }
+
+  model <- tree_model()
+  df    <- tree_data()
+
+  probs <- predict(model, newdata = df, type = "prob")
+  response <- df[[input$tree_target]]
+
+  positive_class <- levels(response)[2]
+
+  roc_obj <- pROC::roc(
+    response = response,
+    predictor = probs[, positive_class],
+    quiet = TRUE
+  )
+
+  auc_value <- pROC::auc(roc_obj)
+
+  cat("Area Under the Curve (AUC):", round(as.numeric(auc_value), 3))
+})
+
+
 
 # -------------------------
 # INTERPRETATION BLOCK
