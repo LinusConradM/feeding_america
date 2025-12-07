@@ -23,7 +23,7 @@ p, li {
 }
 
 /* ===============================================================
-   App Header
+   App Header (used when NOT inside navbarPage title)
    =============================================================== */
 .app-header {
   background-color: #220BED;
@@ -32,20 +32,18 @@ p, li {
   font-size: 3.2rem;
   font-weight: 1000;
   letter-spacing: 0.5px;
-  text-align: left;
+  text-align: center;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   margin-bottom: 20px;
   position: relative;
   z-index: 2;
-  text-align: center;
 }
 
 /* ===============================================================
-   Navbar
+   Navbar (ORIGINAL STYLING)
    =============================================================== */
-/* NAVBAR CONTAINER */
 .navbar {
   background-color: #220BED !important;
   border-top: 3px solid #F5F8FC !important;
@@ -53,28 +51,27 @@ p, li {
   margin-top: -5px;
 }
 
-/* NAVBAR TEXT (Bootstrap 5 uses .nav-link, NOT li > a) */
+/* Large tab labels (original look) */
 .navbar-nav .nav-link {
   color: white !important;
   font-weight: 600 !important;
-  font-size: 30px !important;    /* ← Increase tab text size */
-  padding: 14px 22px !important; /* ← Optional: make tabs larger */
+  font-size: 30px !important;
+  padding: 14px 22px !important;
 }
 
-/* HOVER STATE */
+/* Hover */
 .navbar-nav .nav-link:hover {
   color: #909b17ff !important;
 }
 
-/* ACTIVE TAB */
+/* Active tab */
 .navbar-nav .nav-link.active {
   background-color: rgba(255,255,255,0.15);
   border-radius: 8px;
   color: #fff !important;
-  font-weight: 700 !important;   /* Make active tab bolder */
-  font-size: 20px !important;    /* Ensure same size */
+  font-weight: 700 !important;
+  font-size: 20px !important;
 }
-
 
 /* ===============================================================
    Buttons
@@ -125,9 +122,8 @@ p, li {
 }
 
 /* ===============================================================
-   KPI CARDS — SF-425 Style
+   KPI CARDS — ORIGINAL ENHANCED STYLE
    =============================================================== */
-
 .kpi-card {
   background: #ffffff;
   border-radius: 16px;
@@ -146,7 +142,6 @@ p, li {
   box-shadow: 0 8px 18px rgba(0,0,0,0.12);
 }
 
-/* --- FIXED KPI TITLE (Bold + dark) --- */
 .kpi-title {
   font-size: 28px !important;
   font-weight: 900 !important;
@@ -155,20 +150,12 @@ p, li {
   text-align: center;
 }
 
-/* --- KPI VALUE (big dark numbers) --- */
 .kpi-card .kpi-value {
   font-size: 42px !important;
   font-weight: 700 !important;
   color: #111 !important;
   line-height: 1.1;
   text-align: center;
-}
-
-/* Trend text */
-.kpi-change {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 4px;
 }
 
 /* Accent borders */
@@ -178,18 +165,10 @@ p, li {
 .kpi-purple { border-color: #8A5BFF; }
 .kpi-red    { border-color: #FF4D4F; }
 
-/* Reduce spacing between columns (tighten KPI grid) */
+/* Tight grid spacing */
 .row > [class*='col-'] {
   padding-left: 8px !important;
   padding-right: 8px !important;
-}
-
-/* Mobile */
-@media (max-width: 992px) {
-  .kpi-card {
-    height: auto;
-    padding: 18px 22px;
-  }
 }
 
 /* ===============================================================
@@ -202,13 +181,11 @@ p, li {
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   overflow: hidden;
 }
+
 .table th {
   background-color: #220BED;
   color: white;
   font-weight: 600;
-}
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: #f9fafc;
 }
 
 /* ===============================================================
@@ -222,58 +199,20 @@ p, li {
 }
 
 /* ===============================================================
-   Form Inputs
-   =============================================================== */
-input, select, textarea {
-  border-radius: 10px !important;
-  border: 1px solid #d0d5dd !important;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: #220BED !important;
-  box-shadow: 0 0 0 0.2rem rgba(34,11,237,0.25) !important;
-}
-
-/* ===============================================================
-   Footer
-   =============================================================== */
-.footer {
-  text-align: center;
-  color: #6c757d;
-  padding: 20px;
-}
-
-/* Utility + Animation */
-.text-muted { color: #6c757d !important; }
-.fw-bold { font-weight: 700 !important; }
-.text-center { text-align: center !important; }
-
-.fade-in {
-  animation: fadeIn 0.6s ease-in-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-
-/* ===============================================================
-   Sub-tabs (Trends → State Trends, Racial Disparities, etc.)
+   Sub-tabs (Analysis / Exploration inner tabs)
    =============================================================== */
 .nav-tabs .nav-link {
   font-size: 22px !important;
   font-weight: 600 !important;
-  color: #0a8a6a !important;   /* teal text for inactive tabs */
+  color: #0a8a6a !important;
   padding: 12px 20px !important;
-  border-radius: 10px !important; /* smooth rounded corners */
-  transition: all 0.25s ease;
+  border-radius: 10px !important;
 }
 
 .nav-tabs .nav-link.active {
-  background-color: #e6e6ff !important;   /* light purple highlight */
-  color: #220BED !important;              /* active tab text color */
+  background-color: #e6e6ff !important;
+  color: #220BED !important;
   font-weight: 800 !important;
-  border: 2px solid #220BED !important;   /* strong border accent */
-  border-bottom: none !important;         /* removes bootstrap underline */
-  box-shadow: 0 2px 6px rgba(34, 11, 237, 0.2); /* subtle glow */
+  border: 2px solid #220BED !important;
+  border-bottom: none !important;
 }
-
