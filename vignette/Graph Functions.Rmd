@@ -18,7 +18,7 @@ Big Function for Graphs
 
 mmg_plot <- function(year_input, variable, plot_type) {
   
-  if (year_start>=2019){
+  if (year_input>=2019){
     df<-fa_post 
   }
   else  {
@@ -87,7 +87,7 @@ server <- function(input, output, session) {
   
   output$var_select <- renderUI({
     
-  if (input$yeart>=2019){
+  if (input$year>=2019){
     df<-fa_post 
   }
   else  {
