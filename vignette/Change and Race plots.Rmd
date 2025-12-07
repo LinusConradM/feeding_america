@@ -11,6 +11,14 @@ library(readxl)
 library(tidyverse)
 ```
 
+```{r}
+fa_pre <- read_excel("../data/feeding_america(2009-2018).xlsx")
+fa_post<- read_excel("../data/feeding_america(2019-2023).xlsx")
+
+intersect(names(fa_pre),names(fa_post))
+```
+
+
 Year over year change plot
 ```{r}
 
@@ -21,25 +29,25 @@ fi_change_plot <- function(
 ) {
   if (year_start>=2019){
     df_start<-fa_post |> 
-      select(FIPS, value_start = all_of(variable))
+      select(fips, value_start = all_of(variable))
   }
   else  {
      df_start<-fa_pre |> 
-      select(FIPS, value_start = all_of(variable))
+      select(fips, value_start = all_of(variable))
   }
 
   if (year_end>=2019){
     df_end<-fa_post |> 
-      select(FIPS, value_end = all_of(variable))
+      select(fips, value_end = all_of(variable))
   }
   else  {
      df_end<-fa_pre |> 
-      select(FIPS, value_end = all_of(variable))
+      select(fips, value_end = all_of(variable))
   }
   
 
   df <- df_start |> 
-    inner_join(df_end, by = "FIPS") |> 
+    inner_join(df_end, by = "fips") |> 
     mutate(change = value_end - value_start)
 
   if (plot_type == "Slope") {
@@ -50,7 +58,7 @@ fi_change_plot <- function(
       mutate(year = recode(year,
                            "value_start" = year_start,
                            "value_end" = year_end)) |> 
-      ggplot(aes(x = year, y = value, group = FIPS)) +
+      ggplot(aes(x = year, y = value, group = fips)) +
       geom_line(alpha = 0.5) +
       geom_point(size = 2) +
       labs(
@@ -114,9 +122,9 @@ ui <- fluidPage(
         choices = c(
           "Overall Food Insecurity Rate",
           "Child Food Insecurity Rate",
-          "Food Insecurity Rate among Black Persons (all ethnicities)",
-          "Food Insecurity Rate among Hispanic Persons (any race)",
-          "Food Insecurity Rate among White, non-Hispanic Persons"
+          "povert_rate",
+          "No of Food Insecure Persons Overall",
+          "Cost Per Meal"
         ),
         selected = "Overall Food Insecurity Rate"
       ),
@@ -148,8 +156,7 @@ server <- function(input, output, session) {
       year_start = input$year_start,
       year_end   = input$year_end,
       variable   = input$variable,
-      plot_type  = input$plot_type,
-      data_list  = mmg_list
+      plot_type  = input$plot_type
     )
 
   })

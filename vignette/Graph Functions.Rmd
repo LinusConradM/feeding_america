@@ -15,28 +15,15 @@ library(dplyr)
 
 Big Function for Graphs
 ```{r}
-#Converting data set to years
-mmg_list <- list(
-  "2009" = MMG_2009,
-  "2010" = MMG_2010,
-  "2011" = MMG_2011,
-  "2012" = MMG_2012,
-  "2013" = MMG_2013,
-  "2014" = MMG_2014,
-  "2015" = MMG_2015,
-  "2016" = MMG_2016,
-  "2017" = MMG_2017,
-  "2018" = MMG_2018,
-  "2019" = MMG_2019,
-  "2020" = MMG_2020,
-  "2021" = MMG_2021,
-  "2022" = MMG_2022,
-  "2023" = MMG_2023
-)
 
-mmg_plot <- function(year_input, variable, plot_type, data_list = mmg_list) {
+mmg_plot <- function(year_input, variable, plot_type) {
   
-  df <- data_list[[as.character(year_input)]]
+  if (year_start>=2019){
+    df<-fa_post 
+  }
+  else  {
+     df<-fa_pre 
+  }
   
   if(!variable %in% names(df)) stop("Variable not found in dataset.")
   
@@ -99,8 +86,13 @@ Server
 server <- function(input, output, session) {
   
   output$var_select <- renderUI({
-    df <- mmg_list[[as.character(input$year)]]
     
+  if (input$yeart>=2019){
+    df<-fa_post 
+  }
+  else  {
+     df<-fa_pre 
+  }
     numeric_vars <- names(df)[sapply(df, is.numeric)]
     
     selectInput("variable", "Select Variable:", choices = numeric_vars)
