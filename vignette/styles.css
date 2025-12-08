@@ -7,3 +7,17 @@ p, li {
 h1, h2, h3 {
   line-height: 1.1;
 }
+
+/* Figure captions */
+.figure-caption {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: black;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Cross-reference figure labels (e.g., Figure 1:) */
+.figure-caption strong {
+  font-weight: bold;
+}
