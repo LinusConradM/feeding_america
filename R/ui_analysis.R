@@ -1,7 +1,6 @@
 # ==============================================================================
 # UI: ANALYSIS MODULE
 # ==============================================================================
-
 ui_analysis <- tabPanel(
   "Analysis",
   
@@ -23,7 +22,7 @@ ui_analysis <- tabPanel(
           choices = c(
             "Correlation Analysis"        = "correlation",
             "Regression Analysis"         = "regression",
-            "Logistic Regression"         = "logistic",
+            "Multinomial Logistic Regression" = "multinomial",
             "Decision Tree"               = "decision_tree",
             "Principal Component Analysis"= "pca",
             "K-Means Clustering"          = "kmeans",
@@ -54,18 +53,15 @@ ui_analysis <- tabPanel(
           selectInput("reg_independent","Independent Variables (X):",choices=NULL,multiple=TRUE),
           actionButton("run_regression","Run Regression Analysis",class="btn-primary btn-block")
         ),
-        
+
         # ==================================================================
-        # LOGISTIC REGRESSION INPUTS
+        # MULTINOMIAL REGRESSION INPUTS
         # ==================================================================
         conditionalPanel(
-          condition = "input.analysis_type == 'logistic'",
-          h4("Logistic Regression"),
-          selectInput("logit_dependent","Binary Outcome Variable:",choices=NULL),
-          selectInput("logit_independent","Independent Variables (X):",choices=NULL,multiple=TRUE),
-          actionButton("run_logistic","Run Logistic Regression",class="btn-primary btn-block")
+          condition = "input.analysis_type == 'multinomial'",
+          uiOutput("multinomial_ui")
         ),
-        
+
         # ==================================================================
         # DECISION TREE INPUTS
         # ==================================================================
@@ -108,7 +104,7 @@ ui_analysis <- tabPanel(
           selectInput(
             "group_var","Grouping Variable:",
             choices=c("Census Region","Census Division","Rural/Urban",
-                      "Poverty Category","Income Category","FI Category","Race")
+                      "Poverty Category","Income Category","FI Category")
           ),
           selectInput("group_target","Outcome Variable:",choices=NULL),
           actionButton("run_group_comparison","Run Group Comparison",class="btn-primary btn-block")
@@ -141,19 +137,18 @@ ui_analysis <- tabPanel(
             tabPanel("Coefficients",plotOutput("reg_coefficients",height="500px"))
           )
         ),
-        
+
         conditionalPanel(
-          condition="input.analysis_type=='logistic'",
-          h3("Logistic Regression Results"),
+          condition = "input.analysis_type == 'multinomial'",
+          h3("Multinomial Logistic Regression Results"),
           tabsetPanel(
-            tabPanel("Model Summary",verbatimTextOutput("logit_summary")),
-            tabPanel("Odds Ratios",plotOutput("logit_odds",height="500px")),
-            tabPanel("Confusion Matrix",tableOutput("logit_confusion")),
-            tabPanel("ROC Curve",plotOutput("logit_roc",height="500px")),
-            tabPanel("Interpretation",uiOutput("logit_interpretation"))
+            tabPanel("Model Summary", verbatimTextOutput("multi_summary")),
+            tabPanel("Relative Risk Ratios", plotOutput("multi_rrr", height = "600px")),
+            tabPanel("Classification Accuracy", verbatimTextOutput("multi_accuracy")),
+            tabPanel("Interpretation", uiOutput("multi_interpretation"))
           )
         ),
-        
+
         conditionalPanel(
           condition="input.analysis_type=='decision_tree'",
           h3("Decision Tree Results"),
@@ -161,18 +156,57 @@ ui_analysis <- tabPanel(
             tabPanel("Tree Plot", plotOutput("tree_plot", height = "600px")),
             tabPanel("Variable Importance", plotOutput("tree_importance", height = "500px")),
 
-          conditionalPanel(
-            condition = "output.is_tree_binary",
-            tabPanel("ROC Curve", plotOutput("tree_roc", height = "500px")),
-            tabPanel("AUC", verbatimTextOutput("tree_auc")),
-            tabPanel("Confusion Matrix", tableOutput("tree_confusion"))),
-          tabPanel("Interpretation", uiOutput("tree_interpretation")),
-          tabPanel("Model Data", DT::DTOutput("tree_model_data"))
+            # Binary classification tabs with conditional content
+            tabPanel(
+              "Confusion Matrix",
+              conditionalPanel(
+                condition = "output.is_tree_binary",
+                tableOutput("tree_confusion")
+              ),
+              conditionalPanel(
+                condition = "!output.is_tree_binary",
+                div(
+                  style = "padding: 20px; color: #666; font-style: italic;",
+                  p("Confusion matrix is only available for binary classification trees.")
+                )
+              )
+            ),
 
+            tabPanel(
+              "ROC Curve",
+              conditionalPanel(
+                condition = "output.is_tree_binary",
+                plotOutput("tree_roc", height = "500px")
+              ),
+              conditionalPanel(
+                condition = "!output.is_tree_binary",
+                div(
+                  style = "padding: 20px; color: #666; font-style: italic;",
+                  p("ROC curve is only available for binary classification trees.")
+                )
+              )
+            ),
 
+            tabPanel(
+              "AUC",
+              conditionalPanel(
+                condition = "output.is_tree_binary",
+                verbatimTextOutput("tree_auc")
+              ),
+              conditionalPanel(
+                condition = "!output.is_tree_binary",
+                div(
+                  style = "padding: 20px; color: #666; font-style: italic;",
+                  p("AUC is only available for binary classification trees.")
+                )
+              )
+            ),
+
+            tabPanel("Interpretation", uiOutput("tree_interpretation")),
+            tabPanel("Model Data", DT::DTOutput("tree_model_data"))
           )
         ),
-        
+
         conditionalPanel(
           condition="input.analysis_type=='pca'",
           h3("PCA Results"),
@@ -193,8 +227,7 @@ ui_analysis <- tabPanel(
             tabPanel("Interpretation",uiOutput("kmeans_interpretation"))
           )
         ),
-        
-        # ✅ ENHANCED GROUP COMPARISON (ONLY CHANGE)
+
         conditionalPanel(
           condition="input.analysis_type=='group_comparison'",
           h3("Group Comparison Results"),

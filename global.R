@@ -1,4 +1,6 @@
+# ==============================================================================
 # GLOBAL.R — Loads data + sets global ggplot theme
+# ==============================================================================
 
 # ==============================================================================
 # REQUIRED PACKAGES
@@ -6,7 +8,8 @@
 
 required_packages <- c(
   "shiny", "tidyverse", "readxl", "leaflet", "leaflet.extras",
-  "plotly", "DT", "maps", "scales", "janitor"
+  "plotly", "DT", "maps", "scales", "janitor",
+  "nnet", "rpart", "rpart.plot", "broom", "pROC"
 )
 
 # Install missing packages
@@ -14,22 +17,32 @@ missing_packages <- required_packages[!required_packages %in% installed.packages
 
 if(length(missing_packages) > 0) {
   cat("Installing missing packages:", paste(missing_packages, collapse = ", "), "\n")
-  install.packages(missing_packages)
+  install.packages(missing_packages, dependencies = TRUE)
 }
 
-# Load packages
-library(shiny)
-library(tidyverse)
-library(readxl)
-library(leaflet)
-library(plotly)
-library(DT)
-library(maps)
-library(scales)
-library(janitor)
+# Load packages (with suppressed startup messages for cleaner console)
+suppressPackageStartupMessages({
+  library(shiny)
+  library(tidyverse)
+  library(readxl)
+  library(leaflet)
+  library(plotly)
+  library(DT)
+  library(maps)
+  library(scales)
+  library(janitor)
+  library(nnet)
+  library(rpart)
+  library(rpart.plot)
+  library(broom)
+  library(pROC)
+})
 
-cat("✓ All packages loaded\n")
+cat("✓ All packages loaded\n\n")
 
+# ==============================================================================
+# LOAD DATA
+# ==============================================================================
 
 cat("========================================\n")
 cat("LOADING FOOD INSECURITY DATA\n")
@@ -44,6 +57,8 @@ path_post <- "data/feeding_america(2019-2023).xlsx"
 cat("Loading Excel files...\n")
 fa_pre_raw  <- read_excel(path_pre)
 fa_post_raw <- read_excel(path_post)
+cat("  Pre-pandemic rows:", format(nrow(fa_pre_raw), big.mark = ","), "\n")
+cat("  Post-pandemic rows:", format(nrow(fa_post_raw), big.mark = ","), "\n")
 cat("✓ Files loaded\n\n")
 
 # Clean column names
@@ -52,7 +67,10 @@ fa_pre  <- fa_pre_raw %>% clean_names()
 fa_post <- fa_post_raw %>% clean_names()
 cat("✓ Column names cleaned\n\n")
 
+# ==============================================================================
 # CREATE FIPS STATE CODE LOOKUP TABLE
+# ==============================================================================
+
 state_lookup <- tibble(
   state_fips = c(1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 
                  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 
@@ -72,7 +90,10 @@ character_cols <- c(
   "low_threshold_type", "high_threshold_type", "year_group"
 )
 
-# Apply data cleaning and type fixing
+# ==============================================================================
+# APPLY DATA CLEANING AND TYPE CONVERSIONS
+# ==============================================================================
+
 cat("Applying data cleaning and type conversions...\n")
 
 fa_pre <- fa_pre %>%
@@ -132,11 +153,14 @@ cat("  fa_post$state:", class(fa_post$state), "\n")
 cat("  fa_pre$snap_rate:", class(fa_pre$snap_rate), "\n")
 cat("  fa_post$snap_rate:", class(fa_post$snap_rate), "\n\n")
 
-# Combine both time periods into one dataset
+# ==============================================================================
+# COMBINE DATASETS AND CREATE DERIVED VARIABLES
+# ==============================================================================
+
 cat("Combining datasets...\n")
 
 food_data <- bind_rows(fa_pre, fa_post) %>%
-  distinct(fips, year, .keep_all = TRUE) %>%  # REMOVE DUPLICATES!
+  distinct(fips, year, .keep_all = TRUE) %>%  # Remove duplicates!
   arrange(fips, year) %>%  
   # Create derived variables
   mutate(
@@ -181,9 +205,15 @@ food_data <- bind_rows(fa_pre, fa_post) %>%
     )
   )
 
-cat("✓ Datasets combined successfully!\n\n")
+cat("✓ Datasets combined successfully!\n")
+cat("  Total rows:", format(nrow(food_data), big.mark = ","), "\n")
+cat("  Years:", paste(range(food_data$year, na.rm = TRUE), collapse = "–"), "\n")
+cat("  Counties:", format(n_distinct(food_data$fips), big.mark = ","), "\n\n")
 
-# Categorical variables converted to factors
+# ==============================================================================
+# CONVERT CATEGORICAL VARIABLES TO FACTORS
+# ==============================================================================
+
 cat("Applying categorical → factor conversion for modeling...\n")
 
 food_data <- food_data %>%
@@ -191,25 +221,28 @@ food_data <- food_data %>%
     census_region = factor(census_region),
     census_division = factor(census_division),
     fns_region = factor(fns_region),
-    urban_rural = factor(urban_rural),
-    fi_category = factor(fi_category),
-    poverty_category = factor(poverty_category),
-    income_category = factor(income_category),
-    education_category = factor(education_category),
+    urban_rural = factor(urban_rural, levels = c("Rural", "Non-metro", "Metro")),
+    fi_category = factor(fi_category, levels = c("Low", "Moderate", "High", "Very High")),
+    poverty_category = factor(poverty_category, levels = c("Low", "Medium", "High", "Very High")),
+    income_category = factor(income_category, levels = c("Low", "Medium", "High")),
+    education_category = factor(education_category, levels = c("Low Education", "Medium Education", "High Education")),
     low_threshold_type = factor(low_threshold_type),
     high_threshold_type = factor(high_threshold_type),
-    year_group = factor(year_group)
+    year_group = factor(year_group, levels = c("2009–2018", "2019–2023"))
   )
 
 cat("✓ Categorical variables converted to factors (models enabled)\n\n")
 
-# Summary
+# ==============================================================================
+# DATA SUMMARY
+# ==============================================================================
+
 cat("========================================\n")
 cat("DATA LOADING COMPLETE!\n")
 cat("========================================\n")
 cat("  Rows:", format(nrow(food_data), big.mark = ","), "\n")
 cat("  Columns:", ncol(food_data), "\n")
-cat("  Years:", paste(range(food_data$year, na.rm = TRUE), collapse = "-"), "\n")
+cat("  Years:", paste(range(food_data$year, na.rm = TRUE), collapse = "–"), "\n")
 cat("  Counties:", format(n_distinct(food_data$fips), big.mark = ","), "\n")
 cat("========================================\n\n")
 
@@ -221,7 +254,59 @@ cat("  Median income missing:", sum(is.na(food_data$median_income)), "\n")
 cat("  Cost per meal missing:", sum(is.na(food_data$cost_per_meal)), "\n\n")
 
 # ==============================================================================
-# ADD GEOGRAPHIC COORDINATES FOR MAPPING (SIMPLIFIED)
+# DIAGNOSTIC: CHECK FACTOR VARIABLES FOR MULTINOMIAL REGRESSION
+# ==============================================================================
+
+cat("========================================\n")
+cat("CHECKING FACTORS FOR MULTINOMIAL MODEL\n")
+cat("========================================\n\n")
+
+factor_vars <- names(food_data)[sapply(food_data, is.factor)]
+cat("Factor variables found:", length(factor_vars), "\n")
+cat("Names:", paste(factor_vars, collapse = ", "), "\n\n")
+
+cat("Factor levels check:\n")
+
+# Track which variables are suitable for multinomial
+multinomial_suitable <- character(0)
+
+for (var in factor_vars) {
+  n_levels <- nlevels(food_data[[var]])
+  cat(sprintf("  %-25s: %2d levels", var, n_levels))
+  
+  if (n_levels >= 3) {
+    cat(" ✓ (suitable for multinomial)")
+    multinomial_suitable <- c(multinomial_suitable, var)
+  } else if (n_levels == 2) {
+    cat(" (binary)")
+  } else if (n_levels < 2) {
+    cat(" ⚠ (insufficient levels)")
+  }
+  cat("\n")
+  
+  # Show the levels
+  if (n_levels > 0) {
+    cat(sprintf("    Levels: %s", 
+                paste(levels(food_data[[var]])[1:min(5, n_levels)], collapse = ", ")))
+    if (n_levels > 5) cat(" ...")
+    cat("\n")
+  }
+  cat("\n")
+}
+
+# Summary
+cat("Summary:\n")
+cat("  Total factor variables:", length(factor_vars), "\n")
+cat("  Suitable for multinomial (3+ levels):", length(multinomial_suitable), "\n")
+if (length(multinomial_suitable) > 0) {
+  cat("    →", paste(multinomial_suitable, collapse = ", "), "\n")
+}
+cat("\n")
+
+cat("========================================\n\n")
+
+# ==============================================================================
+# ADD GEOGRAPHIC COORDINATES FOR MAPPING
 # ==============================================================================
 
 cat("Adding geographic coordinates for mapping...\n")
@@ -235,35 +320,7 @@ county_fips <- maps::county.fips %>%
   ) %>%
   separate(polyname, c("state_map", "county_map"), sep = ",", remove = FALSE)
 
-# Get county centroids (using ggplot2::map_data, not maps::map_data)
-county_coords <- ggplot2::map_data("county") %>%
-  group_by(region, subregion) %>%
-  summarise(
-    lon = mean(long),
-    lat = mean(lat),
-    .groups = "drop"
-  )
-
-# Merge FIPS with coordinates
-county_geo <- county_fips %>%
-  left_join(
-    county_coords,
-    by = c("state_map" = "region", "county_map" = "subregion")
-  ) %>%
-  select(fips, lon, lat) %>%
-  distinct(fips, .keep_all = TRUE)
-
-
-# Get county FIPS codes (from maps package)
-county_fips <- maps::county.fips %>%
-  as_tibble() %>%
-  mutate(
-    fips = sprintf("%05d", fips),
-    polyname = as.character(polyname)
-  ) %>%
-  separate(polyname, c("state_map", "county_map"), sep = ",", remove = FALSE)
-
-# Get county centroids (using ggplot2::map_data, not maps::map_data)
+# Get county centroids (using ggplot2::map_data)
 county_coords <- ggplot2::map_data("county") %>%
   group_by(region, subregion) %>%
   summarise(
@@ -292,10 +349,12 @@ cat("  Counties with coordinates:",
     format(coords_added, big.mark = ","), 
     "out of", 
     format(nrow(food_data), big.mark = ","),
-    paste0(" (", round(coords_added/nrow(food_data)*100, 1), "%)\n\n"))
+    sprintf(" (%.1f%%)\n", coords_added/nrow(food_data)*100))
 
-# For counties without coordinates, use state center
+# For counties without coordinates, use state centers
 if (sum(is.na(food_data$lon)) > 0) {
+  
+  cat("  Adding state center coordinates for remaining counties...\n")
   
   # State centers (approximate)
   state_centers <- tibble(
@@ -321,58 +380,70 @@ if (sum(is.na(food_data$lon)) > 0) {
       lat = coalesce(lat, state_lat)
     ) %>%
     select(-state_lon, -state_lat)
- 
   
-  food_data <- food_data %>%
-    left_join(state_centers, by = "state") %>%
-    mutate(
-      lon = coalesce(lon, state_lon),
-      lat = coalesce(lat, state_lat)
-    ) %>%
-    select(-state_lon, -state_lat)
-  
-  cat("✓ State centers used for remaining counties\n\n")
+  cat("  ✓ State centers used for remaining counties\n")
 }
+cat("\n")
 
-## Create global ggplot theme
+# ==============================================================================
+# SET GLOBAL GGPLOT THEME
+# ==============================================================================
+
+cat("Setting global ggplot theme...\n")
 
 bs_theme <- theme(
-    text = element_text(family = "Arial", size = 14, color = "black"),
-    plot.title = element_text(
-      hjust = 0.5, 
-      size = 20, 
-      face = "bold",
-      color = "black"
-    ),
-    axis.title = element_text(
-      size = 16,
-      color = "black",
-      face = "bold"
-    ),
-    axis.text = element_text(
-      size = 14,
-      color = "#000000",
-      face = "bold"
-    ),
-    legend.title = element_text(
-      size = 14,
-      face = "bold",
-      color = "black"
-    ),
-    legend.text = element_text(
-      size = 12,
-      color = "black"
-    ),
-    strip.text = element_text(
-      size = 14,
-      face = "bold",
-      color = "black"
-    ),
-    panel.grid.major = element_line(color = "grey85"),
-    panel.grid.minor = element_blank()
-  )
+  text = element_text(family = "Arial", size = 14, color = "black"),
+  plot.title = element_text(
+    hjust = 0.5, 
+    size = 20, 
+    face = "bold",
+    color = "black"
+  ),
+  axis.title = element_text(
+    size = 16,
+    color = "black",
+    face = "bold"
+  ),
+  axis.text = element_text(
+    size = 14,
+    color = "#000000",
+    face = "bold"
+  ),
+  legend.title = element_text(
+    size = 14,
+    face = "bold",
+    color = "black"
+  ),
+  legend.text = element_text(
+    size = 12,
+    color = "black"
+  ),
+  strip.text = element_text(
+    size = 14,
+    face = "bold",
+    color = "black"
+  ),
+  panel.grid.major = element_line(color = "grey85"),
+  panel.grid.minor = element_blank()
+)
 
 theme_set(bs_theme)
 
-cat("✓ ggplot theme set\n")
-cat("✓ Ready to run Shiny app!\n\n")
+cat("✓ ggplot theme set\n\n")
+
+# ==============================================================================
+# FINAL STATUS
+# ==============================================================================
+
+cat("========================================\n")
+cat("✓ READY TO RUN SHINY APP\n")
+cat("========================================\n")
+cat("Dataset: food_data\n")
+cat("  Rows:", format(nrow(food_data), big.mark = ","), "\n")
+cat("  Columns:", ncol(food_data), "\n")
+cat("  Factor variables:", length(factor_vars), "\n")
+if (length(multinomial_suitable) > 0) {
+  cat("  Multinomial-ready variables:", length(multinomial_suitable), "\n")
+  cat("    →", paste(multinomial_suitable, collapse = ", "), "\n")
+}
+cat("========================================\n\n")
