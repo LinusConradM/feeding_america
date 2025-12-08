@@ -1,0 +1,832 @@
+---
+title: "Untitled"
+format: html
+---
+
+Call my Api Key
+
+```{r}
+# Load your Census API key from environment variable
+
+api_key <- Sys.getenv("CENSUS_API_KEY")
+```
+
+Load libraries and define helper function
+
+```{r}
+#| label: load libraries
+
+library(httr)
+library(jsonlite)
+library(dplyr)
+```
+
+
+
+Setting helper function to call Census API
+```{r}
+#| label: census data extraction
+
+census_call <- function(vars, year) {
+  url <- paste0(
+    "https://api.census.gov/data/", year, "/acs/acs5?get=",
+    paste(vars, collapse = ","),
+    "&for=county:*&key=", api_key
+  )
+
+  resp <- httr::GET(url)
+  text <- rawToChar(resp$content)
+
+  # If variable does not exist for this year → return NULL
+  if (grepl("unknown variable", text, ignore.case = TRUE) ||
+      grepl("<html", text, ignore.case = TRUE)) {
+    message("Skipping unavailable variables for year ", year)
+    return(NULL)
+  }
+
+  dat <- jsonlite::fromJSON(text)
+  df  <- as.data.frame(dat[-1, ], stringsAsFactors = FALSE)
+  names(df) <- dat[1, ]
+  df$year <- year
+
+  df
+}
+```
+
+```{r}
+#| label: main data extraction and processing
+pop_vars <- c("NAME", "B01001_001E")
+inc_vars <- c("NAME", "B19013_001E")
+pov_vars <- c("NAME", "B17001_002E", "B17001_001E")
+race_vars <- c("NAME","B02001_001E","B02001_002E","B02001_003E","B02001_005E")
+hisp_vars <- c("NAME","B03003_003E","B03003_001E")
+snap_vars <- c("NAME","B22003_002E","B22003_001E")
+rent_vars <- c("NAME","B25070_001E","B25070_007E","B25070_008E","B25070_009E","B25070_010E","B25070_011E")
+unemp_vars <- c("NAME","B23025_005E","B23025_003E")
+female_vars <- c("NAME","B11005_016E","B11005_001E")
+novehicle_vars <- c("NAME","B08201_002E","B08201_001E")
+edu_vars <- c("NAME",paste0("B15003_", sprintf("%03dE", 2:16)),"B15003_001E")
+gini_vars <- c("NAME","B19083_001E")
+```
+
+```{r}
+years <- 2013:2023
+all_years_list <- list()
+
+```
+
+```{r}
+safe_left_join <- function(x, y, by) {
+  if (is.null(y)) return(x)
+  dplyr::left_join(x, y, by = by)
+}
+```
+
+
+
+```{r}
+# label: data merging and final processing
+
+all_years_list <- list()
+
+for (yr in years) {
+
+  cat("Pulling year:", yr, "\n")
+
+  df_pop     <- census_call(pop_vars, yr)
+  if (is.null(df_pop)) next   # cannot proceed without base
+
+  df_year <- df_pop
+
+  df_year <- safe_left_join(df_year, census_call(inc_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(pov_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(race_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(hisp_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(unemp_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(female_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(novehicle_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(edu_vars, yr),
+                             c("NAME","state","county","year"))
+  df_year <- safe_left_join(df_year, census_call(gini_vars, yr),
+                             c("NAME","state","county","year"))
+
+  # optional blocks
+  if (yr >= 2012) {
+    df_year <- safe_left_join(df_year, census_call(snap_vars, yr),
+                               c("NAME","state","county","year"))
+    df_year <- safe_left_join(df_year, census_call(rent_vars, yr),
+                               c("NAME","state","county","year"))
+  }
+
+  all_years_list[[as.character(yr)]] <- df_year
+}
+
+```
+
+```{r}
+df_panel <- dplyr::bind_rows(all_years_list)
+```
+
+
+```{r}
+#| label: final calculations and cleaning
+df_panel <- df_panel %>%
+  mutate(
+    # Population
+    population = as.numeric(B01001_001E),
+
+    # Poverty
+    poverty_rate =
+      as.numeric(B17001_002E) / as.numeric(B17001_001E),
+
+    median_income = as.numeric(B19013_001E),
+
+    # SNAP
+    snap_rate =
+      as.numeric(B22003_002E) / as.numeric(B22003_001E),
+
+    # Rent burden (≥30%)
+    rent_burden =
+      (as.numeric(B25070_007E) +
+       as.numeric(B25070_008E) +
+       as.numeric(B25070_009E) +
+       as.numeric(B25070_010E) +
+       as.numeric(B25070_011E)) /
+      as.numeric(B25070_001E),
+
+    # Unemployment rate
+    unemployment_rate =
+      as.numeric(B23025_005E) / as.numeric(B23025_003E),
+
+    # Female-headed households with children
+    female_headed =
+      as.numeric(B11005_016E) / as.numeric(B11005_001E),
+
+    # No vehicle access
+    no_vehicle =
+      as.numeric(B08201_002E) / as.numeric(B08201_001E),
+
+    # Education: high school or less
+    hs_or_less =
+      rowSums(across(
+        starts_with("B15003_") & !ends_with("001E"),
+        ~ as.numeric(.)
+      ), na.rm = TRUE) /
+      as.numeric(B15003_001E),
+
+    # Gini index
+    gini = as.numeric(B19083_001E),
+
+    # Race/ethnicity shares
+    black_pct =
+      as.numeric(B02001_003E) / as.numeric(B02001_001E),
+
+    hispanic_pct =
+      as.numeric(B03003_003E) / as.numeric(B03003_001E),
+
+    # FIPS Code
+    fips = paste0(state, county)
+  )
+```
+
+
+```{r}
+write.csv(df_panel, "census_food_insecurity_panel_2012.csv", row.names = FALSE)
+```
+
+### Merging
+
+## 2009 Food Insecurity Data
+```{r}
+#| label: merging 2009 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2009.xlsx")
+colnames(fa)
+```
+
+```{r}
+#| label: cleaning and merging 2009 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2009)
+fa <- fa %>% rename(FA_State = `State Name`)
+df_2009 <- df_panel %>% filter(year == 2009)
+merged_2009 <- df_2009 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2009_clean <- merged_2009 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2013 merged data
+merged_2009_clean <- merged_2009_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2009_clean <- merged_2009_clean %>%
+  mutate(across(
+    any_of(c(
+      "Child FI Rate",
+      "% of children in FI HH with HH incomes at or below 185% FPL",
+      "% of children in FI HH with HH incomes above 185% FPL"
+    )),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2009_clean, "census_fa_merged_2009.csv", row.names = FALSE)
+```
+
+## 2010 Food Insecurity Data
+```{r}
+#| label: merging 2010 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2010.xlsx")
+colnames(fa)
+```
+
+```{r}
+#| label: cleaning and merging 2010 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2010)
+fa <- fa %>% rename(FA_State = State)
+df_2010 <- df_panel %>% filter(year == 2010)
+merged_2010 <- df_2010 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2010_clean <- merged_2010 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2013 merged data
+merged_2010_clean <- merged_2010_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2010_clean <- merged_2010_clean %>%
+  mutate(across(
+    any_of(c(
+      "2010 Child food insecurity rate",
+      "% of children in FI HH with HH incomes at or below 185% FPL",
+      "% of children in FI HH with HH incomes above 185% FPL"
+    )),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2010_clean, "census_fa_merged_2010.csv", row.names = FALSE)
+```
+
+
+
+## 2011 Food Insecurity Data
+```{r}
+#| label: merging 2011 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2011.xlsx")
+colnames(fa)
+```
+
+```{r}
+colnames(fa)
+```
+
+
+```{r}
+#| label: cleaning and merging 2011 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2011)
+fa <- fa %>% rename(FA_State = State)
+df_2011 <- df_panel %>% filter(year == 2011)
+merged_2011 <- df_2011 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2011_clean <- merged_2011 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2011 merged data
+merged_2011_clean <- merged_2011_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2011_clean <- merged_2011_clean %>%
+  mutate(across(
+    any_of(c(
+      "2011 Child food insecurity rate",
+      "% of children in FI HH with HH incomes at or below 185% FPL",
+      "% of children in FI HH with HH incomes above 185% FPL"
+    )),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2011_clean, "census_fa_merged_2011.csv", row.names = FALSE)
+```
+
+## 2012 Food Insecurity Data
+```{r}
+#| label: merging 2010 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2012.xlsx")
+colnames(fa)
+```
+
+```{r}
+#| label: cleaning and merging 2012 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2012)
+fa <- fa %>% rename(FA_State = State)
+df_2012 <- df_panel %>% filter(year == 2012)
+merged_2012 <- df_2012 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2012_clean <- merged_2012 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2013 merged data
+merged_2012_clean <- merged_2012_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2012_clean <- merged_2012_clean %>%
+  mutate(across(
+    any_of(c(
+      "2012 Child food insecurity rate",
+      "% of children in FI HH with HH incomes at or below 185% FPL",
+      "% of children in FI HH with HH incomes above 185% FPL"
+    )),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2012_clean, "census_fa_merged_2012.csv", row.names = FALSE)
+```
+
+
+
+
+## 2013 Food Insecurity Data
+```{r}
+#| label: merging 2013 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2013.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2013 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2013)
+fa <- fa %>% rename(FA_State = State)
+df_2013 <- df_panel %>% filter(year == 2013)
+merged_2013 <- df_2013 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2013_clean <- merged_2013 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2013 merged data
+merged_2013_clean <- merged_2013_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2013_clean <- merged_2013_clean %>%
+  mutate(across(
+    c(
+      `2013 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2013`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2013`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2013_clean, "census_fa_merged_2013.csv", row.names = FALSE)
+```
+
+## 2014 Food Insecurity Data
+```{r}
+#| label: merging 2014 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2014.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2014 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2014)
+fa <- fa %>% rename(FA_State = State)
+df_2014 <- df_panel %>% filter(year == 2014)
+merged_2014 <- df_2014 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2014_clean <- merged_2014 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2013 merged data
+merged_2014_clean <- merged_2014_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2014_clean <- merged_2014_clean %>%
+  mutate(across(
+    c(
+      `2014 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2014`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2014`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2014_clean, "census_fa_merged_2014.csv", row.names = FALSE)
+```
+
+
+## 2015 Food Insecurity Data
+```{r}
+#| label: merging 2015 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2015.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2015 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2015)
+fa <- fa %>% rename(FA_State = State)
+df_2015 <- df_panel %>% filter(year == 2015)
+merged_2015 <- df_2015 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2015_clean <- merged_2015 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2015 merged data
+merged_2015_clean <- merged_2015_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2015_clean <- merged_2015_clean %>%
+  mutate(across(
+    c(
+      `2015 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2015`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2015`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2015_clean, "census_fa_merged_2015.csv", row.names = FALSE)
+```
+
+
+## 2016 Food Insecurity Data
+```{r}
+#| label: merging 2016 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2016.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2016 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2016)
+fa <- fa %>% rename(FA_State = State)
+df_2016 <- df_panel %>% filter(year == 2016)
+merged_2016 <- df_2016 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2016_clean <- merged_2016 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2016 merged data
+merged_2016_clean <- merged_2016_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2016_clean <- merged_2016_clean %>%
+  mutate(across(
+    c(
+      `2016 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2016`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2016`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2016_clean, "census_fa_merged_2016.csv", row.names = FALSE)
+```
+
+## 2017 Food Insecurity Data
+```{r}
+#| label: merging 2017 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2017.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2017 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2017)
+fa <- fa %>% rename(FA_State = State)
+df_2017 <- df_panel %>% filter(year == 2017)
+merged_2017 <- df_2017 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2017_clean <- merged_2017 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2015 merged data
+merged_2017_clean <- merged_2017_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2017_clean <- merged_2017_clean %>%
+  mutate(across(
+    c(
+      `2017 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2017`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2017`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2017_clean, "census_fa_merged_2017.csv", row.names = FALSE)
+```
+
+
+## 2018 Food Insecurity Data
+```{r}
+#| label: merging 2018 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2018.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2018 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2018)
+fa <- fa %>% rename(FA_State = State)
+df_2018 <- df_panel %>% filter(year == 2018)
+merged_2018 <- df_2018 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2018_clean <- merged_2018 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2018 merged data
+merged_2018_clean <- merged_2018_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2018_clean <- merged_2018_clean %>%
+  mutate(across(
+    c(
+      `2018 Child food insecurity rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL in 2018`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL in 2018`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2018_clean, "census_fa_merged_2018.csv", row.names = FALSE)
+```
+
+
+## 2019 Food Insecurity Data
+```{r}
+#| label: merging 2019 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2019.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2019 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2019)
+fa <- fa %>% rename(FA_State = State)
+df_2019 <- df_panel %>% filter(year == 2019)
+merged_2019 <- df_2019 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2019_clean <- merged_2019 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2019 merged data
+merged_2019_clean <- merged_2019_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+```{r}
+names(merged_2019_clean)
+```
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2019_clean <- merged_2019_clean %>%
+  mutate(across(
+    c(
+      `Child Food Insecurity Rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2019_clean, "census_fa_merged_2019.csv", row.names = FALSE)
+```
+
+
+## 2020 Food Insecurity Data
+```{r}
+#| label: merging 2020 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2020.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2020 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2020)
+fa <- fa %>% rename(FA_State = State)
+df_2020 <- df_panel %>% filter(year == 2020)
+merged_2020 <- df_2020 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2020_clean <- merged_2020 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2020 merged data
+merged_2020_clean <- merged_2020_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2020_clean <- merged_2020_clean %>%
+  mutate(across(
+    c(
+      `Child Food Insecurity Rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2020_clean, "census_fa_merged_2020.csv", row.names = FALSE)
+```
+
+
+## 2021 Food Insecurity Data
+```{r}
+#| label: merging 2021 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2021.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2021 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2021)
+fa <- fa %>% rename(FA_State = State)
+df_2021 <- df_panel %>% filter(year == 2021)
+merged_2021 <- df_2021 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2021_clean <- merged_2021 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2021 merged data
+merged_2021_clean <- merged_2021_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2021_clean <- merged_2021_clean %>%
+  mutate(across(
+    c(
+      `Child Food Insecurity Rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2021_clean, "census_fa_merged_2021.csv", row.names = FALSE)
+```
+
+## 2022 Food Insecurity Data
+```{r}
+#| label: merging 2022 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2022.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2022 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2022)
+fa <- fa %>% rename(FA_State = State)
+df_2022 <- df_panel %>% filter(year == 2022)
+merged_2022 <- df_2022 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2022_clean <- merged_2022 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2022 merged data
+merged_2022_clean <- merged_2022_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2022_clean <- merged_2022_clean %>%
+  mutate(across(
+    c(
+      `Child Food Insecurity Rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2022_clean, "census_fa_merged_2022.csv", row.names = FALSE)
+```
+
+## 2023 Food Insecurity Data
+```{r}
+#| label: merging 2023 food insecurity data
+library(readxl)
+fa <- read_excel("MMG_2023.xlsx")
+```
+
+```{r}
+#| label: cleaning and merging 2023 data
+fa <- fa %>%mutate(FIPS = sprintf("%05d", as.numeric(FIPS)),year = 2023)
+fa <- fa %>% rename(FA_State = State)
+df_2023 <- df_panel %>% filter(year == 2023)
+merged_2023 <- df_2023 %>%
+  left_join(fa, by = c("fips" = "FIPS"))
+merged_2023_clean <- merged_2023 %>%
+  filter(state != "72")
+```
+
+```{r}
+#| label: finalizing 2022 merged data
+merged_2023_clean <- merged_2023_clean %>%
+  mutate(year = year.x) %>%
+  select(-year.x, -year.y)
+```
+
+
+```{r}
+#| label: converting food insecurity rate columns to numeric
+merged_2023_clean <- merged_2023_clean %>%
+  mutate(across(
+    c(
+      `Child Food Insecurity Rate`,
+      `% food insecure children in HH w/ HH incomes below 185 FPL`,
+      `% food insecure children in HH w/ HH incomes above 185 FPL`
+    ),
+    ~ as.numeric(gsub("[^0-9.]", "", .x))
+  ))
+
+write.csv(merged_2023_clean, "census_fa_merged_2023.csv", row.names = FALSE)
+```

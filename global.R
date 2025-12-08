@@ -399,6 +399,17 @@ bs_theme <- theme(
     face = "bold",
     color = "black"
   ),
+  plot.subtitle = element_text(
+    hjust = 0.5,
+    size = 20,
+    face = "bold"
+  ),
+  plot.caption = element_text(
+    size = 16,
+    color = "gray30",
+    hjust = 1,
+    face = "italic"
+  ),
   axis.title = element_text(
     size = 16,
     color = "black",

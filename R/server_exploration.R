@@ -305,7 +305,9 @@ output$trend_state <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +         # Add na.rm = TRUE
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "State-Level Food Insecurity Trends",
+      #title = "State-Level Food Insecurity Trends",
+      subtitle = "Figure 1: Annual food insecurity trends by state (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Food Insecurity Rate"
     ) +
@@ -336,7 +338,9 @@ output$trend_race <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "Food Insecurity by Race/Ethnicity",
+      #title = "Food Insecurity by Race/Ethnicity",
+      subtitle = "Figure 2: Annual food insecurity rates by race/ethnicity (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Food Insecurity Rate"
     ) +
@@ -370,10 +374,11 @@ output$trend_child <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "Child vs Overall Food Insecurity",
+      #title = "Child vs Overall Food Insecurity",
+      subtitle = "Figure 3: Annual food insecurity rates among children vs overall (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Food Insecurity Rate",
-      caption = "Note: Years 2010-2013 excluded due to data quality issues"
     ) +
     scale_x_continuous(breaks = seq(2009, 2023, by = 1))
 })
@@ -404,10 +409,11 @@ output$trend_cost <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +
     facet_wrap(~Metric, scales = "free_y", ncol = 1) +
     labs(
-      title = "Cost of Food Insecurity Over Time",
+      #title = "Cost of Food Insecurity Over Time",
+      subtitle = "Figure 4: Average cost per meal and annual shortfall (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Value",
-      caption = "Note: Years 2011-2012 excluded due to missing cost data"
     ) +
     scale_x_continuous(breaks = seq(2009, 2023, by = 1)) +
     theme(legend.position = "none")
@@ -434,7 +440,9 @@ output$trend_rural <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "Rural vs Urban Food Insecurity",
+      #title = "Rural vs Urban Food Insecurity",
+      subtitle = "Figure 5: Annual food insecurity rates in rural vs urban counties (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Food Insecurity Rate",
       color = "Category"
@@ -463,7 +471,9 @@ output$trend_region <- renderPlot({
     geom_point(size = 2, na.rm = TRUE) +
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "Food Insecurity by Census Region",
+      #title = "Food Insecurity by Census Region",
+      subtitle = "Figure 6: Annual food insecurity rates by census region (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Food Insecurity Rate",
       color = "Region"
@@ -496,7 +506,9 @@ output$trend_gap <- renderPlot({
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
     scale_y_continuous(labels = scales::percent) +
     labs(
-      title = "Racial Food Insecurity Gaps Over Time",
+      #title = "Racial Food Insecurity Gaps Over Time",
+      subtitle = "Figure 7: Food insecurity rate gaps between Black, Hispanic, and White populations (2009-2023)",
+      caption = "Source: Feeding America Map the Meal Gap",
       x = "Year",
       y = "Percentage Point Gap",
       color = "Gap Type"
