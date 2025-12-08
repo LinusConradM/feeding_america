@@ -1,5 +1,5 @@
 # ==============================================================================
-# SERVER: ANALYSIS MODULE
+# SERVER: ANALYSIS MODULE - FIXED VERSION
 # ==============================================================================
 
 server_analysis <- function(input, output, session, data) {
@@ -100,10 +100,10 @@ server_analysis <- function(input, output, session, data) {
   })
 
   # ============================================================================
-  # MULTINOMIAL LOGISTIC REGRESSION DROPDOWNS
+  # MULTINOMIAL LOGISTIC REGRESSION UI (FIXED!)
   # ============================================================================
 
-  observe({
+  output$multinomial_ui <- renderUI({
     df <- data()
     
     # Get valid targets (factors with 3+ levels)
@@ -111,15 +111,42 @@ server_analysis <- function(input, output, session, data) {
       sapply(df, function(x) is.factor(x) && nlevels(x) >= 3)
     ]
     
-    updateSelectInput(
-      session,
-      "multi_target",
-      choices = sort(valid_targets)
+    # Get all potential predictors
+    all_predictors <- names(df)[
+      sapply(df, function(x) is.numeric(x) || is.factor(x))
+    ]
+    
+    tagList(
+      h4("Multinomial Logistic Regression"),
+      
+      selectInput(
+        "multi_target",
+        "Categorical Outcome (3+ levels):",
+        choices = c("", sort(valid_targets)),
+        selected = ""
+      ),
+      
+      selectInput(
+        "multi_predictors",
+        "Predictor Variables:",
+        choices = sort(all_predictors),
+        multiple = TRUE
+      ),
+      
+      actionButton(
+        "run_multinomial",
+        "Run Multinomial Regression",
+        class = "btn-primary btn-block"
+      ),
+      
+      br(),
+      helpText("Note: Outcome variable must have at least 3 categories. The first category will be used as the reference level.")
     )
   })
-
+  
+  # Update predictors when target changes
   observe({
-    req(input$multi_target)
+    req(input$multi_target, input$multi_target != "")
     df <- data()
     
     # Get all potential predictors (exclude target)
@@ -312,8 +339,7 @@ server_analysis <- function(input, output, session, data) {
             y = "Relative Risk Ratio (log scale)",
             x = "Predictor",
             color = "Outcome Category"
-          ) +
-          theme_minimal()
+          )
       }, error = function(e) {
         # Fallback: manual calculation
         coef_matrix <- coef(model)
@@ -334,8 +360,7 @@ server_analysis <- function(input, output, session, data) {
             y = "Relative Risk Ratio (log scale)",
             x = "Predictor",
             color = "Outcome Category"
-          ) +
-          theme_minimal()
+          )
       })
     })
 
@@ -890,8 +915,7 @@ server_analysis <- function(input, output, session, data) {
                      "Rural/Urban" = df$urban_rural,
                      "Poverty Category" = df$poverty_category,
                      "Income Category" = df$income_category,
-                     "FI Category" = df$fi_category,
-                     "Race" = df$race)
+                     "FI Category" = df$fi_category)
     
     target_var <- input$group_target
     df <- df %>% drop_na(grp, .data[[target_var]])
