@@ -163,8 +163,6 @@ food_data <- bind_rows(fa_pre, fa_post) %>%
 
 cat("✓ Datasets combined successfully!\n\n")
 
-glimpse(food_data)
-
 # Categorical variables converted to factors
 cat("Applying categorical → factor conversion for modeling...\n")
 
@@ -235,6 +233,34 @@ county_geo <- county_fips %>%
   select(fips, lon, lat) %>%
   distinct(fips, .keep_all = TRUE)
 
+
+# Get county FIPS codes (from maps package)
+county_fips <- maps::county.fips %>%
+  as_tibble() %>%
+  mutate(
+    fips = sprintf("%05d", fips),
+    polyname = as.character(polyname)
+  ) %>%
+  separate(polyname, c("state_map", "county_map"), sep = ",", remove = FALSE)
+
+# Get county centroids (using ggplot2::map_data, not maps::map_data)
+county_coords <- ggplot2::map_data("county") %>%
+  group_by(region, subregion) %>%
+  summarise(
+    lon = mean(long),
+    lat = mean(lat),
+    .groups = "drop"
+  )
+
+# Merge FIPS with coordinates
+county_geo <- county_fips %>%
+  left_join(
+    county_coords,
+    by = c("state_map" = "region", "county_map" = "subregion")
+  ) %>%
+  select(fips, lon, lat) %>%
+  distinct(fips, .keep_all = TRUE)
+
 # Add coordinates to food_data
 food_data <- food_data %>%
   left_join(county_geo, by = "fips")
@@ -267,6 +293,15 @@ if (sum(is.na(food_data$lon)) > 0) {
                   44.5, 41.0, 41.7, 34.0, 44.5, 39.3, 44.0, 37.5, 31.0, 
                   38.5, 47.5, 39.0, 43.0, 43.0)
   )
+  
+  food_data <- food_data %>%
+    left_join(state_centers, by = "state") %>%
+    mutate(
+      lon = coalesce(lon, state_lon),
+      lat = coalesce(lat, state_lat)
+    ) %>%
+    select(-state_lon, -state_lat)
+ 
   
   food_data <- food_data %>%
     left_join(state_centers, by = "state") %>%
