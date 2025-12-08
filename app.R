@@ -5,28 +5,8 @@
 # Load global environment (data + theme)
 source("global.R", local = TRUE)
 
-# Required packages not in global
 library(shiny)
 library(bslib)
-library(broom)  # regression output
-library(car)    # VIF
-
-# ==============================================================================
-# LOAD HELPERS
-# ==============================================================================
-
-# Core Shiny packages
-library(shiny)
-library(bslib)
-
-# Visualization packages
-library(leaflet)
-library(plotly)
-library(DT)
-
-# Analysis packages
-library(broom)
-library(car)
 
 cat("✓ All app packages loaded\n")
 
@@ -47,7 +27,7 @@ source("R/server_exploration.R")
 source("R/server_analysis.R")
 
 # ==============================================================================
-# UI DEFINITION  ✅ SINGLE HEADER / WORKING STYLE
+# UI DEFINITION SINGLE HEADER / WORKING STYLE
 # ==============================================================================
 
 ui <- fluidPage(

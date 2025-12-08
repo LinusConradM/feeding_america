@@ -18,7 +18,7 @@ ui_exploration <- tabPanel(
         
         h4("Filters", style = "margin-top: 0;"),
         
-        # State Selector (FIXED - explicit state list)
+        # State Selector
         selectInput(
           "state_filter",
           "Select State(s):",
@@ -34,7 +34,7 @@ ui_exploration <- tabPanel(
           multiple = TRUE
         ),
         
-        # County Selector (will populate based on state)
+        # County Selector
         selectInput(
           "county_filter",
           "Select County:",
@@ -85,7 +85,6 @@ ui_exploration <- tabPanel(
           selected = "Overall FI Rate"
         ),
         
-        # Update Map Button
         actionButton(
           "update_map",
           "Update Map",
@@ -106,40 +105,100 @@ ui_exploration <- tabPanel(
           id = "exploration_tabs",
           
           # ==================================================================
-          # TAB 1: MAP
+          # MAP TAB
           # ==================================================================
           tabPanel(
             "Map",
-            
-            # THIS IS WHERE THE MAP GOES!
             leaflet::leafletOutput("us_county_map", height = "700px")
           ),
           
           # ==================================================================
-          # TAB 2: TRENDS
+          # TRENDS TAB (WITH 7 SUB-TABS)
           # ==================================================================
           tabPanel(
             "Trends",
             
-            plotly::plotlyOutput("trends_plot", height = "600px")
+            tabsetPanel(
+              
+              tabPanel(
+                "State Trends",
+                tags$div(
+                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+                  "Note: All food insecurity estimates shown are modeled approximations."
+                ),
+                plotly::plotlyOutput("trend_state", height = "600px")
+              ),
+              
+              tabPanel(
+                "Racial Disparities",
+                tags$div(
+                  style = "color:#AA5500; font-size:12px; margin-bottom:10px;",
+                  "Caution: Race/ethnicity estimates have wide uncertainty."
+                ),
+                plotly::plotlyOutput("trend_race", height = "600px")
+              ),
+              
+              tabPanel(
+                "Child Food Insecurity",
+                tags$div(
+                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+                  "Note: Child food insecurity estimates are modeled values."
+                ),
+                plotly::plotlyOutput("trend_child", height = "600px")
+              ),
+              
+              tabPanel(
+                "Cost Burden",
+                tags$div(
+                  style = "color:#D95F0E; font-size:12px; margin-bottom:10px;",
+                  "Warning: Cost methodology changed in 2023."
+                ),
+                plotly::plotlyOutput("trend_cost", height = "600px")
+              ),
+              
+              tabPanel(
+                "Rural vs Urban",
+                tags$div(
+                  style = "color:#444444; font-size:12px; margin-bottom:10px;",
+                  "Rural–Urban Continuum Codes vary by state."
+                ),
+                plotly::plotlyOutput("trend_rural", height = "600px")
+              ),
+              
+              tabPanel(
+                "Regional Trends",
+                tags$div(
+                  style = "color:#4444AA; font-size:12px; margin-bottom:10px;",
+                  "Regional averages combine modeled county estimates."
+                ),
+                plotly::plotlyOutput("trend_region", height = "600px")
+              ),
+              
+              tabPanel(
+                "Inequality Gaps",
+                tags$div(
+                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+                  "Gap metrics should be interpreted cautiously."
+                ),
+                plotly::plotlyOutput("trend_gap", height = "600px")
+              )
+            )
           ),
           
           # ==================================================================
-          # TAB 3: SUMMARY TABLE
+          # SUMMARY TABLE TAB
           # ==================================================================
           tabPanel(
             "Summary Table",
-            
-            DT::DTOutput("summary_table")  # Use explicit namespace
+            DT::DTOutput("summary_table")
           ),
           
           # ==================================================================
-          # TAB 4: DATA VIEWER
+          # DATA VIEWER TAB
           # ==================================================================
           tabPanel(
             "Data Viewer",
-            
-            DT::DTOutput("data_viewer")  # Use explicit namespace
+            DT::DTOutput("data_viewer")
           )
         )
       )
