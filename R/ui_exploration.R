@@ -113,77 +113,77 @@ ui_exploration <- tabPanel(
           ),
           
           # ==================================================================
-          # TRENDS TAB (WITH 7 SUB-TABS)
-          # ==================================================================
-          tabPanel(
-            "Trends",
-            
-            tabsetPanel(
-              
-              tabPanel(
-                "State Trends",
-                tags$div(
-                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-                  "Note: All food insecurity estimates shown are modeled approximations."
-                ),
-                plotly::plotlyOutput("trend_state", height = "600px")
-              ),
-              
-              tabPanel(
-                "Racial Disparities",
-                tags$div(
-                  style = "color:#AA5500; font-size:12px; margin-bottom:10px;",
-                  "Caution: Race/ethnicity estimates have wide uncertainty."
-                ),
-                plotly::plotlyOutput("trend_race", height = "600px")
-              ),
-              
-              tabPanel(
-                "Child Food Insecurity",
-                tags$div(
-                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-                  "Note: Child food insecurity estimates are modeled values."
-                ),
-                plotly::plotlyOutput("trend_child", height = "600px")
-              ),
-              
-              tabPanel(
-                "Cost Burden",
-                tags$div(
-                  style = "color:#D95F0E; font-size:12px; margin-bottom:10px;",
-                  "Warning: Cost methodology changed in 2023."
-                ),
-                plotly::plotlyOutput("trend_cost", height = "600px")
-              ),
-              
-              tabPanel(
-                "Rural vs Urban",
-                tags$div(
-                  style = "color:#444444; font-size:12px; margin-bottom:10px;",
-                  "Rural–Urban Continuum Codes vary by state."
-                ),
-                plotly::plotlyOutput("trend_rural", height = "600px")
-              ),
-              
-              tabPanel(
-                "Regional Trends",
-                tags$div(
-                  style = "color:#4444AA; font-size:12px; margin-bottom:10px;",
-                  "Regional averages combine modeled county estimates."
-                ),
-                plotly::plotlyOutput("trend_region", height = "600px")
-              ),
-              
-              tabPanel(
-                "Inequality Gaps",
-                tags$div(
-                  style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
-                  "Gap metrics should be interpreted cautiously."
-                ),
-                plotly::plotlyOutput("trend_gap", height = "600px")
-              )
-            )
-          ),
+# TRENDS TAB (WITH 7 SUB-TABS)
+# ==================================================================
+tabPanel(
+  "Trends",
+  
+  tabsetPanel(
+    
+    tabPanel(
+      "State Trends",
+      tags$div(
+        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+        "Note: All food insecurity estimates shown are modeled approximations."
+      ),
+      plotOutput("trend_state", height = "600px")
+    ),
+    
+    tabPanel(
+      "Racial Disparities",
+      tags$div(
+        style = "color:#AA5500; font-size:12px; margin-bottom:10px;",
+        "Caution: Race/ethnicity estimates have wide uncertainty."
+      ),
+      plotOutput("trend_race", height = "600px")
+    ),
+    
+    tabPanel(
+      "Child Food Insecurity",
+      tags$div(
+        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+        "Note: Child food insecurity estimates are modeled values."
+      ),
+      plotOutput("trend_child", height = "600px")
+    ),
+    
+    tabPanel(
+      "Cost Burden",
+      tags$div(
+        style = "color:#D95F0E; font-size:12px; margin-bottom:10px;",
+        "Warning: Cost methodology changed in 2023."
+      ),
+      plotOutput("trend_cost", height = "600px")
+    ),
+    
+    tabPanel(
+      "Rural vs Urban",
+      tags$div(
+        style = "color:#444444; font-size:12px; margin-bottom:10px;",
+        "Rural–Urban Continuum Codes vary by state."
+      ),
+      plotOutput("trend_rural", height = "600px")
+    ),
+    
+    tabPanel(
+      "Regional Trends",
+      tags$div(
+        style = "color:#4444AA; font-size:12px; margin-bottom:10px;",
+        "Regional averages combine modeled county estimates."
+      ),
+      plotOutput("trend_region", height = "600px")
+    ),
+    
+    tabPanel(
+      "Inequality Gaps",
+      tags$div(
+        style = "color:#AA0000; font-size:12px; margin-bottom:10px;",
+        "Gap metrics should be interpreted cautiously."
+      ),
+      plotOutput("trend_gap", height = "600px")
+    )
+  )
+),
           
           # ==================================================================
           # SUMMARY TABLE TAB
