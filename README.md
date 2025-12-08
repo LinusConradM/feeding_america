@@ -1,177 +1,454 @@
 # Investigating U.S. Food Insecurity Through Data
 
-## Purpose of the App
-This interactive R Shiny dashboard analyzes and visualizes household food-insecurity patterns across U.S. states and demographic groups.  
-It links socioeconomic drivers income, poverty, education, and employment to food insecurity outcomes and program participation (e.g., SNAP, WIC).  
-The goal is to provide policymakers, researchers, and nonprofit practitioners with a transparent, data-driven tool to explore disparities and evaluate interventions that improve food affordability and access.
+## Overview
 
----
+An interactive R Shiny App analyzing household food insecurity patterns across U.S. counties, states, and demographic groups from 2009–2023. The application provides policymakers, researchers, and nonprofit practitioners with evidence-based insights into food insecurity disparities, socioeconomic drivers, and intervention impacts.
 
-## Group Members
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Features
+
+### Three Interactive Tabs
+
+**1. Overview Tab** - National summary statistics and KPI cards - Food insecurity definitions and methodology - Trend summaries and key takeaways - Data quality indicators
+
+**2. Exploration Tab** - Interactive choropleth maps with 15+ food insecurity indicators - Time series visualizations (2009–2023): - State-level trends - Racial/ethnic disparities - Child vs. overall food insecurity - Cost burden analysis - Rural vs. urban comparisons - Regional trends - Inequality gap analysis - Dynamic filtering by state, county, year, and time period - Summary tables and data viewer with export capabilities
+
+**3. Analysis Tab** - **7 Statistical Methods:** 1. Correlation Analysis (heatmaps and tables) 2. Linear Regression (with diagnostics) 3. Multinomial Logistic Regression (3+ category outcomes) 4. Decision Trees (classification with ROC/AUC for binary outcomes) 5. Principal Component Analysis (PCA) 6. K-Means Clustering 7. Group Comparisons (t-tests and ANOVA) - Interactive variable selection - Model diagnostics and interpretation guides - Downloadable results
+
+### Key Capabilities
+
+-   **Geographic Analysis:** County-level resolution across all 50 states + DC
+-   **Temporal Coverage:** 15 years of data (2009–2023)
+-   **Demographic Breakdowns:** Race/ethnicity, rural/urban, income categories
+-   **Auto-updating Visualizations:** Responsive filters with real-time updates
+-   **Professional Theme:** Custom ggplot2 theme applied globally
+-   **Tidyverse-Compliant Code:** All code follows tidyverse style guidelines
+
+------------------------------------------------------------------------
+
+## App Structure
+
+```         
+FoodInsecurityDashboard/
+├── app.R                           # Main app launcher
+├── global.R                        # Data loading, theme, packages
+├── data/
+│   ├── feeding_america(2009-2018).xlsx
+│   └── feeding_america(2019-2023).xlsx
+├── R/
+│   ├── ui_overview.R              # Overview tab UI
+│   ├── ui_exploration.R           # Exploration tab UI
+│   ├── ui_analysis.R              # Analysis tab UI
+│   ├── server_overview.R          # Overview tab server logic
+│   ├── server_exploration.R       # Exploration tab server logic
+│   └── server_analysis.R          # Analysis tab server logic
+├── www/
+│   └── AU-Logo-on-white-small.png # Logo assets
+└── README.md                       # This file
+```
+
+### Module Architecture
+
+The app uses a **modular design pattern** separating UI and server logic:
+
+-   **UI Modules:** Define layout, inputs, and output placeholders
+-   **Server Modules:** Handle reactive logic, data processing, and rendering
+-   **Global Environment:** Loads data once, sets theme, manages packages
+
+------------------------------------------------------------------------
+
+## Data Source
+
+**Primary Dataset:** Feeding America – Map the Meal Gap (2009–2023)\
+**URL:** [feedingamerica.org/research/map-the-meal-gap](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
+
+### Variables Included
+
+**Food Insecurity Metrics:** - Overall food insecurity rate - Child food insecurity rate - Number of food insecure persons (total and children) - Food insecurity by race/ethnicity (Black, Hispanic, White non-Hispanic)
+
+**Economic Indicators:** - Cost per meal - Weighted annual food budget shortfall - Median household income - Poverty rate - Unemployment rate
+
+**Demographic Variables:** - Population - Urban/rural classification (derived) - Education levels (% high school or less) - Census region and division - FNS (Food and Nutrition Service) region
+
+**Program Participation:** - SNAP participation rate - Eligibility thresholds
+
+### Geographic Coverage
+
+-   **Level:** County (3,100+ counties)
+-   **Temporal:** 2009–2023 (15 years)
+-   **Spatial:** All 50 states + Washington, D.C.
+
+### Data Processing
+
+The app performs comprehensive data harmonization:
+
+1.  **Schema Alignment:** Reconciles variable name changes across years
+2.  **FIPS Standardization:** 5-digit county codes for geographic joins
+3.  **Type Conversion:** Numeric, character, and factor variables properly typed
+4.  **Derived Variables:** Urban/rural categories, food insecurity categories, poverty/income/education categories
+5.  **Geographic Coordinates:** County centroids added for mapping
+6.  **Quality Checks:** Missing value reporting and validation
+
+**Methodological Note:** Feeding America revised estimation methods post-2020 due to COVID-19 impacts. Our harmonization ensures temporal continuity while documenting methodological changes.
+
+------------------------------------------------------------------------
+
+## Installation
+
+### Prerequisites
+
+-   **R:** Version 4.3 or higher
+-   **RStudio:** Recommended for development
+-   **Git:** For cloning repository
+
+### Required Packages
+
+The app automatically installs missing packages on first run:
+
+``` r
+# Core Shiny packages
+shiny, bslib
+
+# Tidyverse ecosystem
+tidyverse (includes dplyr, ggplot2, tidyr, readr, purrr, stringr, forcats)
+readxl, janitor
+
+# Visualization
+leaflet, leaflet.extras, plotly, DT
+
+# Mapping
+maps, scales
+
+# Statistical modeling
+nnet (multinomial regression)
+rpart, rpart.plot (decision trees)
+broom (model tidying)
+pROC (ROC analysis)
+```
+
+### Clone and Run
+
+``` bash
+# Clone repository
+git clone https://github.com/25F-DATA-413-613/gp-food-basket.git
+cd gp-food-basket
+
+# Open R/RStudio and run
+R
+> shiny::runApp()
+```
+
+**First Run:** The app will: 1. Check for missing packages and install them 2. Load and process \~47,000 county-year observations 3. Create derived variables and geographic coordinates 4. Set global ggplot2 theme 5. Launch in your default browser
+
+**Typical Load Time:** 10-15 seconds on first run, \<5 seconds on subsequent runs
+
+------------------------------------------------------------------------
+
+## Usage
+
+### Quick Start
+
+1.  **Launch the app** from RStudio or command line
+2.  **Navigate tabs** using the top navigation bar
+3.  **Apply filters** in the sidebar (state, year, indicators)
+4.  **Interact with visualizations** (hover, click, zoom)
+5.  **Run analyses** by selecting variables and clicking "Run" buttons
+
+### Example Workflows
+
+**Workflow 1: Explore State Trends** 1. Go to **Exploration** tab 2. Select **Trends** sub-tab 3. Choose **State Trends** 4. Use period slider to focus on specific years 5. Observe food insecurity trajectories by state
+
+**Workflow 2: Analyze Racial Disparities** 1. Go to **Exploration** tab → **Trends** → **Racial Disparities** 2. Compare Black, Hispanic, White, and Overall rates over time 3. Switch to **Inequality Gaps** to see disparity magnitude 4. Export summary table for further analysis
+
+**Workflow 3: Predict Food Insecurity Categories** 1. Go to **Analysis** tab 2. Select **Multinomial Logistic Regression** 3. Choose outcome: `fi_category` (Low, Moderate, High, Very High) 4. Select predictors: `poverty_rate`, `median_income`, `unemployment_rate` 5. Click **Run Multinomial Regression** 6. Review model summary, relative risk ratios, and classification accuracy
+
+**Workflow 4: Geographic Deep Dive** 1. Go to **Exploration** tab → **Map** 2. Select state (e.g., California) 3. Choose indicator (e.g., Child FI Rate) 4. Select year (e.g., 2023) 5. Map auto-zooms to state 6. Click counties for detailed popup information
+
+------------------------------------------------------------------------
+
+## Statistical Methods
+
+### 1. Correlation Analysis
+
+-   **Method:** Pearson or Spearman correlation
+-   **Output:** Heatmap, correlation table, interpretation
+-   **Use Case:** Identify relationships between multiple variables
+
+### 2. Linear Regression
+
+-   **Method:** Ordinary Least Squares (OLS)
+-   **Outputs:**
+    -   Model summary (coefficients, R², p-values)
+    -   Diagnostic plots (residuals, Q-Q, scale-location, leverage)
+    -   Predictions vs. actual scatter plot
+    -   Coefficient plot with confidence intervals
+-   **Use Case:** Predict continuous outcomes (e.g., food insecurity rate)
+
+### 3. Multinomial Logistic Regression
+
+-   **Method:** Multinomial logit via `nnet::multinom()`
+-   **Requirements:** Outcome with 3+ categories
+-   **Outputs:**
+    -   Model summary with log-odds coefficients
+    -   Relative Risk Ratios (exponentiated coefficients)
+    -   Classification accuracy
+    -   Interpretation guide
+-   **Use Case:** Predict categorical outcomes (e.g., FI category, income level)
+
+### 4. Decision Trees
+
+-   **Method:** CART via `rpart`
+-   **Outputs:**
+    -   Tree visualization
+    -   Variable importance plot
+    -   Confusion matrix (classification)
+    -   ROC curve and AUC (binary classification only)
+    -   Model data summary
+-   **Use Case:** Non-linear classification/regression, interpretable rules
+
+### 5. Principal Component Analysis (PCA)
+
+-   **Method:** Dimensionality reduction
+-   **Outputs:**
+    -   Scree plot (variance explained)
+    -   Biplot (PC1 vs PC2 with variable loadings)
+    -   Loadings table
+    -   Interpretation of major components
+-   **Use Case:** Reduce multicollinearity, identify data structure
+
+### 6. K-Means Clustering
+
+-   **Method:** Unsupervised clustering
+-   **Outputs:**
+    -   Cluster visualization (PCA projection)
+    -   Cluster summary statistics
+    -   Interpretation by risk profile
+-   **Use Case:** Segment counties by food insecurity characteristics
+
+### 7. Group Comparison
+
+-   **Methods:**
+    -   Two groups: Independent t-test
+    -   Three+ groups: One-way ANOVA
+-   **Outputs:**
+    -   Boxplots and violin plots
+    -   Statistical test results
+    -   Group means table
+    -   Effect size estimates
+-   **Use Case:** Compare food insecurity across regions, categories
+
+------------------------------------------------------------------------
+
+## Team
 
 | Name | Course | Role | GitHub |
-|------|---------|------|---------|
-| **Conrad Linus Muhirwe** | DATA-613 | Repository management, statistical modeling | [@LinusConradM](https://github.com/LinusConradM) |
-| **Sharon Wanyana** | DATA-613 | Correlation and regression analysis, hypothesis testing | [@SullenSchemer](https://github.com/SullenSchemer) |
-| **Ryann Tompkins** | DATA-613 | Literature & ethics review, exploratory visualization & mapping | [@ryanntompkins](https://github.com/ryanntompkins) |
-| **Alex Arevalo** | DATA-413 | Data acquisition, cleaning, and UI/UX design | [@banditox79](https://github.com/banditox79) |
+|------------------|-------------------|------------------|-------------------|
+| **Conrad Linus Muhirwe** | DATA-613 | Repository management, statistical modeling | [\@LinusConradM](https://github.com/LinusConradM) |
+| **Sharon Wanyana** | DATA-613 | Correlation/regression analysis, hypothesis testing | [\@SullenSchemer](https://github.com/SullenSchemer) |
+| **Ryann Tompkins** | DATA-613 | Literature review, ethics, exploratory visualization | [\@ryanntompkins](https://github.com/ryanntompkins) |
+| **Alex Arevalo** | DATA-413 | Data acquisition, cleaning, UI/UX design | [\@banditox79](https://github.com/banditox79) |
 
-**Instructor:** Professor Richard Ressler  
-**Course:** DATA-613: Data Science Practicum (Fall 2025)  
-**Report Date:** November 11, 2025  
+**Instructor:** Professor Richard Ressler\
+**Course:** DATA-613: Data Science Practicum (Fall 2025)\
+**Institution:** American University, College of Arts & Sciences\
+**Report Date:** December 8, 2025
 
----
+------------------------------------------------------------------------
+
+## Technical Details
+
+### Code Quality
+
+**Tidyverse Style Compliance:** All R code follows the [tidyverse style guide](https://style.tidyverse.org/): - Named function arguments - Proper spacing (after commas, around operators) - Pipes broken across lines - Consistent indentation (2 spaces) - Lines under 80 characters - `case_when()` instead of nested `ifelse()`
+
+**Code Organization:** - Modular structure (separate UI/server files) - Clear section headers with comment blocks - Descriptive variable names (snake_case) - Comprehensive inline documentation
+
+### Global Theme
+
+All ggplot2 visualizations use a custom theme (`bs_theme`) set in `global.R`:
+
+``` r
+bs_theme <- theme(
+  text = element_text(family = "Arial", size = 14, color = "black"),
+  plot.title = element_text(hjust = 0.5, size = 20, face = "bold"),
+  axis.title = element_text(size = 16, face = "bold"),
+  axis.text = element_text(size = 14, face = "bold"),
+  legend.title = element_text(size = 14, face = "bold"),
+  panel.grid.major = element_line(color = "grey85"),
+  panel.grid.minor = element_blank()
+)
+```
+
+### Performance Optimizations
+
+-   **Reactive Data:** Filtered data updates automatically with input changes
+-   **Efficient Rendering:** Plots only re-render when dependencies change
+-   **Lazy Loading:** Modules load on-demand
+-   **Data Caching:** County coordinates calculated once in global environment
+
+### Browser Compatibility
+
+Tested on: - Chrome 120+ - Firefox 121+ - Safari 17+ - Edge 120+
+
+------------------------------------------------------------------------
+
+## Ethics & Reproducibility
+
+### Ethical Guidelines
+
+We adhere to the **American Statistical Association's Ethical Guidelines for Statistical Practice (2022)**:
+
+1.  **Data Privacy:** All data are public, de-identified, and aggregated
+2.  **Transparency:** Open-source code with version control
+3.  **Accessibility:** Neutral color palettes, clear labels, alt text ready
+4.  **Honesty:** Methodological limitations documented
+5.  **Responsibility:** Results contextualized with appropriate caveats
+
+### Data Ethics
+
+-   **No Individual-Level Data:** All metrics are county aggregates
+-   **Public Domain:** Feeding America data are freely available
+-   **Appropriate Use:** Tool designed for policy analysis, not surveillance
+-   **Equity Focus:** Explicit attention to racial/ethnic disparities
+
+### Reproducibility
+
+**Version Control:** - Full Git history with descriptive commit messages - Tagged releases for major milestones - Branch-based development workflow
+
+**Documentation:** - Inline code comments - README with installation instructions - Data dictionary (in progress) - Session info capture (`sessionInfo()`)
+
+**Environment:**
+
+``` r
+# Capture environment details
+writeLines(capture.output(sessionInfo()), "session_info.txt")
+```
+
+------------------------------------------------------------------------
 
 ## Project Context
 
-Food insecurity the economic inability to consistently afford adequate food disproportionately affects low-income households, racial and ethnic minorities, and families with children.  
-It reflects broader structural inequities including income volatility, housing costs, and access to education and employment.
+Food insecurity—the economic inability to consistently afford adequate food— affects **44 million Americans** (13.5% of households, USDA 2023). It disproportionately impacts:
 
-This project:
-- Quantifies food insecurity prevalence and geographic distribution across states and demographic groups.  
-- Analyzes relationships with socioeconomic factors (poverty, unemployment, education, income).  
-- Visualizes insights through a Shiny dashboard supporting evidence-based policymaking.  
+-   **Low-income households:** 29.1% food insecure
+-   **Black households:** 22.4% food insecure
+-   **Hispanic households:** 20.8% food insecure
+-   **Households with children:** 17.9% food insecure
 
-The app enables exploration of trends, disparities, and intervention impacts to guide more equitable food policy decisions.
+### Policy Relevance
 
----
+This dashboard supports: - **Targeted Interventions:** Identify high-need counties - **Program Evaluation:** Assess SNAP and WIC impact - **Equity Analysis:** Track racial/ethnic disparities - **Resource Allocation:** Guide funding decisions - **Academic Research:** Enable hypothesis testing and modeling
 
-## Key Elements of the App
-
-1. **Overview Tab** – National summary statistics, KPIs, definitions, and trend summaries.  
-2. **Exploration Tab** – Interactive choropleth maps, line charts, and demographic comparisons.  
-3. **Analysis Tab** – Correlation matrices, regression modeling, and group-comparison tests.  
-4. **Data Table (Planned)** – Interactive filtering and export tools using `{DT}`.  
-5. **Ethics & Reproducibility** – Uses only public, de-identified data consistent with ASA ethical guidelines.
-
----
-
-## Data Source (Updated & Corrected)
-
-**Primary Dataset:**  
-**Feeding America – Map the Meal Gap (2009–2023)**  
-[https://www.feedingamerica.org/research/map-the-meal-gap/by-county](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
-
-## What It Measures
-- Food insecurity rate  
-- Child food insecurity rate  
-- Number of food insecure persons and children  
-- Cost per meal  
-- Food budget shortfall  
-- Race/ethnicity-based food insecurity (Black, Hispanic, White non-Hispanic)
-
-## Geographic Levels
-- County, State, and Congressional District  
-
-## Methodological Note
-Feeding America adjusted its estimation methods post-2020 due to COVID-19 impacts.  
-We harmonized variables across 15 years (2009–2023) and built a **dual-dataset strategy**:
-- **Longitudinal Trends (2009–2023)** – Core variables available all years  
-- **Equity Analysis (2019–2023)** – Includes demographic breakdowns  
-
-**Progress:** ~75% complete  
-- FIPS codes standardized  
-- Variables harmonized across schema changes  
-- Missing values documented and validated  
-
----
-
-## Literature Context
-
-- **National Trends:** Food insecurity affected **13.5% of U.S. households** in 2023 (USDA ERS, 2024).  
-- **Geographic Disparities:** Rural and southern counties remain the most affected (Feeding America, 2024).  
-- **Socioeconomic Determinants:** Income, race/ethnicity, family structure, and education strongly predict food insecurity (Gundersen & Ziliak, 2015).  
-- **Policy Impact:** SNAP participation reduces household food insecurity by ~6 percentage points (Gundersen, Kreider, & Pepper, 2017).  
-
----
-
-## Application Design Overview
-
-| Tab | Description |
-|-----|--------------|
-| **Overview** | National KPIs and summary statistics |
-| **Exploration** | Interactive maps, trends, and subgroup comparisons |
-| **Analysis** | Regression and correlation tools with diagnostic plots |
-| **Data Table (Planned)** | Search, filter, and export functions via `{DT}` |
-
-## User Options
-- **Geographic Filters:** State/region and county dropdowns  
-- **Temporal Sliders:** Year range selection (2009–2023)  
-- **Variable Selection:** Income, poverty, education, unemployment  
-- **Demographic Focus:** Race/ethnicity, households with children, rural vs. urban  
-
----
-
-## Statistical Modeling Capabilities
-
-- **DATA-413 Track:** Correlation (Pearson/Spearman), multiple linear regression, diagnostic plots.  
-- **DATA-613 Track:** Classification models (predicting high/low food insecurity) and model comparison tools.
-
----
-
-## Ethics and Reproducibility
-
-We adhere to the **American Statistical Association’s Ethical Guidelines (2023)**:
-- All data are **public and de-identified**.  
-- Transparent R scripts with version control and commit documentation.  
-- Neutral and accessible visualization choices.  
-- Repository structure supports full reproducibility.
+------------------------------------------------------------------------
 
 ## References
-**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** 
-*Household Food Security in the United States in 2022.* 
-U.S. Department of Agriculture, Economic Research Service, ERR-325.
+
+**Primary Data Source:**
+
+**Feeding America (2024).** *Map the Meal Gap 2024: Overall Food Insecurity in the United States.* Retrieved from https://www.feedingamerica.org/research/map-the-meal-gap/by-county
+
+**Government Statistics:**
+
+**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** *Household Food Security in the United States in 2022.* U.S. Department of Agriculture, Economic Research Service, ERR-325.\
 https://www.ers.usda.gov/publications/pub-details/?pubid=107703
 
-**U.S. Department of Agriculture, Economic Research Service (2024).** 
-*Food Security in the U.S.*
+**U.S. Department of Agriculture, Economic Research Service (2024).** *Food Security in the U.S.* Retrieved from\
 https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u-s/
 
-**Feeding America (2024).** 
-*Map the Meal Gap 2024: Overall Food Insecurity in the United States.* 
-https://www.feedingamerica.org/research/map-the-meal-gap/by-county
+**Academic Literature:**
 
-**Gundersen, C., & Ziliak, J. P. (2015).** 
-*Food Insecurity and Health Outcomes.* 
-Health Affairs, 34(11), 1830-1839. https://doi.org/10.1377/hlthaff.2015.0645
+**Gundersen, C., & Ziliak, J. P. (2015).** *Food Insecurity and Health Outcomes.* Health Affairs, 34(11), 1830-1839.\
+https://doi.org/10.1377/hlthaff.2015.0645
 
-**Gundersen, C., Kreider, B., & Pepper, J. (2017).** 
-*Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* 
-RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130. https://doi.org/10.7758/rsf.2017.3.2.06
+**Gundersen, C., Kreider, B., & Pepper, J. (2017).** *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.\
+https://doi.org/10.7758/rsf.2017.3.2.06
 
-**For Policy Analysis:**
-- Gregory, C. A., & Coleman-Jensen, A. (2017). *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
+**Gregory, C. A., & Coleman-Jensen, A. (2017).** *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
 
-**For Geographic Analysis:**
-- Gundersen, C., Dewey, A., Crumbaugh, A., Kato, M., & Engelhard, E. (2024). *Map the Meal Gap 2024: An Analysis of County and Congressional District Food Insecurity and County Food Cost in the United States.* Feeding America.
+**Gundersen, C., Dewey, A., Crumbaugh, A., Kato, M., & Engelhard, E. (2024).** *Map the Meal Gap 2024: An Analysis of County and Congressional District Food Insecurity and County Food Cost in the United States.* Feeding America.
 
-**For Racial Equity:**
-- Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020). *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
+**Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020).** *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
 
----
+------------------------------------------------------------------------
 
+## Future Enhancements
 
-## Reproducibility – Run Locally
+**Planned Features:** - \[ \] Download buttons for all plots and tables - \[ \] PDF report generation - \[ \] Advanced filtering with AND/OR logic - \[ \] Time series forecasting models - \[ \] Spatial autocorrelation analysis - \[ \] Mobile-responsive design improvements - \[ \] Accessibility audit (WCAG 2.1 AA compliance) - \[ \] Multi-language support (Spanish)
 
-To reproduce the app locally:
+**Technical Debt:** - \[ \] Unit tests for server functions - \[ \] Integration tests for UI interactions - \[ \] Performance profiling and optimization - \[ \] Database backend for faster loading - \[ \] Docker containerization
 
-```bash
-git clone https://github.com/LinusConradM/FoodInsecurityDashboard.git
-cd FoodInsecurityDashboard
+------------------------------------------------------------------------
+
+## Contributing
+
+We welcome contributions! Please:
+
+1.  Fork the repository
+2.  Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Follow tidyverse style guidelines
+4.  Add tests for new features
+5.  Commit with descriptive messages (`git commit -m 'Add AmazingFeature'`)
+6.  Push to branch (`git push origin feature/AmazingFeature`)
+7.  Open a Pull Request
+
+------------------------------------------------------------------------
+
+## Troubleshooting
+
+**Issue:** App won't load data\
+**Solution:** Ensure Excel files are in `data/` directory with exact names: - `feeding_america(2009-2018).xlsx` - `feeding_america(2019-2023).xlsx`
+
+**Issue:** Missing packages error\
+**Solution:** Run `install.packages("package_name")` or let global.R auto-install
+
+**Issue:** Map not rendering\
+**Solution:** Check internet connection (required for Leaflet tiles)
+
+**Issue:** Slow performance\
+**Solution:** Filter to specific states/years to reduce data volume
+
+**Issue:** Plots not using custom theme\
+**Solution:** Verify `global.R` runs successfully and `theme_set(bs_theme)` executes
+
+------------------------------------------------------------------------
+
+## Citation
+
+If you use this dashboard in research or publications, please cite:
+
+```         
+Muhirwe, C. L., Wanyana, S., Tompkins, R., & Arevalo, A. (2024). 
+Investigating U.S. Food Insecurity Through Data: An Interactive R Shiny Dashboard. 
+American University. https://github.com/LinusConradM/FoodInsecurityDashboard
 ```
 
----
+------------------------------------------------------------------------
 
 ## License
-This work is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 
-You are free to:
+This work is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
 
-- Share — copy and redistribute the material in any medium or format.
-- Adapt — remix, transform, and build upon the material for any purpose, even commercially.
+You are free to: - **Share** — Copy and redistribute the material in any medium or format - **Adapt** — Remix, transform, and build upon the material for any purpose, even commercially
 
-Under the following terms:
+Under the following terms: - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 
-- Attribution — You must give appropriate credit and indicate if changes were made.
+Full license text: https://creativecommons.org/licenses/by/4.0/
 
-Link to full license text: `https://creativecommons.org/licenses/by/4.0/`
+------------------------------------------------------------------------
+
+## Acknowledgments
+
+-   **Feeding America** for providing comprehensive county-level food insecurity data
+-   **USDA Economic Research Service** for national food security statistics
+-   **American University** for institutional support
+-   **Professor Richard Ressler** for course guidance and feedback
+-   **R Shiny Community** for extensive documentation and examples
+
+------------------------------------------------------------------------
+
+**Last Updated:** December 8, 2025\
+**Version:** 1.0.0\
+**Status:** Production Ready ✅

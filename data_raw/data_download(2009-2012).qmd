@@ -1,0 +1,113 @@
+---
+title: "Untitled"
+format: html
+---
+
+Call my Api Key
+
+```{r}
+# Load your Census API key from environment variable
+
+api_key <- Sys.getenv("CENSUS_API_KEY")
+```
+
+Load libraries and define helper function
+
+```{r}
+#| label: load libraries
+
+library(httr)
+library(jsonlite)
+library(dplyr)
+```
+
+
+
+Setting helper function to call Census API
+```{r}
+#| label: census data extraction
+
+census_call <- function(vars, year) {
+  url <- paste0(
+    "https://api.census.gov/data/", year, "/acs/acs5?get=",
+    paste(vars, collapse = ","),
+    "&for=county:*&key=", api_key
+  )
+
+  resp <- httr::GET(url)
+  text <- rawToChar(resp$content)
+
+  # Detect HTML error (invalid variable or wrong year)
+  if (grepl("<html", text)) {
+    stop("\nCensus API error for year ", year, 
+         "\nURL:\n", url,
+         "\nMost likely: variable does NOT exist for this year.")
+  }
+
+  dat <- jsonlite::fromJSON(text)
+  df <- as.data.frame(dat[-1, ], stringsAsFactors = FALSE)
+  names(df) <- dat[1, ]
+  df$year <- year
+  return(df)
+}
+```
+
+```{r}
+#| label: main data extraction and processing
+pop_vars <- c("NAME", "B01001_001E")
+inc_vars <- c("NAME", "B19013_001E")
+pov_vars <- c("NAME", "B17001_002E", "B17001_001E")
+race_vars <- c("NAME","B02001_001E","B02001_002E","B02001_003E","B02001_005E")
+hisp_vars <- c("NAME","B03003_003E","B03003_001E")
+snap_vars <- c("NAME","B22003_002E","B22003_001E")
+rent_vars <- c("NAME","B25070_001E","B25070_007E","B25070_008E","B25070_009E","B25070_010E","B25070_011E")
+unemp_vars <- c("NAME","B23025_005E","B23025_003E")
+female_vars <- c("NAME","B11005_016E","B11005_001E")
+novehicle_vars <- c("NAME","B08201_002E","B08201_001E")
+edu_vars <- c("NAME",paste0("B15003_", sprintf("%03dE", 2:16)),"B15003_001E")
+gini_vars <- c("NAME","B19083_001E")
+```
+
+```{r}
+years <- 2009:2012
+all_years_list <- list()
+
+```
+
+
+```{r}
+# label: data merging and final processing
+
+for (yr in years) {
+  cat("Pulling year:", yr, "\n")
+
+  df_pop      <- census_call(pop_vars, yr)
+  df_inc      <- census_call(inc_vars, yr)
+  df_pov      <- census_call(pov_vars, yr)
+  df_race     <- census_call(race_vars, yr)
+  df_hisp     <- census_call(hisp_vars, yr)
+  df_snap     <- census_call(snap_vars, yr)
+  df_rent     <- census_call(rent_vars, yr)
+  df_unemp    <- census_call(unemp_vars, yr)
+  df_female   <- census_call(female_vars, yr)
+  df_vehicle  <- census_call(novehicle_vars, yr)
+  df_edu      <- census_call(edu_vars, yr)
+  df_gini     <- census_call(gini_vars, yr)
+
+  df_year <- df_pop %>%
+    left_join(df_inc,     by = c("NAME","state","county","year")) %>%
+    left_join(df_pov,     by = c("NAME","state","county","year")) %>%
+    left_join(df_race,    by = c("NAME","state","county","year")) %>%
+    left_join(df_hisp,    by = c("NAME","state","county","year")) %>%
+    left_join(df_snap,    by = c("NAME","state","county","year")) %>%
+    left_join(df_rent,    by = c("NAME","state","county","year")) %>%
+    left_join(df_unemp,   by = c("NAME","state","county","year")) %>%
+    left_join(df_female,  by = c("NAME","state","county","year")) %>%
+    left_join(df_vehicle, by = c("NAME","state","county","year")) %>%
+    left_join(df_edu,     by = c("NAME","state","county","year")) %>%
+    left_join(df_gini,    by = c("NAME","state","county","year"))
+
+  all_years_list[[as.character(yr)]] <- df_year
+}
+
+```
