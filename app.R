@@ -1,9 +1,22 @@
 # ==============================================================================
-# FOOD INSECURITY SHINY APP
+# FOOD INSECURITY SHINY APP - DIAGNOSTIC VERSION
 # ==============================================================================
 
+cat("\n========================================\n")
+cat("STARTING APP\n")
+cat("========================================\n")
+
 # Load global environment (data + theme)
+cat("Sourcing global.R...\n")
 source("global.R", local = TRUE)
+cat("✓ global.R loaded\n")
+
+# Check if food_data exists
+if (exists("food_data")) {
+  cat("✓ food_data exists:", nrow(food_data), "rows\n")
+} else {
+  cat("✗ food_data NOT FOUND!\n")
+}
 
 library(shiny)
 library(bslib)
@@ -14,25 +27,30 @@ cat("✓ All app packages loaded\n")
 # LOAD UI MODULES
 # ==============================================================================
 
+cat("Loading UI modules...\n")
 source("R/ui_overview.R")
 source("R/ui_exploration.R")
 source("R/ui_analysis.R")
+cat("✓ UI modules loaded\n")
 
 # ==============================================================================
 # LOAD SERVER MODULES
 # ==============================================================================
 
+cat("Loading server modules...\n")
 source("R/server_overview.R")
 source("R/server_exploration.R")
 source("R/server_analysis.R")
+cat("✓ Server modules loaded\n")
+
+# Test if server_analysis exists
+cat("server_analysis function exists:", exists("server_analysis"), "\n")
 
 # ==============================================================================
-# UI DEFINITION SINGLE HEADER / WORKING STYLE
+# UI DEFINITION
 # ==============================================================================
 
 ui <- fluidPage(
-
-  # Custom CSS (KPI cards, typography, shadows)
   tags$head(
     tags$style(HTML("
       .app-header {
@@ -77,15 +95,10 @@ ui <- fluidPage(
     title = div(
       style = "display:flex; align-items:center; gap:12px;",
       if (file.exists("www/AU-Logo-on-white-small.png")) {
-        tags$img(
-          src = "AU-Logo-on-white-small.png",
-          height = "32px"
-        )
+        tags$img(src = "AU-Logo-on-white-small.png", height = "32px")
       },
-      span(
-        "Investigating U.S. Food Insecurity Through Data",
-        style = "font-weight:700; font-size:1.4rem; color:white;"
-      )
+      span("Investigating U.S. Food Insecurity Through Data",
+           style = "font-weight:700; font-size:1.4rem; color:white;")
     ),
 
     theme = bs_theme(
@@ -114,19 +127,40 @@ ui <- fluidPage(
 # ==============================================================================
 
 server <- function(input, output, session) {
+  
+  cat("\n========================================\n")
+  cat("SERVER FUNCTION CALLED\n")
+  cat("========================================\n")
 
   # Data already prepared in global.R
   data <- reactive({
+    cat("Creating data reactive\n")
     food_data
   })
+  
+  # Test data reactive
+  cat("Testing data reactive...\n")
+  test_data <- isolate(data())
+  cat("Data has", nrow(test_data), "rows\n")
 
+  cat("\nCalling server modules...\n")
   server_overview(input, output, session, data)
+  cat("✓ server_overview called\n")
+  
   server_exploration(input, output, session, data)
+  cat("✓ server_exploration called\n")
+  
   server_analysis(input, output, session, data)
+  cat("✓ server_analysis called\n")
+  
+  cat("\n========================================\n")
+  cat("SERVER INITIALIZATION COMPLETE\n")
+  cat("========================================\n\n")
 }
 
 # ==============================================================================
 # RUN APP
 # ==============================================================================
 
+cat("\nStarting Shiny app...\n\n")
 shinyApp(ui, server)
