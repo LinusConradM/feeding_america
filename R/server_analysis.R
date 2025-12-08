@@ -1,90 +1,34 @@
 # ==============================================================================
 # SERVER: ANALYSIS MODULE
 # ==============================================================================
-
 server_analysis <- function(input, output, session, data) {
-
-  data <- if (is.reactive(data)) data else reactive(data)
-
+  
   # ============================================================================
-  # MULTINOMIAL UI
+  # REACTIVE: Get numeric and Categorical variables
   # ============================================================================
-  output$multinomial_ui <- renderUI({
-    
-    df <- data()
-    
-    # Get valid targets (factors with 3+ levels)
-    valid_targets <- names(df)[
-      sapply(df, function(x) is.factor(x) && nlevels(x) >= 3)
-    ]
-    
-    # Get all potential predictors
-    all_predictors <- names(df)[
-      sapply(df, function(x) is.numeric(x) || is.factor(x))
-    ]
-
-    tagList(
-      h4("Multinomial Logistic Regression"),
-
-      selectizeInput(
-        "multi_target",
-        "Categorical Outcome (3+ levels):",
-        choices = sort(valid_targets),
-        selected = NULL
-      ),
-
-      selectizeInput(
-        "multi_predictors",
-        "Predictor Variables:",
-        choices = sort(all_predictors),
-        multiple = TRUE,
-        selected = NULL
-      ),
-
-      actionButton(
-        "run_multinomial",
-        "Run Multinomial Logistic Regression",
-        class = "btn-primary btn-block"
-      )
-    )
-  })
-
-  outputOptions(output, "multinomial_ui", suspendWhenHidden = FALSE)
-
-  # Update predictors when target changes
-  observeEvent(input$multi_target, {
-    req(input$multi_target, data())
-    
-    df <- data()
-    predictors <- names(df)[
-      sapply(df, function(x) is.numeric(x) || is.factor(x))
-    ]
-    
-    updateSelectizeInput(
-      session,
-      "multi_predictors",
-      choices = setdiff(sort(predictors), input$multi_target)
-    )
-  })
-
-  # ============================================================================
-  # REACTIVE: Variable Detection
-  # ============================================================================
+  
   numeric_vars <- reactive({
-    data() %>% select(where(is.numeric)) %>% names() %>% sort()
+    df <- data()
+    df %>% select(where(is.numeric)) %>% names() %>% sort()
   })
 
   categorical_vars <- reactive({
-    data() %>%
-      select(where(~ is.factor(.) || is.character(.))) %>%
-      names() %>%
-      sort()
+  df <- data()
+  df %>%
+    select(where(~ is.character(.) || is.factor(.))) %>%
+    names() %>%
+    sort()
   })
+
+  # ============================================================================
+  # REACTIVE: Decision tree target / predictor choices
+  # ============================================================================
 
   tree_target_choices <- reactive({
     sort(unique(c(numeric_vars(), categorical_vars())))
   })
 
+  
   # ============================================================================
   # POPULATE DROPDOWNS
   # ============================================================================
@@ -105,48 +49,59 @@ server_analysis <- function(input, output, session, data) {
                       selected = "overall_food_insecurity_rate")
   })
 
-  observe({
-    updateSelectInput(
-      session,
-      "tree_target",
-      choices  = tree_target_choices(),
-      selected = "overall_food_insecurity_rate"
-    )
-  })
+# ============================================================================
+# DECISION TREE DROPDOWNS ✅ FIXED
+# ============================================================================
+
+observe({
+  updateSelectInput(
+    session,
+    "tree_target",
+    choices  = tree_target_choices(),
+    selected = "overall_food_insecurity_rate"
+  )
+})
+
+observe({
+  req(input$tree_target)
+  updateSelectInput(
+    session,
+    "tree_predictors",
+    choices = setdiff(tree_target_choices(), input$tree_target)
+  )
+})
+
+
+
+
+  # Update PCA variable selector
+observe({
+  updateSelectInput(
+    session,
+    "pca_vars",
+    choices = numeric_vars()
+  )
+})
+
 
   observe({
-    req(input$tree_target)
-    updateSelectInput(
-      session,
-      "tree_predictors",
-      choices = setdiff(tree_target_choices(), input$tree_target)
-    )
-  })
-
-  observe({
-    updateSelectInput(
-      session,
-      "pca_vars",
-      choices = numeric_vars()
-    )
-  })
-
-  observe({
-    updateSelectInput(
-      session,
-      "kmeans_vars",
-      choices = numeric_vars()
-    )
-  })
+  updateSelectInput(
+    session,
+    "kmeans_vars",
+    choices = numeric_vars()
+  )
+})
   
   # ============================================================================
-  # CORRELATION ANALYSIS  
+  # CORRELATION ANALYSIS  ✅ RESTORED IN FULL
   # ============================================================================
   
   observeEvent(input$run_correlation, {
+    
     req(input$corr_vars, length(input$corr_vars) >= 2)
     
     df <- data() %>% select(all_of(input$corr_vars)) %>% drop_na()
+    
     corr_matrix <- cor(df, use = "pairwise.complete.obs")
     
     output$corr_plot <- renderPlot({
@@ -173,10 +128,11 @@ server_analysis <- function(input, output, session, data) {
   })
   
   # ============================================================================
-  # REGRESSION ANALYSIS 
+  # REGRESSION ANALYSIS ✅ RESTORED IN FULL
   # ============================================================================
   
   observeEvent(input$run_regression, {
+    
     req(input$reg_dependent, input$reg_independent)
     
     df <- data() %>%
@@ -212,436 +168,608 @@ server_analysis <- function(input, output, session, data) {
     })
   })
 
-  # ============================================================================
-  # MULTINOMIAL LOGISTIC REGRESSION
-  # ============================================================================
+# ============================================================================
+# DECISION TREE ANALYSIS
+# ============================================================================
 
-  observeEvent(input$run_multinomial, {
-    req(input$multi_target)
-    req(input$multi_predictors)
-    req(length(input$multi_predictors) >= 1)
-    req(data())
+# Store fitted decision tree model
+tree_model <- reactiveVal(NULL)
 
-    df <- data()
-    vars <- c(input$multi_target, input$multi_predictors)
-    md <- df %>% select(all_of(vars)) %>% drop_na()
+# Store tree training data (needed for interpretation)
+tree_data <- reactiveVal(NULL)
 
-    if (nrow(md) < 30) {
-      output$multi_interpretation <- renderUI({
-        HTML("<p style='color:red;'>Not enough complete cases to fit the multinomial model.</p>")
-      })
-      return()
-    }
 
-    md[[input$multi_target]] <- droplevels(factor(md[[input$multi_target]]))
+# -------------------------------------------------
+# ✅ Reactive flag: is the decision tree BINARY?
+# -------------------------------------------------
+is_tree_binary <- reactive({
+  req(tree_data(), input$tree_target)
 
-    if (nlevels(md[[input$multi_target]]) < 3) {
-      output$multi_interpretation <- renderUI({
-        HTML("<p style='color:red;'>Outcome must have at least 3 categories.</p>")
-      })
-      return()
-    }
+  target <- tree_data()[[input$tree_target]]
 
-    model <- nnet::multinom(
-      as.formula(
-        paste(input$multi_target, "~",
-              paste(input$multi_predictors, collapse = " + "))
-      ),
-      data  = md,
-      trace = FALSE
+  is.factor(target) && length(levels(target)) == 2
+})
+
+# Expose to UI (for conditionalPanel)
+output$is_tree_binary <- reactive({
+  is_tree_binary()
+})
+
+outputOptions(output, "is_tree_binary", suspendWhenHidden = FALSE)
+  
+
+  
+observeEvent(input$run_tree, {
+  
+  req(input$tree_target)
+  req(input$tree_predictors)
+  req(length(input$tree_predictors) >= 1)
+  
+  df <- data()
+
+
+  
+  # -------------------------
+# Prepare data
+# -------------------------
+tree_vars <- c(input$tree_target, input$tree_predictors)
+
+td <- df %>%
+  select(all_of(tree_vars)) %>%
+  drop_na()
+
+tree_data(td)
+
+
+# -------------------------
+# SAFETY CHECK ✅ FIXED
+# -------------------------
+if (
+  nrow(td) == 0 ||
+  length(unique(td[[input$tree_target]])) < 2
+) {
+  output$tree_interpretation <- renderUI({
+    HTML(
+      "<p style='color:red;'>
+      Selected target variable has insufficient non-missing
+      or unique values to build a decision tree.
+      </p>"
+    )
+  })
+  return()
+}
+
+# -------------------------
+# Identify model type
+# -------------------------
+target <- td[[input$tree_target]]
+
+is_binary_numeric <- is.numeric(target) && all(unique(target) %in% c(0, 1))
+is_categorical    <- is.factor(target) || is.character(target)
+is_classification <- is_binary_numeric || is_categorical
+
+# ENSURE proper classification target
+if (is_classification && !is.factor(td[[input$tree_target]])) {
+  td[[input$tree_target]] <- factor(td[[input$tree_target]])
+}
+
+
+  
+  # Build formula
+  formula_str <- paste(input$tree_target, "~",
+                       paste(input$tree_predictors, collapse = " + "))
+  tree_formula <- as.formula(formula_str)
+  
+  # -------------------------
+  # Fit tree
+  # -------------------------
+  set.seed(123)
+  
+  if (is_classification) {
+  model <- rpart::rpart(
+    tree_formula,
+    data = td,
+    method = "class",
+    control = rpart::rpart.control(cp = 0.01)
+  )
+} else {
+  model <- rpart::rpart(
+    tree_formula,
+    data = td,
+    method = "anova",
+    control = rpart::rpart.control(cp = 0.01)
+  )
+}
+
+tree_model(model)
+
+  # -------------------------
+# MODEL DATA (WHAT THE TREE USED)
+# -------------------------
+
+output$tree_model_data_summary <- renderTable({
+
+  req(tree_data())
+
+  data.frame(
+    Item = c(
+      "Target variable",
+      "Predictor variables",
+      "Observations used"
+    ),
+    Value = c(
+      input$tree_target,
+      paste(input$tree_predictors, collapse = ", "),
+      nrow(tree_data())
+    )
+  )
+})
+
+output$tree_model_data <- renderDT({
+
+  req(tree_data())
+
+  datatable(
+    tree_data(),
+    options = list(
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    rownames = FALSE
+  )
+})
+
+  
+  
+  # -------------------------
+  # TREE PLOT
+  # -------------------------
+  output$tree_plot <- renderPlot({
+    rpart.plot::rpart.plot(
+      tree_model(),
+      type = 2,
+      extra = ifelse(is_classification, 104, 101),
+      fallen.leaves = TRUE,
+      main = "Decision Tree"
+    )
+  })
+  
+  # -------------------------
+  # VARIABLE IMPORTANCE
+  # -------------------------
+  output$tree_importance <- renderPlot({
+    
+    model <- tree_model()   
+    req(model)
+
+    imp <- data.frame(
+      Variable = names(model$variable.importance),
+      Importance = model$variable.importance
     )
 
-    output$multi_summary <- renderPrint({
-  cat(strrep("=", 60), "\n")
-  cat("MULTINOMIAL LOGISTIC REGRESSION MODEL SUMMARY\n")
-  cat(strrep("=", 60), "\n\n")
-  
-  cat("Reference Category:", levels(md[[input$multi_target]])[1], "\n")
-  cat("Sample Size:", nrow(md), "observations\n")
-  cat("Predictors:", paste(input$multi_predictors, collapse = ", "), "\n\n")
-  
-  cat(strrep("=", 60), "\n")
-  cat("COEFFICIENTS (Log-Odds Scale)\n")
-  cat(strrep("=", 60), "\n")
-  
-  # Get coefficients and format nicely
-  coef_matrix <- summary(model)$coefficients
-  se_matrix <- summary(model)$standard.errors
-  
-  for (outcome in rownames(coef_matrix)) {
-    cat("\n", outcome, "vs", levels(md[[input$multi_target]])[1], ":\n")
-    cat(strrep("-", 60), "\n")
     
-    for (pred in colnames(coef_matrix)) {
-      coef_val <- coef_matrix[outcome, pred]
-      se_val <- se_matrix[outcome, pred]
-      z_val <- coef_val / se_val
-      p_val <- 2 * (1 - pnorm(abs(z_val)))
-      
-      sig <- ifelse(p_val < 0.001, "***",
-             ifelse(p_val < 0.01, "**",
-             ifelse(p_val < 0.05, "*", "")))
-      
-      cat(sprintf("  %-20s: %10.4f  (SE: %.4f)  %s\n", 
-                  pred, coef_val, se_val, sig))
-    }
+    ggplot(imp, aes(x = reorder(Variable, Importance), y = Importance)) +
+      geom_col(fill = "#2C7FB8") +
+      coord_flip() +
+      labs(
+        title = "Variable Importance",
+        x = "Predictor",
+        y = "Importance"
+      )
+  })
+  
+  # -------------------------
+  # CONFUSION MATRIX (classification only)
+  # -------------------------
+  output$tree_confusion <- renderTable({
+    
+    if (!is_classification) return(NULL)
+    
+    preds <- predict(tree_model(), newdata = td, type = "class")
+    table(Predicted = preds, Actual = target)
+  }, rownames = TRUE)
+
+
+  # -------------------------
+  # ROC CURVE & AUC (classification only)
+  # -------------------------
+
+  output$tree_roc <- renderPlot({
+
+  req(tree_model())
+  req(is_classification)
+
+  if (!is_classification) return(NULL)
+
+  model <- tree_model()
+  df    <- tree_data()
+
+  probs <- predict(model, newdata = df, type = "prob")
+  response <- df[[input$tree_target]]
+
+  positive_class <- levels(response)[2]
+
+  roc_obj <- pROC::roc(
+    response = response,
+    predictor = probs[, positive_class],
+    quiet = TRUE
+  )
+
+  plot(
+    roc_obj,
+    col = "#2C7FB8",
+    lwd = 3,
+    main = "ROC Curve (Decision Tree Classification)"
+  )
+  abline(a = 0, b = 1, lty = 2, col = "gray")
+})
+
+
+# -------------------------
+# AUC OUTPUT
+# -------------------------
+
+output$tree_auc <- renderPrint({
+
+  req(tree_model())
+  req(is_classification)
+
+  if (!is_classification) {
+    cat("AUC is only available for classification trees.")
+    return()
+  }
+
+  model <- tree_model()
+  df    <- tree_data()
+
+  probs <- predict(model, newdata = df, type = "prob")
+  response <- df[[input$tree_target]]
+
+  positive_class <- levels(response)[2]
+
+  roc_obj <- pROC::roc(
+    response = response,
+    predictor = probs[, positive_class],
+    quiet = TRUE
+  )
+
+  auc_value <- pROC::auc(roc_obj)
+
+  cat("Area Under the Curve (AUC):", round(as.numeric(auc_value), 3))
+})
+
+
+
+# -------------------------
+# INTERPRETATION BLOCK
+# -------------------------
+output$tree_interpretation <- renderUI({
+
+  req(tree_model())
+  model <- tree_model()
+
+  # Variable importance
+  importance <- model$variable.importance
+  top_vars <- names(sort(importance, decreasing = TRUE))[1:min(3, length(importance))]
+
+  # Detect model type
+  target <- input$tree_target
+  df <- tree_data()
+
+  is_classification <-
+    is.factor(df[[target]]) ||
+    (is.numeric(df[[target]]) &&
+     all(unique(df[[target]]) %in% c(0, 1)))
+
+  # Tree complexity
+  n_splits <- nrow(model$splits)
+  depth <- if (!is.null(model$frame$depth)) {
+  max(model$frame$depth, na.rm = TRUE)
+  } else {
+    0
+  }
+
+
+  tagList(
+    h4("Decision Tree Interpretation"),
+
+    tags$ul(
+      tags$li(
+        strong("Model type: "),
+        if (is_classification) "Classification tree" else "Regression tree"
+      ),
+
+      tags$li(
+        strong("Most important predictors: "),
+        paste(top_vars, collapse = ", ")
+      ),
+
+      tags$li(
+        strong("Tree structure: "),
+        paste("The tree contains", n_splits,
+              "splits with a maximum depth of", depth, ".")
+      ),
+
+      tags$li(
+        "The decision tree captures non-linear relationships and interactions ",
+        "between predictors, making it suitable for exploratory and policy analysis."
+      )
+    )
+  )
+})
+
+
+})
+
+
+  # ============================================================================
+# PCA ANALYSIS
+# ============================================================================
+
+observeEvent(input$run_pca, {
+  
+  req(input$pca_vars)
+  req(length(input$pca_vars) >= 2)
+  
+  df <- data()
+  
+  # -------------------------
+  # Prepare data
+  # -------------------------
+  pca_data <- df %>%
+    select(all_of(input$pca_vars)) %>%
+    drop_na()
+  
+  if (nrow(pca_data) < 20) {
+    output$pca_interpretation <- renderUI({
+      HTML("<p style='color:red;'>Not enough data for PCA (need ≥ 20 observations).</p>")
+    })
+    return()
   }
   
-  cat("\n", strrep("=", 60), "\n")
-  cat("MODEL FIT STATISTICS\n")
-  cat(strrep("=", 60), "\n")
-  cat(sprintf("Residual Deviance: %.2f\n", model$deviance))
-  cat(sprintf("AIC:               %.2f\n", model$AIC))
-  cat("\nSignificance: *** p<0.001, ** p<0.01, * p<0.05\n")
+  # -------------------------
+  # Run PCA
+  # -------------------------
+  pca_model <- prcomp(
+    pca_data,
+    scale. = input$pca_scale,
+    center = TRUE
+  )
+  
+  # Variance explained
+  var_explained <- (pca_model$sdev^2) / sum(pca_model$sdev^2)
+  
+  # -------------------------
+  # SCREE PLOT
+  # -------------------------
+  output$pca_scree <- renderPlot({
+    
+    scree_df <- data.frame(
+      PC = factor(seq_along(var_explained)),
+      Variance = var_explained
+    )
+    
+    ggplot(scree_df, aes(x = PC, y = Variance)) +
+      geom_col(fill = "#2C7FB8") +
+      geom_line(aes(group = 1), color = "black") +
+      geom_point(size = 2) +
+      scale_y_continuous(labels = scales::percent_format()) +
+      labs(
+        title = "Scree Plot: Variance Explained by Principal Components",
+        x = "Principal Component",
+        y = "Proportion of Variance Explained"
+      )
+  })
+  
+  # -------------------------
+  # BIPLOT (PC1 vs PC2)
+  # -------------------------
+  output$pca_biplot <- renderPlot({
+    
+    scores <- as.data.frame(pca_model$x[, 1:2])
+    scores$obs <- rownames(scores)
+    
+    loadings <- as.data.frame(pca_model$rotation[, 1:2])
+    loadings$var <- rownames(loadings)
+    
+    ggplot(scores, aes(PC1, PC2)) +
+      geom_point(alpha = 0.4) +
+      geom_segment(
+        data = loadings,
+        aes(x = 0, y = 0, xend = PC1 * 5, yend = PC2 * 5),
+        arrow = arrow(length = unit(0.2, "cm")),
+        color = "red"
+      ) +
+      geom_text(
+        data = loadings,
+        aes(x = PC1 * 5, y = PC2 * 5, label = var),
+        color = "red",
+        size = 4,
+        hjust = 1
+      ) +
+      labs(
+        title = "PCA Biplot (PC1 vs PC2)",
+        x = "PC1",
+        y = "PC2"
+      )
+  })
+  
+  # -------------------------
+  # LOADINGS TABLE
+  # -------------------------
+  output$pca_loadings <- renderDT({
+    
+    loadings_df <- as.data.frame(pca_model$rotation) %>%
+      rownames_to_column("Variable")
+    
+    datatable(
+      loadings_df,
+      options = list(pageLength = 10),
+      rownames = FALSE
+    ) %>%
+      formatRound(columns = -1, digits = 3)
+  })
+  
+  # -------------------------
+  # INTERPRETATION
+  # -------------------------
+  output$pca_interpretation <- renderUI({
+    
+    pc1_vars <- sort(abs(pca_model$rotation[, 1]), decreasing = TRUE)[1:3]
+    pc2_vars <- sort(abs(pca_model$rotation[, 2]), decreasing = TRUE)[1:3]
+    
+    HTML(paste0(
+      "<h4>PCA Interpretation</h4>",
+      "<ul>",
+      "<li><strong>PC1</strong> explains ",
+      round(var_explained[1] * 100, 1),
+      "% of total variance and is mainly driven by: ",
+      paste(names(pc1_vars), collapse = ", "),
+      ".</li>",
+      "<li><strong>PC2</strong> explains ",
+      round(var_explained[2] * 100, 1),
+      "% of total variance and reflects variation in: ",
+      paste(names(pc2_vars), collapse = ", "),
+      ".</li>",
+      "</ul>",
+      "<p>PCA reveals the major dimensions of food insecurity variation across counties.</p>"
+    ))
+  })
 })
-    
-     output$multi_rrr <- renderPlot({
-      
-      # Try using broom::tidy, if it fails, calculate manually
-      tryCatch({
-        coefs <- broom::tidy(model, exponentiate = TRUE)
-        
-        ggplot(
-          coefs %>% filter(term != "(Intercept)"),
-          aes(x = reorder(term, estimate), y = estimate, color = y.level)
-        ) +
-          geom_point(size = 3) +
-          geom_hline(yintercept = 1, linetype = "dashed", color = "gray50") +
-          coord_flip() +
-          scale_y_log10() +
-          labs(
-            title = "Relative Risk Ratios (Multinomial Logistic Regression)",
-            y = "Relative Risk Ratio (log scale)",
-            x = "Predictor",
-            color = "Outcome Category"
-          )
-        
-      }, error = function(e) {
-        # Fallback: manual calculation
-        coef_matrix <- coef(model)
-        rrr_data <- as.data.frame(exp(coef_matrix))
-        rrr_data$outcome <- rownames(rrr_data)
-        
-        rrr_long <- rrr_data %>%
-          pivot_longer(-outcome, names_to = "predictor", values_to = "RRR") %>%
-          filter(predictor != "(Intercept)")
-        
-        ggplot(rrr_long, aes(x = reorder(predictor, RRR), y = RRR, color = outcome)) +
-          geom_point(size = 3) +
-          geom_hline(yintercept = 1, linetype = "dashed", color = "gray50") +
-          coord_flip() +
-          scale_y_log10() +
-          labs(
-            title = "Relative Risk Ratios (Multinomial Logistic Regression)",
-            y = "Relative Risk Ratio (log scale)",
-            x = "Predictor",
-            color = "Outcome Category"
-          ) 
-      })
-    })
 
-    output$multi_accuracy <- renderPrint({
-      preds  <- predict(model, newdata = md)
-      actual <- md[[input$multi_target]]
-      acc <- mean(preds == actual)
-      cat("Training Classification Accuracy:", round(acc, 3))
-    })
-
-    output$multi_interpretation <- renderUI({
-      ref <- levels(md[[input$multi_target]])[1]
-
-      HTML(paste0(
-        "<h4>Interpretation</h4>",
-        "<ul>",
-        "<li>The model predicts <strong>", input$multi_target,
-        "</strong> using multinomial logistic regression.</li>",
-        "<li>Effects are interpreted relative to the reference category: ",
-        "<strong>", ref, "</strong>.</li>",
-        "<li>Relative Risk Ratios greater than 1 indicate increased likelihood ",
-        "of an outcome relative to the reference.</li>",
-        "</ul>"
-      ))
-    })
-  })
-
-  # ============================================================================
-  # DECISION TREE ANALYSIS
-  # ============================================================================
-
-  tree_model <- reactiveVal(NULL)
-  tree_data <- reactiveVal(NULL)
-
-  is_tree_binary <- reactive({
-    req(tree_data(), input$tree_target)
-    target <- tree_data()[[input$tree_target]]
-    is.factor(target) && length(levels(target)) == 2
-  })
-
-  output$is_tree_binary <- reactive({ is_tree_binary() })
-  outputOptions(output, "is_tree_binary", suspendWhenHidden = FALSE)
-
-  observeEvent(input$run_tree, {
-    req(input$tree_target)
-    req(input$tree_predictors)
-    req(length(input$tree_predictors) >= 1)
-    
-    df <- data()
-    tree_vars <- c(input$tree_target, input$tree_predictors)
-    td <- df %>% select(all_of(tree_vars)) %>% drop_na()
-    tree_data(td)
-
-    if (nrow(td) == 0 || length(unique(td[[input$tree_target]])) < 2) {
-      output$tree_interpretation <- renderUI({
-        HTML("<p style='color:red;'>Selected target variable has insufficient non-missing or unique values to build a decision tree.</p>")
-      })
-      return()
-    }
-
-    target <- td[[input$tree_target]]
-    is_binary_numeric <- is.numeric(target) && all(unique(target) %in% c(0, 1))
-    is_categorical    <- is.factor(target) || is.character(target)
-    is_classification <- is_binary_numeric || is_categorical
-
-    if (is_classification && !is.factor(td[[input$tree_target]])) {
-      td[[input$tree_target]] <- factor(td[[input$tree_target]])
-    }
-
-    formula_str <- paste(input$tree_target, "~", paste(input$tree_predictors, collapse = " + "))
-    tree_formula <- as.formula(formula_str)
-    
-    set.seed(123)
-    
-    if (is_classification) {
-      model <- rpart::rpart(tree_formula, data = td, method = "class", control = rpart::rpart.control(cp = 0.01))
-    } else {
-      model <- rpart::rpart(tree_formula, data = td, method = "anova", control = rpart::rpart.control(cp = 0.01))
-    }
-
-    tree_model(model)
-
-    output$tree_model_data_summary <- renderTable({
-      data.frame(
-        Item = c("Target variable", "Predictor variables", "Observations used"),
-        Value = c(input$tree_target, paste(input$tree_predictors, collapse = ", "), nrow(tree_data()))
-      )
-    })
-
-    output$tree_plot <- renderPlot({
-      rpart.plot::rpart.plot(tree_model(), type = 2, extra = ifelse(is_classification, 104, 101), fallen.leaves = TRUE, main = "Decision Tree")
-    })
-    
-    output$tree_importance <- renderPlot({
-      model <- tree_model()   
-      req(model)
-      imp <- data.frame(Variable = names(model$variable.importance), Importance = model$variable.importance)
-      
-      ggplot(imp, aes(x = reorder(Variable, Importance), y = Importance)) +
-        geom_col(fill = "#2C7FB8") +
-        coord_flip() +
-        labs(title = "Variable Importance", x = "Predictor", y = "Importance")
-    })
-    
-    output$tree_confusion <- renderTable({
-      if (!is_classification) return(NULL)
-      preds <- predict(tree_model(), newdata = td, type = "class")
-      table(Predicted = preds, Actual = target)
-    }, rownames = TRUE)
-
-    output$tree_roc <- renderPlot({
-      req(tree_model(), is_classification)
-      if (!is_classification) return(NULL)
-
-      model <- tree_model()
-      df    <- tree_data()
-      probs <- predict(model, newdata = df, type = "prob")
-      response <- df[[input$tree_target]]
-      positive_class <- levels(response)[2]
-
-      roc_obj <- pROC::roc(response = response, predictor = probs[, positive_class], quiet = TRUE)
-
-      plot(roc_obj, col = "#2C7FB8", lwd = 3, main = "ROC Curve (Decision Tree Classification)")
-      abline(a = 0, b = 1, lty = 2, col = "gray")
-    })
-
-    output$tree_auc <- renderPrint({
-      req(tree_model(), is_classification)
-      if (!is_classification) {
-        cat("AUC is only available for classification trees.")
-        return()
-      }
-
-      model <- tree_model()
-      df    <- tree_data()
-      probs <- predict(model, newdata = df, type = "prob")
-      response <- df[[input$tree_target]]
-      positive_class <- levels(response)[2]
-
-      roc_obj <- pROC::roc(response = response, predictor = probs[, positive_class], quiet = TRUE)
-      auc_value <- pROC::auc(roc_obj)
-
-      cat("Area Under the Curve (AUC):", round(as.numeric(auc_value), 3))
-    })
-
-    output$tree_interpretation <- renderUI({
-      req(tree_model())
-      model <- tree_model()
-      importance <- model$variable.importance
-      top_vars <- names(sort(importance, decreasing = TRUE))[1:min(3, length(importance))]
-      target <- input$tree_target
-      df <- tree_data()
-
-      is_classification <- is.factor(df[[target]]) || (is.numeric(df[[target]]) && all(unique(df[[target]]) %in% c(0, 1)))
-      n_splits <- nrow(model$splits)
-      depth <- if (!is.null(model$frame$depth)) max(model$frame$depth, na.rm = TRUE) else 0
-
-      tagList(
-        h4("Decision Tree Interpretation"),
-        tags$ul(
-          tags$li(strong("Model type: "), if (is_classification) "Classification tree" else "Regression tree"),
-          tags$li(strong("Most important predictors: "), paste(top_vars, collapse = ", ")),
-          tags$li(strong("Tree structure: "), paste("The tree contains", n_splits, "splits with a maximum depth of", depth, ".")),
-          tags$li("The decision tree captures non-linear relationships and interactions between predictors, making it suitable for exploratory and policy analysis.")
-        )
-      )
-    })
-  })
-
-  # ============================================================================
-  # PCA ANALYSIS
-  # ============================================================================
-
-  observeEvent(input$run_pca, {
-    req(input$pca_vars, length(input$pca_vars) >= 2)
-    
-    df <- data()
-    pca_data <- df %>% select(all_of(input$pca_vars)) %>% drop_na()
-    
-    if (nrow(pca_data) < 20) {
-      output$pca_interpretation <- renderUI({
-        HTML("<p style='color:red;'>Not enough data for PCA (need ≥ 20 observations).</p>")
-      })
-      return()
-    }
-    
-    pca_model <- prcomp(pca_data, scale. = input$pca_scale, center = TRUE)
-    var_explained <- (pca_model$sdev^2) / sum(pca_model$sdev^2)
-    
-    output$pca_scree <- renderPlot({
-      scree_df <- data.frame(PC = factor(seq_along(var_explained)), Variance = var_explained)
-      
-      ggplot(scree_df, aes(x = PC, y = Variance)) +
-        geom_col(fill = "#2C7FB8") +
-        geom_line(aes(group = 1), color = "black") +
-        geom_point(size = 2) +
-        scale_y_continuous(labels = scales::percent_format()) +
-        labs(title = "Scree Plot: Variance Explained by Principal Components", x = "Principal Component", y = "Proportion of Variance Explained")
-    })
-    
-    output$pca_biplot <- renderPlot({
-      scores <- as.data.frame(pca_model$x[, 1:2])
-      scores$obs <- rownames(scores)
-      loadings <- as.data.frame(pca_model$rotation[, 1:2])
-      loadings$var <- rownames(loadings)
-      
-      ggplot(scores, aes(PC1, PC2)) +
-        geom_point(alpha = 0.4) +
-        geom_segment(data = loadings, aes(x = 0, y = 0, xend = PC1 * 5, yend = PC2 * 5), arrow = arrow(length = unit(0.2, "cm")), color = "red") +
-        geom_text(data = loadings, aes(x = PC1 * 5, y = PC2 * 5, label = var), color = "red", size = 4, hjust = 1) +
-        labs(title = "PCA Biplot (PC1 vs PC2)", x = "PC1", y = "PC2")
-    })
-    
-    output$pca_loadings <- renderDT({
-      loadings_df <- as.data.frame(pca_model$rotation) %>% rownames_to_column("Variable")
-      datatable(loadings_df, options = list(pageLength = 10), rownames = FALSE) %>% formatRound(columns = -1, digits = 3)
-    })
-    
-    output$pca_interpretation <- renderUI({
-      pc1_vars <- sort(abs(pca_model$rotation[, 1]), decreasing = TRUE)[1:3]
-      pc2_vars <- sort(abs(pca_model$rotation[, 2]), decreasing = TRUE)[1:3]
-      
-      HTML(paste0(
-        "<h4>PCA Interpretation</h4><ul>",
-        "<li><strong>PC1</strong> explains ", round(var_explained[1] * 100, 1), "% of total variance and is mainly driven by: ", paste(names(pc1_vars), collapse = ", "), ".</li>",
-        "<li><strong>PC2</strong> explains ", round(var_explained[2] * 100, 1), "% of total variance and reflects variation in: ", paste(names(pc2_vars), collapse = ", "), ".</li>",
-        "</ul><p>PCA reveals the major dimensions of food insecurity variation across counties.</p>"
-      ))
-    })
-  })
 
   # ============================================================================
   # K-MEANS CLUSTERING
   # ============================================================================
   
   observeEvent(input$run_kmeans, {
-    req(input$kmeans_vars, length(input$kmeans_vars) >= 2, input$k_clusters)
+    
+    req(input$kmeans_vars)
+    req(length(input$kmeans_vars) >= 2)
+    req(input$k_clusters)
     
     df <- data()
-    cluster_df <- df %>% select(all_of(input$kmeans_vars)) %>% drop_na()
+    
+    # -------------------------
+    # Prepare clustering data
+    # -------------------------
+    cluster_df <- df %>%
+      select(all_of(input$kmeans_vars)) %>%
+      drop_na()
     
     if (nrow(cluster_df) < input$k_clusters * 5) {
       output$kmeans_plot <- renderPlot({
         plot.new()
-        text(0.5, 0.5, "Not enough data for selected number of clusters", cex = 1.4, col = "red")
+        text(0.5, 0.5, "Not enough data for selected number of clusters",
+             cex = 1.4, col = "red")
       })
       return()
     }
     
+    # -------------------------
+    # Scale data (important!)
+    # -------------------------
     scaled_data <- scale(cluster_df)
+    
     set.seed(123)
     km <- kmeans(scaled_data, centers = input$k_clusters, nstart = 25)
+    
     cluster_df$cluster <- factor(km$cluster)
     
+    # -------------------------
+    # PCA for visualization
+    # -------------------------
     pca_res <- prcomp(scaled_data)
+    
     pca_df <- as.data.frame(pca_res$x[, 1:2])
     pca_df$cluster <- cluster_df$cluster
     
+    # -------------------------
+    # CLUSTER PLOT
+    # -------------------------
     output$kmeans_plot <- renderPlot({
+      
       ggplot(pca_df, aes(PC1, PC2, color = cluster)) +
         geom_point(alpha = 0.6, size = 2) +
         stat_ellipse(type = "norm", level = 0.68, linewidth = 1) +
-        labs(title = paste("K-Means Clustering (k =", input$k_clusters, ")"), subtitle = "Visualization via first two principal components", color = "Cluster")
+        labs(
+          title = paste("K-Means Clustering (k =", input$k_clusters, ")"),
+          subtitle = "Visualization via first two principal components",
+          color = "Cluster"
+        )
     })
     
+    # -------------------------
+    # CLUSTER SUMMARY TABLE
+    # -------------------------
     output$kmeans_summary <- renderDT({
+      
       summary_df <- cluster_df %>%
         group_by(cluster) %>%
-        summarise(n = n(), across(all_of(input$kmeans_vars), mean, na.rm = TRUE), .groups = "drop")
+        summarise(
+          n = n(),
+          across(all_of(input$kmeans_vars), mean, na.rm = TRUE),
+          .groups = "drop"
+        )
       
-      datatable(summary_df, options = list(pageLength = 10), rownames = FALSE) %>% formatRound(input$kmeans_vars, 2)
+      datatable(
+        summary_df,
+        options = list(pageLength = 10),
+        rownames = FALSE
+      ) %>% formatRound(input$kmeans_vars, 2)
     })
     
+    # -------------------------
+    # INTERPRETATION
+    # -------------------------
     output$kmeans_interpretation <- renderUI({
+      
       summary_df <- cluster_df %>%
         group_by(cluster) %>%
-        summarise(across(all_of(input$kmeans_vars), mean, na.rm = TRUE), .groups = "drop")
+        summarise(
+          across(all_of(input$kmeans_vars), mean, na.rm = TRUE),
+          .groups = "drop"
+        )
       
+      # Identify highest-risk cluster using first selected variable
       risk_var <- input$kmeans_vars[1]
-      high_cluster <- summary_df %>% arrange(desc(.data[[risk_var]])) %>% slice(1)
+      
+      high_cluster <- summary_df %>%
+        arrange(desc(.data[[risk_var]])) %>%
+        slice(1)
       
       HTML(paste0(
-        "<h4>Cluster Interpretation</h4><p>",
-        "Cluster <strong>", high_cluster$cluster, "</strong> shows the highest average <strong>", risk_var, "</strong>, indicating a distinct risk profile based on the selected indicators.</p>",
-        "<p>K-Means clustering groups counties with similar structural food insecurity characteristics to support segmentation and targeted policy analysis.</p>"
+        "<h4>Cluster Interpretation</h4>",
+        "<p>",
+        "Cluster <strong>", high_cluster$cluster, "</strong> shows the highest average ",
+        "<strong>", risk_var, "</strong>, indicating a distinct risk profile based on the selected indicators.",
+        "</p>",
+        "<p>",
+        "K-Means clustering groups counties with similar structural food insecurity characteristics to support segmentation and targeted policy analysis.",
+        "</p>"
       ))
     })
   })
 
+
   # ============================================================================
-  # GROUP COMPARISON
+  # GROUP COMPARISON ✅ ENHANCED (UNCHANGED LOGIC + ADDITIONS)
   # ============================================================================
   
   observeEvent(input$run_group_comparison, {
+    
     req(input$group_var, input$group_target)
     
     df <- data()
+    
+    # build group
     df$grp <- switch(input$group_var,
                      "Census Region" = df$census_region,
                      "Census Division" = df$census_division,
                      "Rural/Urban" = df$urban_rural,
                      "Poverty Category" = df$poverty_category,
                      "Income Category" = df$income_category,
-                     "FI Category" = df$fi_category,
-                     "Race" = df$race)
+                     "FI Category" = df$fi_category)
     
     target_var <- input$group_target
     df <- df %>% drop_na(grp, .data[[target_var]])
@@ -650,7 +778,8 @@ server_analysis <- function(input, output, session, data) {
       ggplot(df, aes(grp, .data[[target_var]], fill = grp)) +
         geom_boxplot(alpha = 0.7) +
         stat_summary(fun = mean, geom = "point", shape = 23, fill = "white") +
-        theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+        theme(legend.position = "none",
+              axis.text.x = element_text(angle = 45, hjust = 1))
     })
     
     output$group_stats <- renderPrint({
@@ -665,7 +794,10 @@ server_analysis <- function(input, output, session, data) {
       datatable(
         df %>%
           group_by(grp) %>%
-          summarise(n = n(), mean = mean(.data[[target_var]]), sd = sd(.data[[target_var]]), median = median(.data[[target_var]]))
+          summarise(n = n(),
+                    mean = mean(.data[[target_var]]),
+                    sd = sd(.data[[target_var]]),
+                    median = median(.data[[target_var]]))
       )
     })
     
@@ -677,7 +809,8 @@ server_analysis <- function(input, output, session, data) {
       ggplot(df, aes(grp, .data[[target_var]], fill = grp)) +
         geom_violin(alpha = 0.4) +
         geom_boxplot(width = 0.2) +
-        theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+        theme(legend.position = "none",
+              axis.text.x = element_text(angle = 45, hjust = 1))
     })
     
     output$group_interpretation <- renderUI({
