@@ -6,17 +6,40 @@ An interactive R Shiny App analyzing household food insecurity patterns across U
 
 ------------------------------------------------------------------------
 
-------------------------------------------------------------------------
-
 ## Features
 
 ### Three Interactive Tabs
 
-**1. Overview Tab** - National summary statistics and KPI cards - Food insecurity definitions and methodology - Trend summaries and key takeaways - Data quality indicators
+**1. Overview Tab** 
+- National summary statistics and KPI cards
+- Food insecurity definitions and methodology
+- Trend summaries and key takeaways
+- Data quality indicators
 
-**2. Exploration Tab** - Interactive choropleth maps with 15+ food insecurity indicators - Time series visualizations (2009–2023): - State-level trends - Racial/ethnic disparities - Child vs. overall food insecurity - Cost burden analysis - Rural vs. urban comparisons - Regional trends - Inequality gap analysis - Dynamic filtering by state, county, year, and time period - Summary tables and data viewer with export capabilities
+**2. Exploration Tab** 
+- Interactive choropleth maps with 15+ food insecurity indicators 
+- Time series visualizations (2009–2023):
+ - State-level trends 
+ - Racial/ethnic disparities 
+ - Child vs. overall food insecurity
+ - Cost burden analysis 
+ - Rural vs. urban comparisons 
+ - Regional trends 
+ - Inequality gap analysis 
+- Dynamic filtering by state, county, year, and time period
+- Summary tables and data viewer with export capabilities
 
-**3. Analysis Tab** - **7 Statistical Methods:** 1. Correlation Analysis (heatmaps and tables) 2. Linear Regression (with diagnostics) 3. Multinomial Logistic Regression (3+ category outcomes) 4. Decision Trees (classification with ROC/AUC for binary outcomes) 5. Principal Component Analysis (PCA) 6. K-Means Clustering 7. Group Comparisons (t-tests and ANOVA) - Interactive variable selection - Model diagnostics and interpretation guides - Downloadable results
+**3. Analysis Tab** 
+- **7 Statistical Methods:**
+    1. Correlation Analysis (heatmaps and tables)
+    2. Linear Regression (with diagnostics)
+    3. Multinomial Logistic Regression (3+ category outcomes)
+    4. Decision Trees (classification with ROC/AUC for binary outcomes)
+    5. Principal Component Analysis (PCA)
+    6. K-Means Clustering
+    7. Group Comparisons (t-tests and ANOVA)
+- Interactive variable selection
+- Model diagnostics and interpretation guides
 
 ### Key Capabilities
 
@@ -367,9 +390,19 @@ source("data_raw/02_add_acs_socioeconomic_data.R")
 
 ### Code Quality
 
-**Tidyverse Style Compliance:** All R code follows the [tidyverse style guide](https://style.tidyverse.org/): - Named function arguments - Proper spacing (after commas, around operators) - Pipes broken across lines - Consistent indentation (2 spaces) - Lines under 80 characters - `case_when()` instead of nested `ifelse()`
+**Tidyverse Style Compliance:** All R code follows the [tidyverse style guide](https://style.tidyverse.org/): 
+- Named function arguments
+- Proper spacing (after commas, around operators)
+- Pipes broken across lines
+- Consistent indentation (2 spaces)
+- Lines under 80 characters
+- `case_when()` instead of nested `ifelse()`
 
-**Code Organization:** - Modular structure (separate UI/server files) - Clear section headers with comment blocks - Descriptive variable names (snake_case) - Comprehensive inline documentation
+**Code Organization:** 
+- Modular structure (separate UI/server files)
+- Clear section headers with comment blocks
+- Descriptive variable names (snake_case)
+- Comprehensive inline documentation
 
 ### Global Theme
 
@@ -506,6 +539,8 @@ https://doi.org/10.7758/rsf.2017.3.2.06
 ### Racial Equity
 
 **Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020).** *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
+
+### R Packages
 
 **Walker, K., & Herman, M. (2023).** *tidycensus: Load US Census Boundary and Attribute Data as 'tidyverse' and 'sf'-Ready Data Frames.* R package version 1.5.  
 https://walker-data.com/tidycensus/
