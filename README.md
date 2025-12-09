@@ -19,13 +19,13 @@ An interactive R Shiny App analyzing household food insecurity patterns across U
 **2. Exploration Tab** 
 - Interactive choropleth maps with 15+ food insecurity indicators 
 - Time series visualizations (2009–2023):
- - State-level trends 
- - Racial/ethnic disparities 
- - Child vs. overall food insecurity
- - Cost burden analysis 
- - Rural vs. urban comparisons 
- - Regional trends 
- - Inequality gap analysis 
+  - State-level trends 
+  - Racial/ethnic disparities 
+  - Child vs. overall food insecurity
+  - Cost burden analysis 
+  - Rural vs. urban comparisons 
+  - Regional trends 
+  - Inequality gap analysis 
 - Dynamic filtering by state, county, year, and time period
 - Summary tables and data viewer with export capabilities
 
