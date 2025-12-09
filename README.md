@@ -60,20 +60,73 @@ The app uses a **modular design pattern** separating UI and server logic:
 
 ------------------------------------------------------------------------
 
-## Data Source
+## Data Sources
 
-**Primary Dataset:** Feeding America – Map the Meal Gap (2009–2023)\
+### Primary Data Source: Feeding America
+
+**Feeding America – Map the Meal Gap (2009–2023)**  
 **URL:** [feedingamerica.org/research/map-the-meal-gap](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
 
-### Variables Included
+**Variables from Feeding America:**
 
-**Food Insecurity Metrics:** - Overall food insecurity rate - Child food insecurity rate - Number of food insecure persons (total and children) - Food insecurity by race/ethnicity (Black, Hispanic, White non-Hispanic)
+**Food Insecurity Metrics:**
+- Overall food insecurity rate
+- Child food insecurity rate
+- Number of food insecure persons (total and children)
+- Food insecurity by race/ethnicity (Black, Hispanic, White non-Hispanic)
 
-**Economic Indicators:** - Cost per meal - Weighted annual food budget shortfall - Median household income - Poverty rate - Unemployment rate
+**Economic Indicators:**
+- Cost per meal
+- Weighted annual food budget shortfall
+- Median household income
+- Poverty rate
+- Unemployment rate
 
-**Demographic Variables:** - Population - Urban/rural classification (derived) - Education levels (% high school or less) - Census region and division - FNS (Food and Nutrition Service) region
+**Program Participation:**
+- SNAP participation rate
+- Eligibility thresholds
 
-**Program Participation:** - SNAP participation rate - Eligibility thresholds
+### Secondary Data Source: U.S. Census Bureau
+
+**American Community Survey (ACS) 5-Year Estimates**  
+**URL:** [census.gov/data/developers/data-sets/acs-5year.html](https://www.census.gov/data/developers/data-sets/acs-5year.html)
+
+The ACS 5-Year Estimates provide reliable demographic and socioeconomic data for all U.S. counties, including small population areas. We integrate ACS data to enrich our analysis with additional contextual variables.
+
+**Variables from Census ACS:**
+
+**Demographic Characteristics:**
+- Total population by age groups
+- Race and ethnicity distributions
+- Household composition and family structure
+
+**Socioeconomic Indicators:**
+- Educational attainment (% high school or less, % bachelor's degree or higher)
+- Employment status and labor force participation
+- Income distribution and median household income (validation)
+- Poverty rates by demographic groups
+- Health insurance coverage rates
+
+**Housing & Geography:**
+- Urban/rural classification (derived from population density)
+- Housing tenure (owner vs. renter occupied)
+- Median home values and gross rent
+
+### Data Integration Methodology
+
+Our analysis integrates both data sources using **county FIPS codes** as the primary key:
+
+1. **Spatial Join:** ACS 5-year estimates matched to Feeding America county-level data
+2. **Temporal Alignment:** ACS 5-year periods centered on corresponding Feeding America years
+   - Example: 2019-2023 ACS data paired with 2021 Feeding America estimates
+3. **Variable Harmonization:** Standardized naming conventions across sources
+4. **Quality Validation:** Cross-validation of overlapping variables (income, poverty) between sources
+5. **Missing Data Handling:** ACS provides coverage for counties with limited Feeding America reporting
+
+**API Access:** Census ACS data retrieved programmatically using:
+- U.S. Census Bureau API: https://api.census.gov/data/2021/acs/acs5
+- R packages: `tidycensus`, `censusapi`
+- Secure credential management via `keyring` package
 
 ### Geographic Coverage
 
@@ -92,7 +145,11 @@ The app performs comprehensive data harmonization:
 5.  **Geographic Coordinates:** County centroids added for mapping
 6.  **Quality Checks:** Missing value reporting and validation
 
-**Methodological Note:** Feeding America revised estimation methods post-2020 due to COVID-19 impacts. Our harmonization ensures temporal continuity while documenting methodological changes.
+**Methodological Notes:**
+- Feeding America revised estimation methods post-2020 due to COVID-19 impacts
+- ACS 5-year estimates provide more reliable data for small counties than 1-year estimates
+- Our harmonization ensures temporal continuity while documenting methodological changes
+- Cross-validation between Feeding America and Census poverty rates shows high correlation (r > 0.85)
 
 ------------------------------------------------------------------------
 
@@ -103,6 +160,8 @@ The app performs comprehensive data harmonization:
 -   **R:** Version 4.3 or higher
 -   **RStudio:** Recommended for development
 -   **Git:** For cloning repository
+-   **Census API Key:** (Optional) Required for updating ACS data
+    - Obtain free key at: https://api.census.gov/data/key_signup.html
 
 ### Required Packages
 
@@ -141,10 +200,28 @@ R
 > shiny::runApp()
 ```
 
-**First Run:** The app will: 1. Check for missing packages and install them 2. Load and process \~47,000 county-year observations 3. Create derived variables and geographic coordinates 4. Set global ggplot2 theme 5. Launch in your default browser
+**First Run:** The app will: 
+1. Check for missing packages and install them 
+2. Load and process ~47,000 county-year observations 
+3. Integrate Census ACS socioeconomic variables
+4. Create derived variables and geographic coordinates 
+5. Set global ggplot2 theme 
+6. Launch in your default browser
 
 **Typical Load Time:** 10-15 seconds on first run, \<5 seconds on subsequent runs
 
+### Optional: Update Census ACS Data
+
+To refresh ACS data with the latest releases:
+
+```r
+# Install Census API key (one-time setup)
+library(tidycensus)
+census_api_key("YOUR_API_KEY_HERE", install = TRUE)
+
+# Run data update script (in data_raw/)
+source("data_raw/02_add_acs_socioeconomic_data.R")
+```
 ------------------------------------------------------------------------
 
 ## Usage
@@ -159,13 +236,41 @@ R
 
 ### Example Workflows
 
-**Workflow 1: Explore State Trends** 1. Go to **Exploration** tab 2. Select **Trends** sub-tab 3. Choose **State Trends** 4. Use period slider to focus on specific years 5. Observe food insecurity trajectories by state
+**Workflow 1: Explore State Trends** 
+1. Go to **Exploration** tab 
+2. Select **Trends** sub-tab 
+3. Choose **State Trends** 
+4. Use period slider to focus on specific years 
+5. Observe food insecurity trajectories by state
 
-**Workflow 2: Analyze Racial Disparities** 1. Go to **Exploration** tab → **Trends** → **Racial Disparities** 2. Compare Black, Hispanic, White, and Overall rates over time 3. Switch to **Inequality Gaps** to see disparity magnitude 4. Export summary table for further analysis
+**Workflow 2: Analyze Racial Disparities** 
+1. Go to **Exploration** tab → **Trends** → **Racial Disparities** 
+2. Compare Black, Hispanic, White, and Overall rates over time 
+3. Switch to **Inequality Gaps** to see disparity magnitude 
+4. Export summary table for further analysis
 
-**Workflow 3: Predict Food Insecurity Categories** 1. Go to **Analysis** tab 2. Select **Multinomial Logistic Regression** 3. Choose outcome: `fi_category` (Low, Moderate, High, Very High) 4. Select predictors: `poverty_rate`, `median_income`, `unemployment_rate` 5. Click **Run Multinomial Regression** 6. Review model summary, relative risk ratios, and classification accuracy
+**Workflow 3: Predict Food Insecurity Categories** 
+1. Go to **Analysis** tab 
+2. Select **Multinomial Logistic Regression** 
+3. Choose outcome: `fi_category` (Low, Moderate, High, Very High) 
+4. Select predictors: `poverty_rate`, `median_income`, `unemployment_rate`, `education_hs_or_less`
+5. Click **Run Multinomial Regression** 
+6. Review model summary, relative risk ratios, and classification accuracy
 
-**Workflow 4: Geographic Deep Dive** 1. Go to **Exploration** tab → **Map** 2. Select state (e.g., California) 3. Choose indicator (e.g., Child FI Rate) 4. Select year (e.g., 2023) 5. Map auto-zooms to state 6. Click counties for detailed popup information
+**Workflow 4: Geographic Deep Dive** 
+1. Go to **Exploration** tab → **Map** 
+2. Select state (e.g., California) 
+3. Choose indicator (e.g., Child FI Rate) 
+4. Select year (e.g., 2023) 
+5. Map auto-zooms to state 
+6. Click counties for detailed popup information
+
+**Workflow 5: Socioeconomic Drivers Analysis**
+1. Go to **Analysis** tab → **Correlation Analysis**
+2. Select variables: `overall_fi_rate`, `poverty_rate`, `median_income`, `unemployment_rate`, `education_hs_or_less`, `snap_rate`
+3. Click **Run Correlation Analysis**
+4. Examine heatmap to identify strongest predictors
+5. Use findings to inform regression model specification
 
 ------------------------------------------------------------------------
 
@@ -281,17 +386,24 @@ bs_theme <- theme(
   panel.grid.minor = element_blank()
 )
 ```
+------------------------------------------------------------------------
+## Technical Implementation
 
 ### Performance Optimizations
 
--   **Reactive Data:** Filtered data updates automatically with input changes
+-   **Reactive Programming:** Efficient dependency tracking
 -   **Efficient Rendering:** Plots only re-render when dependencies change
 -   **Lazy Loading:** Modules load on-demand
--   **Data Caching:** County coordinates calculated once in global environment
+-   **Data Caching:** County coordinates and Census variables calculated once in global environment
+-   **Indexed Data:** FIPS codes indexed for fast geographic joins
 
 ### Browser Compatibility
 
-Tested on: - Chrome 120+ - Firefox 121+ - Safari 17+ - Edge 120+
+Tested on: 
+- Chrome 120+ 
+- Firefox 121+ 
+- Safari 17+ 
+- Edge 120+
 
 ------------------------------------------------------------------------
 
@@ -310,15 +422,23 @@ We adhere to the **American Statistical Association's Ethical Guidelines for Sta
 ### Data Ethics
 
 -   **No Individual-Level Data:** All metrics are county aggregates
--   **Public Domain:** Feeding America data are freely available
+-   **Public Domain:** Feeding America and Census data are freely available
 -   **Appropriate Use:** Tool designed for policy analysis, not surveillance
 -   **Equity Focus:** Explicit attention to racial/ethnic disparities
+-   **Census Compliance:** All use adheres to U.S. Census Bureau terms of service
 
 ### Reproducibility
 
-**Version Control:** - Full Git history with descriptive commit messages - Tagged releases for major milestones - Branch-based development workflow
+**Version Control:** 
+- Full Git history with descriptive commit messages 
+- Tagged releases for major milestones 
+- Branch-based development workflow
 
-**Documentation:** - Inline code comments - README with installation instructions - Data dictionary (in progress) - Session info capture (`sessionInfo()`)
+**Documentation:** 
+- Inline code comments 
+- README with installation instructions 
+- Data dictionary (in progress) 
+- Session info capture (`sessionInfo()`)
 
 **Environment:**
 
@@ -340,45 +460,78 @@ Food insecurity—the economic inability to consistently afford adequate food—
 
 ### Policy Relevance
 
-This dashboard supports: - **Targeted Interventions:** Identify high-need counties - **Program Evaluation:** Assess SNAP and WIC impact - **Equity Analysis:** Track racial/ethnic disparities - **Resource Allocation:** Guide funding decisions - **Academic Research:** Enable hypothesis testing and modeling
-
+This dashboard supports: 
+- **Targeted Interventions:** Identify high-need counties 
+- **Program Evaluation:** Assess SNAP and WIC impact 
+- **Equity Analysis:** Track racial/ethnic disparities 
+- **Resource Allocation:** Guide funding decisions 
+- **Academic Research:** Enable hypothesis testing and modeling
+  
 ------------------------------------------------------------------------
 
 ## References
 
-**Primary Data Source:**
+### Data Sources
 
 **Feeding America (2024).** *Map the Meal Gap 2024: Overall Food Insecurity in the United States.* Retrieved from https://www.feedingamerica.org/research/map-the-meal-gap/by-county
 
-**Government Statistics:**
+**U.S. Census Bureau (2024).** *American Community Survey 5-Year Estimates.* Retrieved from https://www.census.gov/data/developers/data-sets/acs-5year.html
 
-**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** *Household Food Security in the United States in 2022.* U.S. Department of Agriculture, Economic Research Service, ERR-325.\
+**U.S. Census Bureau API.** *American Community Survey 5-Year Data (2009-2023).* Retrieved from https://api.census.gov/data.html
+
+### Government Statistics
+
+**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** *Household Food Security in the United States in 2022.* U.S. Department of Agriculture, Economic Research Service, ERR-325.  
 https://www.ers.usda.gov/publications/pub-details/?pubid=107703
 
-**U.S. Department of Agriculture, Economic Research Service (2024).** *Food Security in the U.S.* Retrieved from\
+**U.S. Department of Agriculture, Economic Research Service (2024).** *Food Security in the U.S.* Retrieved from  
 https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u-s/
 
-**Academic Literature:**
+### Academic Literature
 
-**Gundersen, C., & Ziliak, J. P. (2015).** *Food Insecurity and Health Outcomes.* Health Affairs, 34(11), 1830-1839.\
+**Gundersen, C., & Ziliak, J. P. (2015).** *Food Insecurity and Health Outcomes.* Health Affairs, 34(11), 1830-1839.  
 https://doi.org/10.1377/hlthaff.2015.0645
 
-**Gundersen, C., Kreider, B., & Pepper, J. (2017).** *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.\
+**Gundersen, C., Kreider, B., & Pepper, J. (2017).** *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.  
 https://doi.org/10.7758/rsf.2017.3.2.06
+
+### Policy Analysis
 
 **Gregory, C. A., & Coleman-Jensen, A. (2017).** *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
 
+### Geographic Analysis
+
 **Gundersen, C., Dewey, A., Crumbaugh, A., Kato, M., & Engelhard, E. (2024).** *Map the Meal Gap 2024: An Analysis of County and Congressional District Food Insecurity and County Food Cost in the United States.* Feeding America.
 
+### Racial Equity
+
 **Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020).** *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
+
+**Walker, K., & Herman, M. (2023).** *tidycensus: Load US Census Boundary and Attribute Data as 'tidyverse' and 'sf'-Ready Data Frames.* R package version 1.5.  
+https://walker-data.com/tidycensus/
 
 ------------------------------------------------------------------------
 
 ## Future Enhancements
 
-**Planned Features:** - \[ \] Download buttons for all plots and tables - \[ \] PDF report generation - \[ \] Advanced filtering with AND/OR logic - \[ \] Time series forecasting models - \[ \] Spatial autocorrelation analysis - \[ \] Mobile-responsive design improvements - \[ \] Accessibility audit (WCAG 2.1 AA compliance) - \[ \] Multi-language support (Spanish)
+**Planned Features:** 
+- [ ] Download buttons for all plots and tables 
+- [ ] PDF report generation 
+- [ ] Advanced filtering with AND/OR logic 
+- [ ] Time series forecasting models 
+- [ ] Spatial autocorrelation analysis 
+- [ ] Mobile-responsive design improvements 
+- [ ] Accessibility audit (WCAG 2.1 AA compliance) 
+- [ ] Multi-language support (Spanish)
+- [ ] Real-time Census ACS data updates via API
+- [ ] Additional ACS variables (disability status, language, transportation)
 
-**Technical Debt:** - \[ \] Unit tests for server functions - \[ \] Integration tests for UI interactions - \[ \] Performance profiling and optimization - \[ \] Database backend for faster loading - \[ \] Docker containerization
+**Technical Debt:** 
+- [ ] Unit tests for server functions 
+- [ ] Integration tests for UI interactions 
+- [ ] Performance profiling and optimization 
+- [ ] Database backend for faster loading 
+- [ ] Docker containerization
 
 ------------------------------------------------------------------------
 
@@ -398,19 +551,28 @@ We welcome contributions! Please:
 
 ## Troubleshooting
 
-**Issue:** App won't load data\
-**Solution:** Ensure Excel files are in `data/` directory with exact names: - `feeding_america(2009-2018).xlsx` - `feeding_america(2019-2023).xlsx`
+**Issue:** App won't load data  
+**Solution:** Ensure Excel files are in `data/` directory with exact names: 
+- `feeding_america(2009-2018).xlsx` 
+- `feeding_america(2019-2023).xlsx`
 
-**Issue:** Missing packages error\
+**Issue:** Missing packages error  
 **Solution:** Run `install.packages("package_name")` or let global.R auto-install
 
-**Issue:** Map not rendering\
+**Issue:** Census API key error  
+**Solution:** Obtain free key at https://api.census.gov/data/key_signup.html, then run:
+```r
+library(tidycensus)
+census_api_key("YOUR_KEY", install = TRUE)
+```
+
+**Issue:** Map not rendering  
 **Solution:** Check internet connection (required for Leaflet tiles)
 
-**Issue:** Slow performance\
+**Issue:** Slow performance  
 **Solution:** Filter to specific states/years to reduce data volume
 
-**Issue:** Plots not using custom theme\
+**Issue:** Plots not using custom theme  
 **Solution:** Verify `global.R` runs successfully and `theme_set(bs_theme)` executes
 
 ------------------------------------------------------------------------
@@ -423,6 +585,10 @@ If you use this dashboard in research or publications, please cite:
 Muhirwe, C. L., Wanyana, S., Tompkins, R., & Arevalo, A. (2024). 
 Investigating U.S. Food Insecurity Through Data: An Interactive R Shiny Dashboard. 
 American University. https://github.com/LinusConradM/FoodInsecurityDashboard
+
+Data sources:
+- Feeding America. (2024). Map the Meal Gap. https://www.feedingamerica.org/research/map-the-meal-gap
+- U.S. Census Bureau. (2024). American Community Survey 5-Year Estimates. https://www.census.gov/programs-surveys/acs
 ```
 
 ------------------------------------------------------------------------
@@ -431,9 +597,12 @@ American University. https://github.com/LinusConradM/FoodInsecurityDashboard
 
 This work is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
 
-You are free to: - **Share** — Copy and redistribute the material in any medium or format - **Adapt** — Remix, transform, and build upon the material for any purpose, even commercially
+You are free to: 
+- **Share** — Copy and redistribute the material in any medium or format 
+- **Adapt** — Remix, transform, and build upon the material for any purpose, even commercially
 
-Under the following terms: - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+Under the following terms: 
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 
 Full license text: https://creativecommons.org/licenses/by/4.0/
 
@@ -442,10 +611,12 @@ Full license text: https://creativecommons.org/licenses/by/4.0/
 ## Acknowledgments
 
 -   **Feeding America** for providing comprehensive county-level food insecurity data
+-   **U.S. Census Bureau** for American Community Survey data and API access
 -   **USDA Economic Research Service** for national food security statistics
 -   **American University** for institutional support
 -   **Professor Richard Ressler** for course guidance and feedback
 -   **R Shiny Community** for extensive documentation and examples
+-   **tidycensus developers** (Kyle Walker and Matt Herman) for excellent Census API tools
 
 ------------------------------------------------------------------------
 
