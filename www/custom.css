@@ -199,20 +199,30 @@ p, li {
 }
 
 /* ===============================================================
-   Sub-tabs (Analysis / Exploration inner tabs)
+   Sub-tabs (Exploration / Analysis inner tabsetPanel ONLY)
    =============================================================== */
-.nav-tabs .nav-link {
-  font-size: 22px !important;
-  font-weight: 600 !important;
-  color: #0a8a6a !important;
-  padding: 12px 20px !important;
-  border-radius: 10px !important;
+
+.tab-content {
+  margin-top: 12px;
 }
 
-.nav-tabs .nav-link.active {
+/* Normal inner tabs */
+.nav-tabs > li > a {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #0a8a6a !important;
+  padding: 10px 18px !important;
+  border-radius: 10px 10px 0 0 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Active inner tab */
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover {
   background-color: #e6e6ff !important;
   color: #220BED !important;
   font-weight: 800 !important;
   border: 2px solid #220BED !important;
-  border-bottom: none !important;
+  border-bottom: 2px solid #e6e6ff !important;
 }

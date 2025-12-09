@@ -1,5 +1,8 @@
 # ==============================================================================
-# SHARED HELPER FUNCTIONS
+# HELPER FUNCTIONS
+# ==============================================================================
+# PURPOSE: Utility functions used across multiple modules
+# TEAM: Conrad, Sharon, Ryann, Alex
 # ==============================================================================
 
 library(dplyr)
@@ -23,4 +26,3 @@ filter_state_county <- function(df) {
 filter_state_data <- function(df, state_value) {
   df %>% filter(state == state_value)
 }
-
