@@ -504,43 +504,28 @@ This dashboard supports:
 
 ## References
 
-### Data Sources
+**Feeding America (2025).** *Map the Meal Gap Data.* Retrieved from https://www.feedingamerica.org/research/map-the-meal-gap/by-county
 
-**Feeding America (2024).** *Map the Meal Gap 2024: Overall Food Insecurity in the United States.* Retrieved from https://www.feedingamerica.org/research/map-the-meal-gap/by-county
+**Feeding America. (2023).** *Map the Meal Gap 2023: Overall food insecurity in the United States by county in 2021.* Feeding America. 
+[https://www.feedingamerica.org/research/map-the-meal-gap](https://www.feedingamerica.org/sites/default/files/2023-05/Map%20the%20Meal%20Gap%202023.pdf)
 
 **U.S. Census Bureau (2024).** *American Community Survey 5-Year Estimates.* Retrieved from https://www.census.gov/data/developers/data-sets/acs-5year.html
 
 **U.S. Census Bureau API.** *American Community Survey 5-Year Data (2009-2023).* Retrieved from https://api.census.gov/data.html
 
-### Government Statistics
-
-**Coleman-Jensen, A., Rabbitt, M. P., Gregory, C. A., & Singh, A. (2023).** *Household Food Security in the United States in 2022.* U.S. Department of Agriculture, Economic Research Service, ERR-325.  
-https://www.ers.usda.gov/publications/pub-details/?pubid=107703
-
-**U.S. Department of Agriculture, Economic Research Service (2024).** *Food Security in the U.S.* Retrieved from  
-https://www.ers.usda.gov/topics/food-nutrition-assistance/food-security-in-the-u-s/
-
-### Academic Literature
+**Rabbitt, M. P., Reed-Jones, M., Hales, L. J., & Burke, M. P. (2024)**. *Household food security in the United States in 2023* (Report No. ERR-337). U.S. Department of Agriculture, Economic Research Service. https://doi.org/10.32747/2024.8583175.ers
 
 **Gundersen, C., & Ziliak, J. P. (2015).** *Food Insecurity and Health Outcomes.* Health Affairs, 34(11), 1830-1839.  
 https://doi.org/10.1377/hlthaff.2015.0645
 
-**Gundersen, C., Kreider, B., & Pepper, J. (2017).** *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* RSF: The Russell Sage Foundation Journal of the Social Sciences, 3(2), 113-130.  
-https://doi.org/10.7758/rsf.2017.3.2.06
-
-### Policy Analysis
+**Gundersen, C., Kreider, B., & Pepper, J. (2017).** *Reconstructing the Supplemental Nutrition Assistance Program to More Effectively Alleviate Food Insecurity in the United States.* RSF: The Russell Sage Foundation Journal of the Social Sciences February 2018, 4 (2) 113-130.
+https://doi.org/10.7758/RSF.2018.4.2.06  
 
 **Gregory, C. A., & Coleman-Jensen, A. (2017).** *Food Insecurity, Chronic Disease, and Health Among Working-Age Adults.* USDA-ERS Economic Research Report No. 235.
+https://www.ers.usda.gov/publications/pub-details?pubid=84466
 
-### Geographic Analysis
-
-**Gundersen, C., Dewey, A., Crumbaugh, A., Kato, M., & Engelhard, E. (2024).** *Map the Meal Gap 2024: An Analysis of County and Congressional District Food Insecurity and County Food Cost in the United States.* Feeding America.
-
-### Racial Equity
-
-**Myers, A. M., Painter, M. A., Frelier, J. M., et al. (2020).** *Disparities in Food Insecurity Among Racial and Ethnic Minority Groups.* Journal of Hunger & Environmental Nutrition, 15(6), 717-731.
-
-### R Packages
+**Hake, M., Dewey, A., Engelhard, E., & Dawes, S. (2024)**. *Map the Meal Gap 2024: A Report on County and Congressional District Food Insecurity and County Food Cost in the United States in 2022*. Feeding America.
+https://www.feedingamerica.org/research/map-the-meal-gap/overall-executive-summary
 
 **Walker, K., & Herman, M. (2023).** *tidycensus: Load US Census Boundary and Attribute Data as 'tidyverse' and 'sf'-Ready Data Frames.* R package version 1.5.  
 https://walker-data.com/tidycensus/
