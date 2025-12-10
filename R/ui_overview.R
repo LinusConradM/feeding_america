@@ -10,9 +10,200 @@ ui_overview <- tabPanel(
   "Overview",
   fluidPage(
     # ========================================================================
+    # KEY METRICS (KPI TILES) - MOVED TO TOP
+    # ========================================================================
+    
+    fluidRow(
+      column(
+        12,
+        h3(
+          icon("chart-line"), " Key National Indicators (2023)",
+          style = "color: #667eea; margin-bottom: 20px; font-size: 22px;"
+        )
+      )
+    ),
+    
+    # ROW 1: Food Insecurity Metrics
+    fluidRow(
+      # National FI Rate
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #dc3545; transition: transform 0.2s;",
+          div(icon("utensils", style = "font-size: 2em; color: #dc3545; margin-bottom: 10px;")),
+          div("National FI Rate",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_national_fi_rate"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_fi_rate_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Food Insecure Persons
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #ffc107;",
+          div(icon("users", style = "font-size: 2em; color: #ffc107; margin-bottom: 10px;")),
+          div("Food Insecure Persons",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_total_food_insecure"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_fi_persons_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Child FI Rate
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #17a2b8;",
+          div(icon("child", style = "font-size: 2em; color: #17a2b8; margin-bottom: 10px;")),
+          div("Child FI Rate",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_child_fi_rate"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_child_fi_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Avg Cost per Meal
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #28a745;",
+          div(icon("dollar-sign", style = "font-size: 2em; color: #28a745; margin-bottom: 10px;")),
+          div("Avg. Cost per Meal",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_avg_cost_per_meal"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_cost_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      )
+    ),
+    
+    # ROW 2: Socioeconomic Drivers
+    fluidRow(
+      style = "margin-top: 20px;",
+      
+      # Poverty Rate
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #6f42c1;",
+          div(icon("hand-holding-dollar", style = "font-size: 2em; color: #6f42c1; margin-bottom: 10px;")),
+          div("National Poverty Rate",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_poverty_rate"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_poverty_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Median Income
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #20c997;",
+          div(icon("money-bill-wave", style = "font-size: 2em; color: #20c997; margin-bottom: 10px;")),
+          div("Median Income",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_median_income"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_income_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Unemployment Rate
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #fd7e14;",
+          div(icon("briefcase", style = "font-size: 2em; color: #fd7e14; margin-bottom: 10px;")),
+          div("Unemployment Rate",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_unemployment_rate"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_unemployment_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      ),
+      
+      # Annual Budget Shortfall
+      column(
+        3,
+        div(
+          class = "kpi-box",
+          style = "background: white; padding: 20px; border-radius: 8px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+                   border-top: 4px solid #e83e8c;",
+          div(icon("chart-line", style = "font-size: 2em; color: #e83e8c; margin-bottom: 10px;")),
+          div("Annual Budget Shortfall",
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+          ),
+          div(textOutput("kpi_budget_shortfall"),
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
+          ),
+          div(uiOutput("kpi_shortfall_change"),
+              style = "font-size: 12px; margin-top: 8px;"
+          )
+        )
+      )
+    ),
+    
+    # ========================================================================
     # HEADER SECTION: What is Food Insecurity? (IMPROVED READABILITY)
     # ========================================================================
     fluidRow(
+      style = "margin-top: 30px;",
       column(
         12,
         div(
@@ -219,197 +410,6 @@ ui_overview <- tabPanel(
               strong("Policy: "),
               "SNAP participation, eligibility thresholds"
             )
-          )
-        )
-      )
-    ),
-    
-    # ========================================================================
-    # KEY METRICS (KPI TILES)
-    # ========================================================================
-    
-    fluidRow(
-      style = "margin-top: 30px;",
-      column(
-        12,
-        h3(
-          icon("chart-line"), " Key National Indicators (2023)",
-          style = "color: #667eea; margin-bottom: 20px; font-size: 22px;"
-        )
-      )
-    ),
-    
-    # ROW 1: Food Insecurity Metrics
-    fluidRow(
-      # National FI Rate
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #dc3545; transition: transform 0.2s;",
-          div(icon("utensils", style = "font-size: 2em; color: #dc3545; margin-bottom: 10px;")),
-          div("National FI Rate",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_national_fi_rate"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_fi_rate_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Food Insecure Persons
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #ffc107;",
-          div(icon("users", style = "font-size: 2em; color: #ffc107; margin-bottom: 10px;")),
-          div("Food Insecure Persons",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_total_food_insecure"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_fi_persons_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Child FI Rate
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #17a2b8;",
-          div(icon("child", style = "font-size: 2em; color: #17a2b8; margin-bottom: 10px;")),
-          div("Child FI Rate",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_child_fi_rate"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_child_fi_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Avg Cost per Meal
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #28a745;",
-          div(icon("dollar-sign", style = "font-size: 2em; color: #28a745; margin-bottom: 10px;")),
-          div("Avg. Cost per Meal",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_avg_cost_per_meal"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_cost_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      )
-    ),
-    
-    # ROW 2: Socioeconomic Drivers
-    fluidRow(
-      style = "margin-top: 20px;",
-      
-      # Poverty Rate
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #6f42c1;",
-          div(icon("hand-holding-dollar", style = "font-size: 2em; color: #6f42c1; margin-bottom: 10px;")),
-          div("National Poverty Rate",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_poverty_rate"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_poverty_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Median Income
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #20c997;",
-          div(icon("money-bill-wave", style = "font-size: 2em; color: #20c997; margin-bottom: 10px;")),
-          div("Median Income",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_median_income"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_income_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Unemployment Rate
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #fd7e14;",
-          div(icon("briefcase", style = "font-size: 2em; color: #fd7e14; margin-bottom: 10px;")),
-          div("Unemployment Rate",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_unemployment_rate"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_unemployment_change"),
-              style = "font-size: 12px; margin-top: 8px;"
-          )
-        )
-      ),
-      
-      # Annual Budget Shortfall
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 20px; border-radius: 8px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #e83e8c;",
-          div(icon("chart-line", style = "font-size: 2em; color: #e83e8c; margin-bottom: 10px;")),
-          div("Annual Budget Shortfall",
-              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
-          ),
-          div(textOutput("kpi_budget_shortfall"),
-              style = "font-size: 32px; font-weight: 700; color: #212529;"
-          ),
-          div(uiOutput("kpi_shortfall_change"),
-              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       )
