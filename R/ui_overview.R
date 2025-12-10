@@ -22,13 +22,13 @@ ui_overview <- tabPanel(
                    margin-bottom: 30px;
                    border-left: 6px solid #667eea;
                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
-
+          
           # Clear Title with Food Icon
           h2(
             "🍞 Understanding Food Insecurity in America",
             style = "margin-top: 0; font-weight: 700; color: #2c3e50; margin-bottom: 25px;"
           ),
-
+          
           # Definition and Why It Matters - SIDE BY SIDE
           fluidRow(
             # LEFT: What is Food Insecurity?
@@ -41,7 +41,7 @@ ui_overview <- tabPanel(
                          border-left: 4px solid #667eea;
                          height: 100%;",
                 h4("What is Food Insecurity?",
-                  style = "color: #667eea; margin-top: 0; margin-bottom: 12px;"
+                   style = "color: #667eea; margin-top: 0; margin-bottom: 12px;"
                 ),
                 p(
                   style = "font-size: 15px; line-height: 1.6; color: #2c3e50; margin-bottom: 12px;",
@@ -57,7 +57,7 @@ ui_overview <- tabPanel(
                 )
               )
             ),
-
+            
             # RIGHT: Why It Matters (Evidence-Based)
             column(
               6,
@@ -68,7 +68,7 @@ ui_overview <- tabPanel(
                          border-left: 4px solid #dc3545;
                          height: 100%;",
                 h4("Why It Matters:",
-                  style = "color: #dc3545; margin-top: 0; margin-bottom: 12px;"
+                   style = "color: #dc3545; margin-top: 0; margin-bottom: 12px;"
                 ),
                 tags$ul(
                   style = "font-size: 14px; line-height: 1.7; color: #2c3e50; margin-bottom: 0; padding-left: 20px;",
@@ -99,11 +99,11 @@ ui_overview <- tabPanel(
         )
       )
     ),
-
+    
     # ========================================================================
     # DATA SOURCES + VARIABLES ANALYZED (SIDE BY SIDE)
     # ========================================================================
-
+    
     fluidRow(
       # LEFT: DATA SOURCES
       column(
@@ -118,7 +118,7 @@ ui_overview <- tabPanel(
             icon("database"), " Data Sources",
             style = "margin-top: 0; color: #667eea; margin-bottom: 20px; font-size: 20px;"
           ),
-
+          
           # Feeding America
           div(
             style = "margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;",
@@ -137,7 +137,7 @@ ui_overview <- tabPanel(
               style = "color: #667eea; text-decoration: none; font-size: 14px;"
             )
           ),
-
+          
           # Census ACS
           div(
             style = "margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;",
@@ -156,7 +156,7 @@ ui_overview <- tabPanel(
               style = "color: #667eea; text-decoration: none; font-size: 14px;"
             )
           ),
-
+          
           # Coverage
           div(
             style = "padding: 12px; background-color: #e7f3ff; border-radius: 6px; border-left: 3px solid #0066cc;",
@@ -167,7 +167,7 @@ ui_overview <- tabPanel(
           )
         )
       ),
-
+      
       # RIGHT: VARIABLES ANALYZED
       column(
         6,
@@ -223,11 +223,11 @@ ui_overview <- tabPanel(
         )
       )
     ),
-
+    
     # ========================================================================
     # KEY METRICS (KPI TILES)
     # ========================================================================
-
+    
     fluidRow(
       style = "margin-top: 30px;",
       column(
@@ -238,7 +238,7 @@ ui_overview <- tabPanel(
         )
       )
     ),
-
+    
     # ROW 1: Food Insecurity Metrics
     fluidRow(
       # National FI Rate
@@ -251,17 +251,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #dc3545; transition: transform 0.2s;",
           div(icon("utensils", style = "font-size: 2em; color: #dc3545; margin-bottom: 10px;")),
           div("National FI Rate",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_national_fi_rate"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_fi_rate_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Food Insecure Persons
       column(
         3,
@@ -272,17 +272,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #ffc107;",
           div(icon("users", style = "font-size: 2em; color: #ffc107; margin-bottom: 10px;")),
           div("Food Insecure Persons",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_total_food_insecure"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_fi_persons_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Child FI Rate
       column(
         3,
@@ -293,17 +293,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #17a2b8;",
           div(icon("child", style = "font-size: 2em; color: #17a2b8; margin-bottom: 10px;")),
           div("Child FI Rate",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_child_fi_rate"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_child_fi_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Avg Cost per Meal
       column(
         3,
@@ -314,22 +314,22 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #28a745;",
           div(icon("dollar-sign", style = "font-size: 2em; color: #28a745; margin-bottom: 10px;")),
           div("Avg. Cost per Meal",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_avg_cost_per_meal"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_cost_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       )
     ),
-
+    
     # ROW 2: Socioeconomic Drivers
     fluidRow(
       style = "margin-top: 20px;",
-
+      
       # Poverty Rate
       column(
         3,
@@ -340,17 +340,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #6f42c1;",
           div(icon("hand-holding-dollar", style = "font-size: 2em; color: #6f42c1; margin-bottom: 10px;")),
           div("National Poverty Rate",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_poverty_rate"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_poverty_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Median Income
       column(
         3,
@@ -361,17 +361,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #20c997;",
           div(icon("money-bill-wave", style = "font-size: 2em; color: #20c997; margin-bottom: 10px;")),
           div("Median Income",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_median_income"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_income_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Unemployment Rate
       column(
         3,
@@ -382,17 +382,17 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #fd7e14;",
           div(icon("briefcase", style = "font-size: 2em; color: #fd7e14; margin-bottom: 10px;")),
           div("Unemployment Rate",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_unemployment_rate"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_unemployment_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       ),
-
+      
       # Annual Budget Shortfall
       column(
         3,
@@ -403,22 +403,22 @@ ui_overview <- tabPanel(
                    border-top: 4px solid #e83e8c;",
           div(icon("chart-line", style = "font-size: 2em; color: #e83e8c; margin-bottom: 10px;")),
           div("Annual Budget Shortfall",
-            style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
+              style = "font-size: 13px; color: #6c757d; margin-bottom: 5px; font-weight: 600;"
           ),
           div(textOutput("kpi_budget_shortfall"),
-            style = "font-size: 32px; font-weight: 700; color: #212529;"
+              style = "font-size: 32px; font-weight: 700; color: #212529;"
           ),
           div(uiOutput("kpi_shortfall_change"),
-            style = "font-size: 12px; margin-top: 8px;"
+              style = "font-size: 12px; margin-top: 8px;"
           )
         )
       )
     ),
-
+    
     # ========================================================================
     # KEY INSIGHTS (MOVED TO BOTTOM, FULL WIDTH)
     # ========================================================================
-
+    
     fluidRow(
       style = "margin-top: 40px; margin-bottom: 30px;",
       column(
