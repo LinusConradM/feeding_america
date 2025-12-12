@@ -469,3 +469,33 @@ if (length(multinomial_suitable) > 0) {
   cat("    →", paste(multinomial_suitable, collapse = ", "), "\n")
 }
 cat("========================================\n\n")
+cat("Loading beautiful KPI cards...\n")
+source("R/beautiful_kpi_cards.R")
+cat("✓ Beautiful KPI cards loaded\n\n")
+
+
+cat("Creating state name lookup for maps...\n")
+
+state_name_lookup <- tibble(
+  state = c(
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL",
+    "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
+    "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
+    "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
+    "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+  ),
+  state_name = c(
+    "alabama", "alaska", "arizona", "arkansas", "california", "colorado",
+    "connecticut", "delaware", "district of columbia", "florida",
+    "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas",
+    "kentucky", "louisiana", "maine",
+    "maryland", "massachusetts", "michigan", "minnesota", "mississippi",
+    "missouri", "montana", "nebraska", "nevada", "new hampshire",
+    "new jersey", "new mexico", "new york", "north carolina", "north dakota",
+    "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island",
+    "south carolina", "south dakota", "tennessee", "texas", "utah", "vermont",
+    "virginia", "washington", "west virginia", "wisconsin", "wyoming"
+  )
+)
+
+cat("✓ State name lookup created (", nrow(state_name_lookup), " states)\n\n")
