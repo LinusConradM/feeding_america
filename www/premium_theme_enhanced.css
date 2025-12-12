@@ -1,0 +1,630 @@
+/* ==============================================================================
+   PREMIUM DASHBOARD THEME - ENHANCED WITH COLORFUL CARDS
+   ============================================================================== */
+
+/* ==============================================================================
+   COLOR SYSTEM
+   ============================================================================== */
+
+:root {
+  /* Primary Colors */
+  --navy-deep: #1E3A5F;
+  --warm-amber: #F4A261;
+  --fresh-mint: #2A9D8F;
+  --deep-plum: #9D4EDD;
+  
+  /* Supporting Colors */
+  --chart-blue: #457B9D;
+  --alert-coral: #E63946;
+  --success-green: #06D6A0;
+  --soft-gray: #F8F9FA;
+  --near-black: #1A1A1A;
+  
+  /* Gradients */
+  --gradient-blue: linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%);
+  --gradient-mint: linear-gradient(135deg, #2A9D8F 0%, #3CBAA8 100%);
+  --gradient-amber: linear-gradient(135deg, #F4A261 0%, #F8B179 100%);
+  --gradient-plum: linear-gradient(135deg, #9D4EDD 0%, #B96EF0 100%);
+  --gradient-coral: linear-gradient(135deg, #E63946 0%, #F05258 100%);
+  --gradient-success: linear-gradient(135deg, #06D6A0 0%, #1DE5B5 100%);
+}
+
+/* ==============================================================================
+   COLORFUL KPI CARDS
+   ============================================================================== */
+
+/* Base KPI Box Styling */
+.kpi-box,
+.value-box,
+.info-box,
+.small-box {
+  border-radius: 12px !important;
+  padding: 24px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+.kpi-box:hover,
+.value-box:hover,
+.info-box:hover,
+.small-box:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* KPI Card Variants with Gradients */
+
+/* Food Insecurity Rate - Coral Alert */
+.kpi-box:nth-of-type(1),
+div[id*="national_fi"]:has(.kpi-box),
+div:has(> #kpi_national_fi_rate) {
+  background: var(--gradient-coral) !important;
+  color: white !important;
+}
+
+.kpi-box:nth-of-type(1)::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+/* Total Food Insecure - Navy Deep */
+.kpi-box:nth-of-type(2),
+div:has(> #kpi_total_food_insecure) {
+  background: var(--gradient-blue) !important;
+  color: white !important;
+}
+
+/* Child FI Rate - Deep Plum */
+.kpi-box:nth-of-type(3),
+div:has(> #kpi_child_fi_rate) {
+  background: var(--gradient-plum) !important;
+  color: white !important;
+}
+
+/* Cost Per Meal - Warm Amber */
+.kpi-box:nth-of-type(4),
+div:has(> #kpi_avg_cost_per_meal) {
+  background: var(--gradient-amber) !important;
+  color: white !important;
+}
+
+/* Poverty Rate - Chart Blue */
+.kpi-box:nth-of-type(5),
+div:has(> #kpi_poverty_rate) {
+  background: linear-gradient(135deg, #457B9D 0%, #5A94B8 100%) !important;
+  color: white !important;
+}
+
+/* Median Income - Success Green */
+.kpi-box:nth-of-type(6),
+div:has(> #kpi_median_income) {
+  background: var(--gradient-success) !important;
+  color: white !important;
+}
+
+/* Unemployment Rate - Alert Coral */
+.kpi-box:nth-of-type(7),
+div:has(> #kpi_unemployment_rate) {
+  background: var(--gradient-coral) !important;
+  color: white !important;
+}
+
+/* Budget Shortfall - Navy Deep */
+.kpi-box:nth-of-type(8),
+div:has(> #kpi_budget_shortfall) {
+  background: var(--gradient-blue) !important;
+  color: white !important;
+}
+
+/* Additional Metrics - Fresh Mint */
+.kpi-box:nth-of-type(9),
+.kpi-box:nth-of-type(10),
+.kpi-box:nth-of-type(11),
+.kpi-box:nth-of-type(12) {
+  background: var(--gradient-mint) !important;
+  color: white !important;
+}
+
+/* ==============================================================================
+   KPI TEXT STYLING
+   ============================================================================== */
+
+.kpi-box h3,
+.kpi-box h4,
+.value-box h3,
+.value-box h4 {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 12px !important;
+}
+
+.kpi-box h1,
+.kpi-box h2,
+.value-box h1,
+.value-box h2 {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 36px !important;
+  margin: 8px 0 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-box p,
+.value-box p {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 13px !important;
+  margin-top: 8px !important;
+}
+
+/* ==============================================================================
+   CHANGE INDICATORS (↑↓ arrows)
+   ============================================================================== */
+
+.kpi-box span[style*="color"],
+.value-box span[style*="color"] {
+  background: rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  display: inline-block !important;
+  margin-top: 8px !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ==============================================================================
+   CARD CONTAINERS
+   ============================================================================== */
+
+.well,
+.panel,
+.box {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(30, 58, 95, 0.1) !important;
+  margin-bottom: 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+.well:hover,
+.panel:hover,
+.box:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* ==============================================================================
+   PLOT/CHART CONTAINERS
+   ============================================================================== */
+
+div[id*="plot"],
+div[id*="chart"],
+div[id*="map"],
+div[id*="trend"] {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  margin-bottom: 24px !important;
+  border: 1px solid rgba(30, 58, 95, 0.08) !important;
+  transition: all 0.3s ease !important;
+}
+
+div[id*="plot"]:hover,
+div[id*="chart"]:hover,
+div[id*="trend"]:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  border-color: var(--fresh-mint) !important;
+  border-width: 2px !important;
+}
+
+/* ==============================================================================
+   SECTION HEADERS
+   ============================================================================== */
+
+h1, h2, h3, h4 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  color: var(--navy-deep) !important;
+}
+
+h1 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  margin-bottom: 24px !important;
+  border-bottom: 3px solid var(--fresh-mint) !important;
+  padding-bottom: 12px !important;
+}
+
+h2 {
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
+  color: var(--navy-deep) !important;
+}
+
+h3 {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+/* ==============================================================================
+   TABS STYLING
+   ============================================================================== */
+
+.nav-tabs {
+  border-bottom: 2px solid #E5E7EB !important;
+  margin-bottom: 24px !important;
+}
+
+.nav-tabs > li > a {
+  color: #6B7280 !important;
+  font-weight: 500 !important;
+  padding: 12px 20px !important;
+  border: none !important;
+  transition: all 0.2s !important;
+}
+
+.nav-tabs > li > a:hover {
+  background: rgba(42, 157, 143, 0.1) !important;
+  color: var(--fresh-mint) !important;
+  border: none !important;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  background: white !important;
+  color: var(--navy-deep) !important;
+  border: none !important;
+  border-bottom: 3px solid var(--fresh-mint) !important;
+  font-weight: 600 !important;
+}
+
+/* ==============================================================================
+   BUTTONS
+   ============================================================================== */
+
+.btn {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 13px !important;
+}
+
+.btn-primary {
+  background: var(--gradient-mint) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3) !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(42, 157, 143, 0.4) !important;
+}
+
+.btn-success {
+  background: var(--gradient-success) !important;
+  color: white !important;
+}
+
+.btn-info {
+  background: var(--gradient-blue) !important;
+  color: white !important;
+}
+
+.btn-warning {
+  background: var(--gradient-amber) !important;
+  color: white !important;
+}
+
+.btn-danger {
+  background: var(--gradient-coral) !important;
+  color: white !important;
+}
+
+/* ==============================================================================
+   DATA TABLES
+   ============================================================================== */
+
+.dataTables_wrapper {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+table.dataTable thead th {
+  background: var(--navy-deep) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 16px !important;
+  border: none !important;
+}
+
+table.dataTable tbody tr:hover {
+  background: rgba(42, 157, 143, 0.08) !important;
+}
+
+table.dataTable tbody td {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+/* ==============================================================================
+   FORM CONTROLS
+   ============================================================================== */
+
+.form-control,
+.selectize-input,
+select,
+input[type="text"],
+input[type="number"] {
+  border-radius: 8px !important;
+  border: 2px solid #E5E7EB !important;
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.2s !important;
+}
+
+.form-control:focus,
+.selectize-input.focus,
+select:focus,
+input:focus {
+  border-color: var(--fresh-mint) !important;
+  box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1) !important;
+  outline: none !important;
+}
+
+/* ==============================================================================
+   LEAFLET MAP STYLING
+   ============================================================================== */
+
+.leaflet-container {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ==============================================================================
+   LOADING INDICATORS
+   ============================================================================== */
+
+.shiny-output-error {
+  color: var(--alert-coral) !important;
+  background: rgba(230, 57, 70, 0.1) !important;
+  padding: 16px !important;
+  border-radius: 8px !important;
+  border-left: 4px solid var(--alert-coral) !important;
+}
+
+.recalculating {
+  opacity: 0.5 !important;
+  transition: opacity 0.3s !important;
+}
+
+/* ==============================================================================
+   PROGRESS BARS
+   ============================================================================== */
+
+.progress {
+  height: 8px !important;
+  border-radius: 8px !important;
+  background: #E5E7EB !important;
+  overflow: hidden !important;
+}
+
+.progress-bar {
+  background: var(--gradient-mint) !important;
+  transition: width 0.6s ease !important;
+}
+
+/* ==============================================================================
+   ALERTS & NOTIFICATIONS
+   ============================================================================== */
+
+.alert {
+  border-radius: 8px !important;
+  padding: 16px 20px !important;
+  border: none !important;
+  border-left: 4px solid !important;
+  margin-bottom: 20px !important;
+}
+
+.alert-info {
+  background: rgba(69, 123, 157, 0.1) !important;
+  border-left-color: var(--chart-blue) !important;
+  color: var(--navy-deep) !important;
+}
+
+.alert-success {
+  background: rgba(6, 214, 160, 0.1) !important;
+  border-left-color: var(--success-green) !important;
+  color: var(--navy-deep) !important;
+}
+
+.alert-warning {
+  background: rgba(244, 162, 97, 0.1) !important;
+  border-left-color: var(--warm-amber) !important;
+  color: var(--navy-deep) !important;
+}
+
+.alert-danger {
+  background: rgba(230, 57, 70, 0.1) !important;
+  border-left-color: var(--alert-coral) !important;
+  color: var(--navy-deep) !important;
+}
+
+/* ==============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================== */
+
+@media (max-width: 768px) {
+  .kpi-box,
+  .value-box {
+    margin-bottom: 16px !important;
+  }
+  
+  .kpi-box h1,
+  .kpi-box h2 {
+    font-size: 28px !important;
+  }
+  
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+}
+
+/* ==============================================================================
+   UTILITY CLASSES
+   ============================================================================== */
+
+.gradient-blue {
+  background: var(--gradient-blue) !important;
+  color: white !important;
+}
+
+.gradient-mint {
+  background: var(--gradient-mint) !important;
+  color: white !important;
+}
+
+.gradient-amber {
+  background: var(--gradient-amber) !important;
+  color: white !important;
+}
+
+.gradient-plum {
+  background: var(--gradient-plum) !important;
+  color: white !important;
+}
+
+.gradient-coral {
+  background: var(--gradient-coral) !important;
+  color: white !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* ==============================================================================
+   ANIMATIONS
+   ============================================================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.kpi-box,
+.value-box,
+.well,
+.panel {
+  animation: fadeIn 0.5s ease-out !important;
+}
+
+/* Stagger animation for multiple cards */
+.kpi-box:nth-child(1) { animation-delay: 0.05s; }
+.kpi-box:nth-child(2) { animation-delay: 0.10s; }
+.kpi-box:nth-child(3) { animation-delay: 0.15s; }
+.kpi-box:nth-child(4) { animation-delay: 0.20s; }
+.kpi-box:nth-child(5) { animation-delay: 0.25s; }
+.kpi-box:nth-child(6) { animation-delay: 0.30s; }
+.kpi-box:nth-child(7) { animation-delay: 0.35s; }
+.kpi-box:nth-child(8) { animation-delay: 0.40s; }
+
+/* ==============================================================================
+   ACCESSIBILITY
+   ============================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 3px solid var(--fresh-mint) !important;
+  outline-offset: 2px !important;
+}
+
+/* ==============================================================================
+   PRINT STYLES
+   ============================================================================== */
+
+@media print {
+  .kpi-box,
+  .value-box {
+    background: white !important;
+    color: black !important;
+    border: 2px solid #ccc !important;
+    box-shadow: none !important;
+  }
+  
+  .kpi-box h1,
+  .kpi-box h2,
+  .kpi-box h3 {
+    color: black !important;
+  }
+}

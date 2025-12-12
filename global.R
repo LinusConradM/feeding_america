@@ -5,10 +5,10 @@
 # ==============================================================================
 # REQUIRED PACKAGES
 # ==============================================================================
-
+library(shiny)
 required_packages <- c(
   "shiny", "tidyverse", "readxl", "leaflet", "leaflet.extras",
-  "plotly", "DT", "maps", "scales", "janitor",
+  "DT", "maps", "scales", "janitor",
   "nnet", "rpart", "rpart.plot", "broom", "pROC"
 )
 
@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
   library(tidyverse)
   library(readxl)
   library(leaflet)
-  library(plotly)
+# library(plotly)  # Using ggplot2 instead
   library(DT)
   library(maps)
   library(scales)
