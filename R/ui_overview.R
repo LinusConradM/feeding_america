@@ -1,231 +1,381 @@
 # ==============================================================================
-# UI MODULE: EXECUTIVE OVERVIEW
+# UI MODULE: EXECUTIVE OVERVIEW - COMPREHENSIVE VERSION
 # ==============================================================================
-# PURPOSE: Executive-level dashboard - answer "What is happening?"
-# FEATURES: KPIs, trend visualization, insight callouts
-# TEAM: Conrad, Sharon, Ryann, Alex
+# PURPOSE: High-level dashboard for executives and stakeholders
+# FEATURES: KPIs, trends, rankings, demographics, geography, AI insights
 # ==============================================================================
 
 ui_overview <- tabPanel(
-  "Executive Overview",
+  title = "Executive Overview",
   value = "overview",
+  icon = icon("home"),
   
   fluidPage(
-    # Global Controls
-    global_controls_ui(),
-    
-    # Page Title
-    fluidRow(
-      style = "margin-bottom: 20px;",
-      column(
-        12,
-        h2(
-          "Executive Overview Dashboard",
-          style = "color: #2c3e50; font-weight: 600; margin-bottom: 10px;"
-        ),
-        p(
-          "High-level metrics and trends at a glance",
-          style = "color: #6c757d; font-size: 16px;"
-        )
-      )
-    ),
-    
-    # ========================================================================
-    # KPI ROW 1: FOOD INSECURITY METRICS
-    # ========================================================================
-    fluidRow(
-      style = "margin-bottom: 20px;",
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #dc3545; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("utensils", style = "font-size: 2.5em; color: #dc3545; margin-bottom: 15px;")),
-          div("National FI Rate", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_national_fi_rate"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_fi_rate_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #ffc107; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("users", style = "font-size: 2.5em; color: #ffc107; margin-bottom: 15px;")),
-          div("Food Insecure Persons", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_total_food_insecure"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_fi_persons_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #17a2b8; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("user", style = "font-size: 2.5em; color: #17a2b8; margin-bottom: 15px;")),
-          div("Child FI Rate", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_child_fi_rate"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_child_fi_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #28a745; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("money-bill-wave", style = "font-size: 2.5em; color: #28a745; margin-bottom: 15px;")),
-          div("Avg. Cost per Meal", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_avg_cost_per_meal"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_cost_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      )
-    ),
-    
-    # ========================================================================
-    # KPI ROW 2: SOCIOECONOMIC DRIVERS
-    # ========================================================================
-    fluidRow(
+    # Page Header
+    div(
       style = "margin-bottom: 30px;",
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #6f42c1; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("usd", style = "font-size: 2.5em; color: #6f42c1; margin-bottom: 15px;")),
-          div("National Poverty Rate", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_poverty_rate"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_poverty_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
+      h1(
+        icon("chart-line"), 
+        "Executive Overview",
+        style = "color: #1E3A5F; font-weight: 700; border-bottom: 3px solid #2A9D8F; padding-bottom: 12px;"
       ),
-      
+      p(
+        "Comprehensive snapshot of U.S. food insecurity (2009-2023)",
+        style = "color: #6C757D; font-size: 16px; margin-top: 8px;"
+      )
+    ),
+    
+    # ========================================================================
+    # YEAR SELECTOR
+    # ========================================================================
+    fluidRow(
       column(
-        3,
+        width = 12,
         div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #20c997; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("money-bill-wave", style = "font-size: 2.5em; color: #20c997; margin-bottom: 15px;")),
-          div("Median Income", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_median_income"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_income_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #fd7e14; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("briefcase", style = "font-size: 2.5em; color: #fd7e14; margin-bottom: 15px;")),
-          div("Unemployment Rate", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_unemployment_rate"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_unemployment_change"), style = "font-size: 13px; margin-top: 10px;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          class = "kpi-box",
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
-                   border-top: 4px solid #e83e8c; height: 180px;
-                   transition: transform 0.2s;",
-          div(icon("chart-line", style = "font-size: 2.5em; color: #e83e8c; margin-bottom: 15px;")),
-          div("Annual Budget Shortfall", style = "font-size: 14px; color: #6c757d; margin-bottom: 8px; font-weight: 600;"),
-          div(textOutput("kpi_budget_shortfall"), style = "font-size: 40px; font-weight: 700; color: #212529;"),
-          div(uiOutput("kpi_shortfall_change"), style = "font-size: 13px; margin-top: 10px;")
+          style = "background: white; padding: 16px 24px; border-radius: 12px; 
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          fluidRow(
+            column(
+              width = 6,
+              selectInput(
+                "overview_year_selector",
+                label = tags$span(icon("calendar-alt"), " Select Year for Analysis"),
+                choices = 2009:2023,
+                selected = 2023,
+                width = "100%"
+              )
+            ),
+            column(
+              width = 6,
+              div(
+                style = "padding-top: 25px;",
+                actionButton(
+                  "refresh_overview",
+                  "Refresh Dashboard",
+                  icon = icon("redo"),
+                  class = "btn-primary",
+                  style = "margin-right: 10px;"
+                ),
+                actionButton(
+                  "generate_summary",
+                  "Generate AI Summary",
+                  icon = icon("robot"),
+                  class = "btn-success"
+                )
+              )
+            )
+          )
         )
       )
     ),
     
     # ========================================================================
-    # HIGH-LEVEL TREND CHART (WIDE)
+    # KPI CARDS ROW
     # ========================================================================
     fluidRow(
+      # National FI Rate
       column(
-        12,
+        width = 3,
         div(
-          style = "background: white; padding: 30px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 30px;",
-          h4(
-            icon("chart-line"), " National Food Insecurity Trend (2009-2023)",
-            style = "color: #2c3e50; margin-top: 0; margin-bottom: 20px;"
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("NATIONAL FI RATE", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_national_fi_rate"), style = "margin: 8px 0;"),
+          uiOutput("kpi_fi_rate_change")
+        )
+      ),
+      
+      # Total Food Insecure
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("FOOD INSECURE PERSONS", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_total_food_insecure"), style = "margin: 8px 0;"),
+          uiOutput("kpi_fi_persons_change")
+        )
+      ),
+      
+      # Child FI Rate
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("CHILD FI RATE", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_child_fi_rate"), style = "margin: 8px 0;"),
+          uiOutput("kpi_child_fi_change")
+        )
+      ),
+      
+      # Cost Per Meal
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("AVG COST PER MEAL", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_avg_cost_per_meal"), style = "margin: 8px 0;"),
+          uiOutput("kpi_cost_change")
+        )
+      )
+    ),
+    
+    # Second Row of KPIs
+    fluidRow(
+      # Poverty Rate
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("POVERTY RATE", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_poverty_rate"), style = "margin: 8px 0;"),
+          uiOutput("kpi_poverty_change")
+        )
+      ),
+      
+      # Median Income
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("MEDIAN INCOME", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_median_income"), style = "margin: 8px 0;"),
+          uiOutput("kpi_income_change")
+        )
+      ),
+      
+      # Unemployment
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("UNEMPLOYMENT RATE", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_unemployment_rate"), style = "margin: 8px 0;"),
+          uiOutput("kpi_unemployment_change")
+        )
+      ),
+      
+      # Budget Shortfall
+      column(
+        width = 3,
+        div(
+          class = "kpi-box",
+          style = "text-align: center;",
+          h4("BUDGET SHORTFALL", style = "margin-bottom: 12px;"),
+          h2(textOutput("kpi_budget_shortfall"), style = "margin: 8px 0;"),
+          uiOutput("kpi_shortfall_change")
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # AI SUMMARY (Conditional Display)
+    # ========================================================================
+    uiOutput("ai_executive_summary"),
+    
+    # ========================================================================
+    # NATIONAL TREND & REGIONAL COMPARISON
+    # ========================================================================
+    fluidRow(
+      # National Trend Chart
+      column(
+        width = 8,
+        div(
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("chart-line"), 
+            "National Trend (2009-2023)",
+            style = "color: #1E3A5F; margin-top: 0;"
           ),
-          plotOutput("overview_trend_plot", height = "350px")
+          plotOutput("national_trend", height = "400px")
+        )
+      ),
+      
+      # Regional Comparison
+      column(
+        width = 4,
+        div(
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("map"), 
+            "Regional Comparison",
+            style = "color: #1E3A5F; margin-top: 0;"
+          ),
+          plotOutput("regional_comparison", height = "400px")
         )
       )
     ),
     
     # ========================================================================
-    # KEY INSIGHT CALLOUTS
+    # KEY STATISTICS PANEL
     # ========================================================================
     fluidRow(
       column(
-        4,
+        width = 12,
         div(
-          style = "background: linear-gradient(135deg, #0033A0 0%, #003D82 100%);
-                   padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(0, 51, 160, 0.3);
-                   height: 200px;",
-          div(icon("exclamation-circle", style = "font-size: 2em; margin-bottom: 15px;")),
-          h5("Great Recession Impact", style = "margin-top: 0; font-weight: 600;"),
-          p("Food insecurity peaked at 16.3% during 2009-2010, affecting rural communities disproportionately.",
-            style = "font-size: 14px; line-height: 1.6; margin: 0;")
+          style = "background: linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%); 
+                   padding: 24px; border-radius: 12px; margin-bottom: 24px; color: white;
+                   box-shadow: 0 4px 16px rgba(0,0,0,0.12);",
+          h3(
+            icon("info-circle"), 
+            "Key Statistics",
+            style = "color: white; margin-top: 0; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 12px;"
+          ),
+          fluidRow(
+            column(
+              width = 3,
+              div(
+                style = "text-align: center; padding: 16px; background: rgba(255,255,255,0.1); 
+                         border-radius: 8px; backdrop-filter: blur(10px);",
+                h4("MEDIAN FI RATE", style = "color: rgba(255,255,255,0.9); font-size: 13px;"),
+                h2(textOutput("stat_median_fi"), style = "color: white; margin: 8px 0;"),
+                p("Middle value", style = "color: rgba(255,255,255,0.7); font-size: 12px; margin: 0;")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                style = "text-align: center; padding: 16px; background: rgba(255,255,255,0.1); 
+                         border-radius: 8px; backdrop-filter: blur(10px);",
+                h4("RANGE", style = "color: rgba(255,255,255,0.9); font-size: 13px;"),
+                h2(textOutput("stat_range_fi"), style = "color: white; margin: 8px 0;"),
+                p("Min to Max", style = "color: rgba(255,255,255,0.7); font-size: 12px; margin: 0;")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                style = "text-align: center; padding: 16px; background: rgba(255,255,255,0.1); 
+                         border-radius: 8px; backdrop-filter: blur(10px);",
+                h4("STD DEVIATION", style = "color: rgba(255,255,255,0.9); font-size: 13px;"),
+                h2(textOutput("stat_sd_fi"), style = "color: white; margin: 8px 0;"),
+                p("Variability", style = "color: rgba(255,255,255,0.7); font-size: 12px; margin: 0;")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                style = "text-align: center; padding: 16px; background: rgba(255,255,255,0.1); 
+                         border-radius: 8px; backdrop-filter: blur(10px);",
+                h4("ABOVE AVERAGE", style = "color: rgba(255,255,255,0.9); font-size: 13px;"),
+                h2(textOutput("stat_above_avg"), style = "color: white; margin: 8px 0;"),
+                p("Counties", style = "color: rgba(255,255,255,0.7); font-size: 12px; margin: 0;")
+              )
+            )
+          )
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # TOP 10 & BOTTOM 10 STATES
+    # ========================================================================
+    fluidRow(
+      # Top 10 (Highest FI)
+      column(
+        width = 6,
+        div(
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("exclamation-triangle"), 
+            "Top 10 States - Highest Food Insecurity",
+            style = "color: #E63946; margin-top: 0;"
+          ),
+          DT::dataTableOutput("top_10_states")
         )
       ),
       
+      # Bottom 10 (Lowest FI)
       column(
-        4,
+        width = 6,
         div(
-          style = "background: linear-gradient(135deg, #C41E3A 0%, #A01830 100%);
-                   padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);
-                   height: 200px;",
-          div(icon("virus", style = "font-size: 2em; margin-bottom: 15px;")),
-          h5("COVID-19 Disruption", style = "margin-top: 0; font-weight: 600;"),
-          p("Sharp increase to 12.8% in 2020 due to pandemic-related job losses and economic uncertainty.",
-            style = "font-size: 14px; line-height: 1.6; margin: 0;")
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("trophy"), 
+            "Bottom 10 States - Lowest Food Insecurity",
+            style = "color: #06D6A0; margin-top: 0;"
+          ),
+          DT::dataTableOutput("bottom_10_states")
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # DEMOGRAPHIC DISPARITIES & STATE MAP
+    # ========================================================================
+    fluidRow(
+      # Demographic Disparities
+      column(
+        width = 6,
+        div(
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("users"), 
+            "Demographic Disparities",
+            style = "color: #1E3A5F; margin-top: 0;"
+          ),
+          plotOutput("demographic_chart", height = "400px")
         )
       ),
       
+      # State-Level Map
       column(
-        4,
+        width = 6,
         div(
-          style = "background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-                   padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-                   height: 200px;",
-          div(icon("map-marked-alt", style = "font-size: 2em; margin-bottom: 15px;")),
-          h5("Geographic Disparities", style = "margin-top: 0; font-weight: 600;"),
-          p("Rural and southern counties show 3-5 percentage points higher rates than metropolitan areas.",
-            style = "font-size: 14px; line-height: 1.6; margin: 0;")
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("map-marked-alt"), 
+            "Geographic Distribution",
+            style = "color: #1E3A5F; margin-top: 0;"
+          ),
+          plotOutput("state_map", height = "400px")
         )
+      )
+    ),
+    
+    # ========================================================================
+    # URBAN VS RURAL COMPARISON
+    # ========================================================================
+    fluidRow(
+      column(
+        width = 12,
+        div(
+          style = "background: white; padding: 20px; border-radius: 12px; 
+                   box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;",
+          h3(
+            icon("city"), 
+            "Urban vs Rural Food Insecurity",
+            style = "color: #1E3A5F; margin-top: 0;"
+          ),
+          plotOutput("urban_rural_comparison", height = "300px")
+        )
+      )
+    ),
+    
+    # Footer
+    hr(),
+    div(
+      style = "text-align: center; color: #6C757D; padding: 20px;",
+      p(
+        icon("info-circle"),
+        "Data sources: Feeding America Map the Meal Gap, U.S. Census Bureau (ACS)",
+        style = "margin: 0;"
+      ),
+      p(
+        "Last updated:",
+        Sys.Date(),
+        style = "margin: 8px 0 0 0; font-size: 14px;"
       )
     )
   )
