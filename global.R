@@ -55,8 +55,8 @@ path_pre <- "data/feeding_america(2009-2018).xlsx"
 path_post <- "data/feeding_america(2019-2023).xlsx"
 
 cat("Loading Excel files...\n")
-fa_pre_raw <- read_excel(path_pre)
-fa_post_raw <- read_excel(path_post)
+fa_pre_raw <- suppressWarnings(read_excel(path_pre))
+fa_post_raw <- suppressWarnings(read_excel(path_post))
 cat("  Pre-pandemic rows:", format(nrow(fa_pre_raw), big.mark = ","), "\n")
 cat("  Post-pandemic rows:", format(nrow(fa_post_raw), big.mark = ","), "\n")
 cat("✓ Files loaded\n\n")
