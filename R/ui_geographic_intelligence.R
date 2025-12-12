@@ -12,7 +12,7 @@ ui_geographic_intelligence <- tabPanel(
   
   fluidPage(
     # Global Controls
-    # global_controls_ui(),  # Removed to prevent duplicate IDs
+    global_controls_ui(),
     
     # Page Header
     fluidRow(
@@ -66,7 +66,7 @@ ui_geographic_intelligence <- tabPanel(
           actionButton(
             "export_map",
             "Export Map",
-#             icon removed for debugging
+            icon = icon("download"),
             style = "width: 100%; background: #0033A0; color: white; border: none;"
           )
         )
@@ -78,31 +78,8 @@ ui_geographic_intelligence <- tabPanel(
           style = "background: white; padding: 20px; border-radius: 10px;
                    box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: 600px;",
           
-          # Map placeholder
-          div(
-            style = "height: 550px; display: flex; align-items: center; 
-                     justify-content: center; background: #f8f9fa; border-radius: 8px;
-                     border: 2px dashed #dee2e6;",
-            div(
-              style = "text-align: center;",
-              icon("map", style = "font-size: 60px; color: #0033A0; margin-bottom: 20px;"),
-              h4("Interactive County-Level Choropleth Map", 
-                 style = "color: #495057; margin-bottom: 10px;"),
-              p("Leaflet map with county boundaries, color-coded by selected variable",
-                style = "color: #6c757d; margin-bottom: 20px;"),
-              tags$div(
-                tags$strong("Planned Features:", style = "color: #0033A0;"),
-                tags$ul(
-                  style = "text-align: left; display: inline-block; color: #6c757d;",
-                  tags$li("County-level choropleth with custom color scales"),
-                  tags$li("Click county for detailed profile popup"),
-                  tags$li("Hot-spot detection overlay (Getis-Ord Gi*)"),
-                  tags$li("Time-slider for 2009-2023 animation"),
-                  tags$li("Zoom and pan controls")
-                )
-              )
-            )
-          )
+          # Interactive Leaflet Map
+          leaflet::leafletOutput("county_map", height = "550px")
         )
       )
     ),
@@ -184,17 +161,8 @@ ui_geographic_intelligence <- tabPanel(
           ),
           hr(),
           
-          # Placeholder for mini sparkline/trend
-          div(
-            style = "height: 250px; display: flex; align-items: center; 
-                     justify-content: center; background: #f8f9fa; 
-                     border-radius: 8px; border: 2px dashed #dee2e6;",
-            div(
-              style = "text-align: center; color: #6c757d;",
-              icon("chart-line", style = "font-size: 50px; color: #C41E3A; margin-bottom: 10px;"),
-              p("15-year trend chart for selected county", style = "font-size: 14px;")
-            )
-          )
+          # County trend chart
+          plotOutput("county_trend_chart", height = "250px")
         )
       )
     ),

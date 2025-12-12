@@ -43,6 +43,7 @@ source("R/beautiful_kpi_cards.R")  # Custom KPI card UI function
 source("R/server_overview.R")
 source("R/server_exploration.R")
 source("R/server_analysis.R")
+source("R/server_geographic_intelligence.R")  # ← ADDED THIS LINE
 
 cat("✓ All modules loaded\n")
 
@@ -179,25 +180,19 @@ server <- function(input, output, session) {
   })
 
   # ============================================================================
-  # EXISTING SERVER MODULES (WORKING)
+  # ACTIVE SERVER MODULES
   # ============================================================================
   server_overview(input, output, session, data)
   server_exploration(input, output, session, data)
   server_analysis(input, output, session, data)
   
+  # Geographic Intelligence - ACTIVE MODULE
+  server_geographic_intelligence(input, output, session, data)
+  
   # ============================================================================
-  # PLACEHOLDER OUTPUTS FOR NEW TABS
+  # PLACEHOLDER OUTPUTS FOR REMAINING TABS
   # ============================================================================
   # These prevent errors when tabs load. Replace with actual server logic.
-  
-  # Geographic Intelligence placeholders
-  output$hotspot_count <- renderText({ "TBD" })
-  output$coldspot_count <- renderText({ "TBD" })
-  output$morans_i <- renderText({ "TBD" })
-  output$geo_disparity <- renderText({ "TBD" })
-  output$selected_county_profile <- renderUI({ 
-    HTML("<p style='text-align: center; color: #6c757d;'>Select a county on the map</p>")
-  })
   
   # Correlation Analysis placeholders
   output$bivariate_r <- renderText({ "--" })

@@ -8,7 +8,7 @@
 library(shiny)
 required_packages <- c(
   "shiny", "tidyverse", "readxl", "leaflet", "leaflet.extras",
-  "DT", "maps", "scales", "janitor",
+  "DT", "maps", "scales", "janitor","tigris", "sf", "spdep",
   "nnet", "rpart", "rpart.plot", "broom", "pROC"
 )
 
@@ -36,6 +36,9 @@ suppressPackageStartupMessages({
   library(rpart.plot)
   library(broom)
   library(pROC)
+  library(tigris)
+  library(sf)
+  library(spdep)
 })
 
 cat("✓ All packages loaded\n\n")
