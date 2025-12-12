@@ -1,5 +1,5 @@
 # ==============================================================================
-# UI MODULE: EXECUTIVE OVERVIEW - COMPREHENSIVE VERSION
+# UI MODULE: EXECUTIVE OVERVIEW - WITH BEAUTIFUL GRADIENT CARDS
 # ==============================================================================
 # PURPOSE: High-level dashboard for executives and stakeholders
 # FEATURES: KPIs, trends, rankings, demographics, geography, AI insights
@@ -9,6 +9,11 @@ ui_overview <- tabPanel(
   title = "Executive Overview",
   value = "overview",
   icon = icon("home"),
+  
+  # Beautiful KPI Cards CSS
+  tags$head(
+    tags$link(rel = "stylesheet", href = "beautiful_kpi_cards.css")
+  ),
   
   fluidPage(
     # Page Header
@@ -70,108 +75,9 @@ ui_overview <- tabPanel(
     ),
     
     # ========================================================================
-    # KPI CARDS ROW
+    # BEAUTIFUL GRADIENT KPI CARDS
     # ========================================================================
-    fluidRow(
-      # National FI Rate
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("NATIONAL FI RATE", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_national_fi_rate"), style = "margin: 8px 0;"),
-          uiOutput("kpi_fi_rate_change")
-        )
-      ),
-      
-      # Total Food Insecure
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("FOOD INSECURE PERSONS", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_total_food_insecure"), style = "margin: 8px 0;"),
-          uiOutput("kpi_fi_persons_change")
-        )
-      ),
-      
-      # Child FI Rate
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("CHILD FI RATE", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_child_fi_rate"), style = "margin: 8px 0;"),
-          uiOutput("kpi_child_fi_change")
-        )
-      ),
-      
-      # Cost Per Meal
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("AVG COST PER MEAL", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_avg_cost_per_meal"), style = "margin: 8px 0;"),
-          uiOutput("kpi_cost_change")
-        )
-      )
-    ),
-    
-    # Second Row of KPIs
-    fluidRow(
-      # Poverty Rate
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("POVERTY RATE", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_poverty_rate"), style = "margin: 8px 0;"),
-          uiOutput("kpi_poverty_change")
-        )
-      ),
-      
-      # Median Income
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("MEDIAN INCOME", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_median_income"), style = "margin: 8px 0;"),
-          uiOutput("kpi_income_change")
-        )
-      ),
-      
-      # Unemployment
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("UNEMPLOYMENT RATE", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_unemployment_rate"), style = "margin: 8px 0;"),
-          uiOutput("kpi_unemployment_change")
-        )
-      ),
-      
-      # Budget Shortfall
-      column(
-        width = 3,
-        div(
-          class = "kpi-box",
-          style = "text-align: center;",
-          h4("BUDGET SHORTFALL", style = "margin-bottom: 12px;"),
-          h2(textOutput("kpi_budget_shortfall"), style = "margin: 8px 0;"),
-          uiOutput("kpi_shortfall_change")
-        )
-      )
-    ),
+    beautiful_kpi_cards,
     
     # ========================================================================
     # AI SUMMARY (Conditional Display)

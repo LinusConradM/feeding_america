@@ -6,6 +6,27 @@
 # ==============================================================================
 
 server_overview <- function(input, output, session, data) {
+  cat("\n========================================\n")
+  cat("SERVER_OVERVIEW MODULE LOADED\n")
+  cat("========================================\n")
+  
+  # Create state name lookup locally for this module
+  state_name_lookup <- tibble::tibble(
+    state = c("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL",
+              "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
+              "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
+              "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
+              "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"),
+    state_name = c("alabama", "alaska", "arizona", "arkansas", "california", "colorado",
+                   "connecticut", "delaware", "district of columbia", "florida",
+                   "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas",
+                   "kentucky", "louisiana", "maine", "maryland", "massachusetts", "michigan",
+                   "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
+                   "new hampshire", "new jersey", "new mexico", "new york", "north carolina",
+                   "north dakota", "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island",
+                   "south carolina", "south dakota", "tennessee", "texas", "utah", "vermont",
+                   "virginia", "washington", "west virginia", "wisconsin", "wyoming")
+  )
   
   # ==========================================================================
   # REACTIVE: SELECTED YEAR
@@ -674,58 +695,49 @@ server_overview <- function(input, output, session, data) {
       )
   }, height = 400, res = 96)
   
-  # ==========================================================================
-  # STATE-LEVEL MAP (NEW)
+ 
+  
+# ==========================================================================
+  # STATE-LEVEL MAP (DIAGNOSTIC VERSION)
   # ==========================================================================
   
-  output$state_map <- renderPlot({
-    state_data <- year_data() %>%
-      group_by(state) %>%
-      summarise(
-        avg_fi = mean(overall_food_insecurity_rate, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      mutate(state = tolower(state))
-    
-    # Get US map data
-    if (require("maps", quietly = TRUE)) {
+    output$state_map <- renderPlot({
+      # Get state-level data
+      state_data <- year_data() %>%
+        group_by(state) %>%
+        summarise(avg_fi = mean(overall_food_insecurity_rate, na.rm = TRUE), .groups = "drop")
+      
+      # Join with state name lookup
+      state_data <- state_data %>%
+        left_join(state_name_lookup, by = "state")
+      
+      # Get US map
       us_map <- map_data("state")
       
+      # Join map with data
       map_data_merged <- us_map %>%
-        left_join(state_data, by = c("region" = "state"))
+        left_join(state_data, by = c("region" = "state_name"))
       
+      # Create map
       ggplot(map_data_merged, aes(x = long, y = lat, group = group, fill = avg_fi * 100)) +
-        geom_polygon(color = "white", size = 0.5) +
+        geom_polygon(color = "white", linewidth = 0.5) +
         scale_fill_gradient2(
-          low = "#06D6A0",
-          mid = "#F4A261",
-          high = "#E63946",
-          midpoint = 12,
-          na.value = "gray90",
-          name = "FI Rate (%)",
-          limits = c(5, 20)
+          low = "#06D6A0", mid = "#F4A261", high = "#E63946",
+          midpoint = 12, na.value = "gray90",
+          name = "FI Rate (%)", limits = c(5, 20)
         ) +
         coord_map("albers", lat0 = 39, lat1 = 45) +
-        labs(
-          title = paste0("State-Level Food Insecurity (", selected_year(), ")")
-        ) +
+        labs(title = paste0("State Food Insecurity (", selected_year(), ")")) +
         theme_void() +
         theme(
           plot.title = element_text(face = "bold", size = 14, color = "#1E3A5F", hjust = 0.5),
-          legend.position = "right",
-          legend.title = element_text(face = "bold", size = 11),
-          plot.margin = margin(10, 10, 10, 10)
+          legend.position = "right"
         )
-    } else {
-      # Fallback if maps package not available
-      plot.new()
-      text(0.5, 0.5, "Install 'maps' package to view state map\n\ninstall.packages('maps')", 
-           cex = 1.2, col = "#6C757D")
-    }
   }, height = 400, res = 96)
-  
+
+
   # ==========================================================================
-  # URBAN VS RURAL COMPARISON (NEW)
+  # URBAN VS RURAL COMPARISON
   # ==========================================================================
   
   output$urban_rural_comparison <- renderPlot({
@@ -741,33 +753,14 @@ server_overview <- function(input, output, session, data) {
     ggplot(ur_data, aes(x = urban_rural, y = avg_fi * 100, fill = urban_rural)) +
       geom_col(alpha = 0.9, width = 0.6) +
       geom_text(
-        aes(label = paste0(round(avg_fi * 100, 1), "%\n(n=", format(count, big.mark = ","), ")")),
-        vjust = -0.5,
-        size = 5,
-        fontface = "bold"
+        aes(label = paste0(round(avg_fi * 100, 1), "%")),
+        vjust = -0.5, size = 5, fontface = "bold"
       ) +
-      scale_fill_manual(values = c(
-        "Metro" = "#457B9D",
-        "Non-metro" = "#F4A261",
-        "Rural" = "#E63946"
-      )) +
-      scale_y_continuous(
-        labels = function(x) paste0(x, "%"),
-        expand = expansion(mult = c(0, 0.20))
-      ) +
-      labs(
-        title = paste0("Urban vs Rural Food Insecurity (", selected_year(), ")"),
-        x = NULL,
-        y = "Food Insecurity Rate"
-      ) +
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold", size = 15, color = "#1E3A5F", hjust = 0.5),
-        axis.text = element_text(size = 12, color = "#2D3142"),
-        legend.position = "none",
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor = element_blank()
-      )
+      scale_fill_manual(values = c("Metro" = "#457B9D", "Non-metro" = "#F4A261", "Rural" = "#E63946")) +
+      scale_y_continuous(labels = function(x) paste0(x, "%"), expand = expansion(mult = c(0, 0.20))) +
+      labs(title = paste0("Urban vs Rural (", selected_year(), ")"), x = NULL, y = "FI Rate") +
+      theme_minimal() +
+      theme(plot.title = element_text(face = "bold", hjust = 0.5), legend.position = "none")
   }, height = 300, res = 96)
   
   # ==========================================================================
