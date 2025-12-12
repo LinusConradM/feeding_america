@@ -11,9 +11,6 @@ ui_geographic_intelligence <- tabPanel(
   value = "geographic",
   
   fluidPage(
-    # Global Controls
-    global_controls_ui(),
-    
     # Page Header
     fluidRow(
       column(
