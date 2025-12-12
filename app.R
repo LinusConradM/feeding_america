@@ -35,7 +35,7 @@ source("R/ui_county_clustering.R")         # Tab 7: County Clustering
 source("R/ui_timeseries_explorer.R")       # Tab 8: Time-Series Explorer
 source("R/ui_policy_scenarios_expanded.R") # Tab 9: Policy Scenarios
 source("R/ui_data_downloads.R")            # Tab 10: Data & Downloads
-source("R/beautiful_kpi_cards.R")
+source("R/beautiful_kpi_cards.R")  # Custom KPI card UI function
 
 # ==============================================================================
 # LOAD SERVER MODULES
