@@ -2,7 +2,7 @@
 # SERVER MODULE: OVERVIEW TAB
 # ==============================================================================
 # PURPOSE: Calculate and display Key Performance Indicators (KPIs)
-# FEATURES: Current metrics, year-over-year changes, trend indicators
+# FEATURES: Current metrics, year-over-year changes, trend indicators, trend chart
 # TEAM: Conrad, Sharon, Ryann, Alex
 # ==============================================================================
 
@@ -379,5 +379,129 @@ server_overview <- function(input, output, session, data) {
     ))
   })
 
-  # Note: Trend plot removed - it's in the Exploration tab
+  # ==========================================================================
+  # NATIONAL TREND CHART (ggplot2)
+  # ==========================================================================
+
+  output$national_trend <- renderPlot({
+    # Prepare trend data
+    trend_data <- data() %>%
+      group_by(year) %>%
+      summarise(
+        avg_fi_rate = mean(overall_food_insecurity_rate, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    # Create professional ggplot
+    ggplot(trend_data, aes(x = year, y = avg_fi_rate * 100)) +
+      
+      # Add shaded recession/COVID periods FIRST (background)
+      annotate("rect", 
+               xmin = 2007, xmax = 2009, 
+               ymin = -Inf, ymax = Inf,
+               alpha = 0.15, fill = "#E63946") +
+      
+      annotate("rect",
+               xmin = 2020, xmax = 2021,
+               ymin = -Inf, ymax = Inf,
+               alpha = 0.15, fill = "#9D4EDD") +
+      
+      # Main line and points
+      geom_line(color = "#1E3A5F", size = 1.5, lineend = "round") +
+      geom_point(color = "#1E3A5F", size = 4, shape = 21, 
+                 fill = "white", stroke = 2) +
+      
+      # Highlight COVID spike
+      geom_point(data = filter(trend_data, year == 2020),
+                 aes(x = year, y = avg_fi_rate * 100),
+                 color = "#E63946", size = 6, shape = 21,
+                 fill = "#E63946", stroke = 2) +
+      
+      # Event labels
+      annotate("text",
+               x = 2008, y = 15.5,
+               label = "Great Recession",
+               size = 4, color = "#E63946", 
+               fontface = "bold", hjust = 0.5) +
+      
+      annotate("text",
+               x = 2020.5, y = 15.5,
+               label = "COVID-19",
+               size = 4, color = "#9D4EDD", 
+               fontface = "bold", hjust = 0.5) +
+      
+      # Scales and labels
+      scale_y_continuous(
+        labels = function(x) paste0(x, "%"),
+        limits = c(9, 16),
+        breaks = seq(9, 16, 1),
+        expand = c(0, 0)
+      ) +
+      
+      scale_x_continuous(
+        breaks = seq(2009, 2023, 2),
+        expand = c(0.02, 0.02)
+      ) +
+      
+      labs(
+        title = "National Food Insecurity Trend (2009-2023)",
+        subtitle = "Percentage of U.S. population experiencing food insecurity",
+        x = NULL,
+        y = "Food Insecurity Rate",
+        caption = "Source: Feeding America, U.S. Census Bureau (ACS)"
+      ) +
+      
+      # Professional theme
+      theme_minimal(base_size = 15, base_family = "sans") +
+      theme(
+        # Title styling
+        plot.title = element_text(
+          face = "bold", 
+          size = 18, 
+          hjust = 0.5,
+          color = "#1E3A5F",
+          margin = margin(b = 8)
+        ),
+        plot.subtitle = element_text(
+          size = 13,
+          hjust = 0.5,
+          color = "#6C757D",
+          margin = margin(b = 16)
+        ),
+        plot.caption = element_text(
+          color = "#6C757D", 
+          size = 10,
+          hjust = 1,
+          margin = margin(t = 12)
+        ),
+        
+        # Axis styling
+        axis.title.y = element_text(
+          face = "bold",
+          color = "#2D3142",
+          size = 13,
+          margin = margin(r = 10)
+        ),
+        axis.text = element_text(
+          color = "#2D3142",
+          size = 12
+        ),
+        
+        # Grid
+        panel.grid.major.y = element_line(
+          color = "#E5E5E5",
+          size = 0.5
+        ),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        
+        # Background
+        plot.background = element_rect(fill = "white", color = NA),
+        panel.background = element_rect(fill = "white", color = NA),
+        
+        # Margins
+        plot.margin = margin(20, 20, 20, 20)
+      )
+    
+  }, height = 450, res = 96)
 }
