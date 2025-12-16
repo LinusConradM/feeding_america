@@ -272,7 +272,7 @@ ui_geographic_intelligence <- tabPanel(
             actionButton(
               "generate_spatial_summary",
               "Generate AI Summary",
-              icon = icon("sparkles"),
+              icon = icon("magic"),  # ← Changed from sparkles to magic
               style = "background: rgba(255,255,255,0.2); color: white; border: 2px solid white;
                        padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer;
                        transition: all 0.2s;",
