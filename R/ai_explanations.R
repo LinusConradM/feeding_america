@@ -457,3 +457,142 @@ cat("  • explain_comparison() - For group comparisons\n")
 cat("  • answer_question() - For user Q&A\n\n")
 
 cat("========================================\n\n")
+
+
+
+# ==============================================================================
+# AI EXPLANATIONS MODULE
+# ==============================================================================
+# PURPOSE: Provide AI-powered explanations using Claude API
+# USAGE: source("R/ai_explanations.R") in global.R
+# ==============================================================================
+
+#' Call Claude API for AI-Generated Explanations
+#'
+#' @param prompt Character string containing the prompt to send to Claude
+#' @param max_tokens Maximum tokens for response (default: 2000)
+#' @return Character string with Claude's response
+#' @export
+ask_claude <- function(prompt, max_tokens = 2000) {
+  
+  tryCatch({
+    
+    # Check if API key is available
+    api_key <- Sys.getenv("ANTHROPIC_API_KEY")
+    
+    if (api_key == "" || is.null(api_key)) {
+      return(paste0(
+        "<div style='background: #FFF3CD; border-left: 4px solid #FFC107; padding: 20px; border-radius: 8px;'>",
+        "<h4 style='color: #856404; margin-top: 0;'>⚠️ API Key Not Found</h4>",
+        "<p style='color: #856404; margin: 0;'>",
+        "To enable AI-generated summaries, set your Anthropic API key:<br><br>",
+        "<strong>In R Console:</strong><br>",
+        "<code>Sys.setenv(ANTHROPIC_API_KEY = 'your-key-here')</code><br><br>",
+        "<strong>Or in .Renviron file:</strong><br>",
+        "<code>ANTHROPIC_API_KEY=your-key-here</code><br><br>",
+        "Get your key from <a href='https://console.anthropic.com/' target='_blank'>console.anthropic.com</a>",
+        "</p>",
+        "</div>"
+      ))
+    }
+    
+    # Make API request
+    response <- httr::POST(
+      url = "https://api.anthropic.com/v1/messages",
+      httr::add_headers(
+        "x-api-key" = api_key,
+        "anthropic-version" = "2023-06-01",
+        "content-type" = "application/json"
+      ),
+      body = jsonlite::toJSON(list(
+        model = "claude-sonnet-4-20250514",
+        max_tokens = max_tokens,
+        messages = list(
+          list(
+            role = "user",
+            content = prompt
+          )
+        )
+      ), auto_unbox = TRUE),
+      encode = "json"
+    )
+    
+    # Check for errors
+    if (httr::http_error(response)) {
+      error_content <- httr::content(response, as = "text", encoding = "UTF-8")
+      
+      return(paste0(
+        "<div style='background: #F8D7DA; border-left: 4px solid #DC3545; padding: 20px; border-radius: 8px;'>",
+        "<h4 style='color: #721C24; margin-top: 0;'>❌ API Error</h4>",
+        "<p style='color: #721C24;'>Status: ", httr::status_code(response), "<br>",
+        "Error: ", error_content, "</p>",
+        "</div>"
+      ))
+    }
+    
+    # Parse response
+    result <- httr::content(response, as = "parsed", encoding = "UTF-8")
+    
+    # Extract text
+    if (!is.null(result$content) && length(result$content) > 0) {
+      ai_text <- result$content[[1]]$text
+      
+      # Format as HTML
+      return(paste0(
+        "<div style='background: white; color: #2c3e50; padding: 25px; border-radius: 8px; line-height: 1.8;'>",
+        gsub("\n\n", "</p><p>", gsub("\n", "<br>", ai_text)),
+        "</div>"
+      ))
+      
+    } else {
+      return("<div style='padding: 20px;'><p>No response generated.</p></div>")
+    }
+    
+  }, error = function(e) {
+    return(paste0(
+      "<div style='background: #F8D7DA; border-left: 4px solid #DC3545; padding: 20px; border-radius: 8px;'>",
+      "<h4 style='color: #721C24; margin-top: 0;'>❌ Error</h4>",
+      "<p style='color: #721C24;'>", as.character(e$message), "</p>",
+      "</div>"
+    ))
+  })
+}
+
+
+#' Generate Spatial Intelligence Summary
+#'
+#' @export
+generate_spatial_summary <- function(year, hotspots, coldspots, morans_i, disparity, max_fi, min_fi) {
+  
+  prompt <- paste0(
+    "You are a spatial analyst providing insights on U.S. food insecurity for ", year, ". ",
+    "Write a comprehensive, policy-focused analysis based on these spatial statistics:\n\n",
+    "STATISTICS:\n",
+    "• Hot-Spot Counties: ", hotspots, " (high-FI counties surrounded by high-FI counties, p<0.05)\n",
+    "• Cold-Spot Counties: ", coldspots, " (low-FI counties surrounded by low-FI counties, p<0.05)\n",
+    "• Moran's I: ", sprintf("%.3f", morans_i), " (spatial autocorrelation, 0=random, 1=clustered)\n",
+    "• Geographic Disparity: ", disparity, "% (range: ", sprintf("%.1f%%", min_fi), " to ", sprintf("%.1f%%", max_fi), ")\n\n",
+    "Please structure your analysis with these HTML-formatted sections:\n\n",
+    "<h4 style='color: #0033A0;'>📍 Overview</h4>\n",
+    "Brief introduction to what these patterns reveal\n\n",
+    "<h4 style='color: #E63946;'>🔥 Hot-Spot Analysis</h4>\n",
+    "Explain what ", hotspots, " hot-spots means and implications\n\n",
+    "<h4 style='color: #28a745;'>✅ Cold-Spot Insights</h4>\n",
+    "Discuss ", coldspots, " cold-spots and what we can learn\n\n",
+    "<h4 style='color: #ffc107;'>📊 Clustering (Moran's I = ", sprintf("%.3f", morans_i), ")</h4>\n",
+    "Interpret spatial autocorrelation strength\n\n",
+    "<h4 style='color: #6f42c1;'>📏 Geographic Inequality</h4>\n",
+    "Discuss ", disparity, "% disparity implications\n\n",
+    "<h4 style='color: #0033A0;'>💡 Recommendations</h4>\n",
+    "Provide 3-5 specific, actionable policy recommendations\n\n",
+    "Use <p> tags for paragraphs. Be data-driven, policy-focused, and explain technical concepts clearly."
+  )
+  
+  ask_claude(prompt, max_tokens = 3000)
+}
+
+# Load required packages
+if (!require("httr", quietly = TRUE)) install.packages("httr")
+if (!require("jsonlite", quietly = TRUE)) install.packages("jsonlite")
+
+message("✓ AI Explanations module loaded!")
