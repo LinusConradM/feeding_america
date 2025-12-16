@@ -175,11 +175,18 @@ ui_geographic_intelligence <- tabPanel(
         div(
           style = "background: linear-gradient(135deg, #0033A0 0%, #003D82 100%);
                    padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(0, 51, 160, 0.3);",
+                   box-shadow: 0 4px 15px rgba(0, 51, 160, 0.3); position: relative;",
           div(icon("exclamation-triangle", style = "font-size: 2.5em; margin-bottom: 10px;")),
           h5("Hot-Spot Counties", style = "margin: 10px 0 5px 0;"),
           h3(textOutput("hotspot_count"), style = "margin: 0; font-size: 36px;"),
-          p("High-high clusters (p < 0.05)", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+          p("High-high clusters (p < 0.05)", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;"),
+          actionButton(
+            "hotspot_info",
+            label = NULL,
+            icon = icon("info-circle"),
+            style = "position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); 
+                     border: none; color: white; padding: 8px 12px; border-radius: 50%; cursor: pointer;"
+          )
         )
       ),
       
@@ -188,11 +195,18 @@ ui_geographic_intelligence <- tabPanel(
         div(
           style = "background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                    padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);",
+                   box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); position: relative;",
           div(icon("check-circle", style = "font-size: 2.5em; margin-bottom: 10px;")),
           h5("Cold-Spot Counties", style = "margin: 10px 0 5px 0;"),
           h3(textOutput("coldspot_count"), style = "margin: 0; font-size: 36px;"),
-          p("Low-low clusters (p < 0.05)", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+          p("Low-low clusters (p < 0.05)", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;"),
+          actionButton(
+            "coldspot_info",
+            label = NULL,
+            icon = icon("info-circle"),
+            style = "position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); 
+                     border: none; color: white; padding: 8px 12px; border-radius: 50%; cursor: pointer;"
+          )
         )
       ),
       
@@ -201,11 +215,18 @@ ui_geographic_intelligence <- tabPanel(
         div(
           style = "background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
                    padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);",
+                   box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3); position: relative;",
           div(icon("chart-area", style = "font-size: 2.5em; margin-bottom: 10px;")),
           h5("Spatial Autocorrelation", style = "margin: 10px 0 5px 0;"),
           h3(textOutput("morans_i"), style = "margin: 0; font-size: 36px;"),
-          p("Moran's I statistic", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+          p("Moran's I statistic", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;"),
+          actionButton(
+            "morans_info",
+            label = NULL,
+            icon = icon("info-circle"),
+            style = "position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); 
+                     border: none; color: white; padding: 8px 12px; border-radius: 50%; cursor: pointer;"
+          )
         )
       ),
       
@@ -214,11 +235,53 @@ ui_geographic_intelligence <- tabPanel(
         div(
           style = "background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);
                    padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);",
+                   box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3); position: relative;",
           div(icon("layer-group", style = "font-size: 2.5em; margin-bottom: 10px;")),
           h5("Geographic Disparity", style = "margin: 10px 0 5px 0;"),
           h3(textOutput("geo_disparity"), style = "margin: 0; font-size: 36px;"),
-          p("Max - Min county rate", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+          p("Max - Min county rate", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;"),
+          actionButton(
+            "disparity_info",
+            label = NULL,
+            icon = icon("info-circle"),
+            style = "position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); 
+                     border: none; color: white; padding: 8px 12px; border-radius: 50%; cursor: pointer;"
+          )
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # AI-GENERATED SPATIAL STATISTICS SUMMARY
+    # ========================================================================
+    fluidRow(
+      style = "margin-top: 20px;",
+      column(
+        12,
+        div(
+          style = "background: linear-gradient(135deg, #06D6A0 0%, #04A777 100%);
+                   padding: 30px; border-radius: 10px; color: white;
+                   box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);",
+          
+          div(
+            style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;",
+            h3(
+              icon("robot"), " Spatial Intelligence Summary (AI-Generated)",
+              style = "margin: 0; font-weight: 600;"
+            ),
+            actionButton(
+              "generate_spatial_summary",
+              "Generate AI Summary",
+              icon = icon("sparkles"),
+              style = "background: rgba(255,255,255,0.2); color: white; border: 2px solid white;
+                       padding: 10px 20px; font-weight: 600; border-radius: 8px; cursor: pointer;
+                       transition: all 0.2s;",
+              onmouseover = "this.style.background='rgba(255,255,255,0.3)'",
+              onmouseout = "this.style.background='rgba(255,255,255,0.2)'"
+            )
+          ),
+          
+          htmlOutput("spatial_ai_summary")
         )
       )
     )
