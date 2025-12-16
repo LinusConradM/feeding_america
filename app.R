@@ -1,10 +1,5 @@
 # ==============================================================================
-# FOOD INSECURITY SHINY APP - COMPLETE 10-TAB VERSION (WITH DROPDOWN)
-# ==============================================================================
-# PURPOSE: Comprehensive analytics platform for U.S. food insecurity (2009-2023)
-# COURSE: DATA-613 (Graduate Level)
-# TEAM: Conrad, Sharon, Ryann, Alex
-# INSTITUTION: American University
+# UPDATED app.R - WITH PROPER CORRELATION MODULE INTEGRATION
 # ==============================================================================
 
 # ==============================================================================
@@ -28,7 +23,7 @@ source("R/global_controls.R")              # Global filter controls
 source("R/ui_landing.R")                   # Tab 1: Landing/Home
 source("R/ui_overview.R")                  # Tab 2: Executive Overview ✅
 source("R/ui_geographic_intelligence.R")   # Tab 3: Geographic Intelligence ✅
-source("R/ui_correlation_analysis.R")      # Tab 4: Correlation Analysis
+source("R/ui_correlation_analysis.R")      # Tab 4: Correlation Analysis ✅
 source("R/ui_regression_models.R")         # Tab 5: Regression Models
 source("R/ui_equity.R")                    # Tab 6: Equity & Disparities
 source("R/ui_county_clustering.R")         # Tab 7: County Clustering
@@ -43,7 +38,8 @@ source("R/beautiful_kpi_cards.R")          # Custom KPI card UI function
 source("R/server_overview.R")
 source("R/server_exploration.R")
 source("R/server_analysis.R")
-source("R/server_geographic_intelligence.R")  # ✅ Geographic Intelligence
+source("R/server_geographic_intelligence.R")
+source("R/server_correlation_analysis.R")  # ✅ CORRELATION MODULE
 
 cat("✓ All modules loaded\n")
 
@@ -66,10 +62,6 @@ ui <- navbarPage(
   theme = NULL,
   windowTitle = "U.S. Food Insecurity Dashboard",
   id = "navbar",
-  
-  # ============================================================================
-  # NAVIGATION STRUCTURE WITH ANALYSIS DROPDOWN
-  # ============================================================================
   
   # Tab 1: Home/Landing
   ui_landing,
@@ -101,7 +93,7 @@ ui <- navbarPage(
       ui_regression_models
     ),
     
-    # Equity & Disparities (FIXED: matches ui_equity.R)
+    # Equity & Disparities
     tabPanel(
       title = div(icon("balance-scale"), "Equity & Disparities"),
       value = "equity",
@@ -119,7 +111,7 @@ ui <- navbarPage(
     tabPanel(
       title = div(icon("clock"), "Time-Series Explorer"),
       value = "timeseries",
-      ui_timeseries_explorer  # ← Fixed: no underscore between time and series
+      ui_timeseries_explorer
     )
   ),
   
@@ -130,7 +122,7 @@ ui <- navbarPage(
   ui_data_downloads,
   
   # ============================================================================
-  # CUSTOM CSS (ENHANCED WITH DROPDOWN STYLING)
+  # CUSTOM CSS
   # ============================================================================
   tags$head(
     # Premium Theme
@@ -147,9 +139,7 @@ ui <- navbarPage(
     
     # Custom styles
     tags$style(HTML("
-      /* ================================================================= */
-      /* MODERN NAVBAR WITH AU BLUE */
-      /* ================================================================= */
+      /* Modern Navbar with AU Blue */
       .navbar { 
         background: linear-gradient(135deg, #0033A0 0%, #003D82 100%) !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -177,9 +167,7 @@ ui <- navbarPage(
         border-radius: 5px;
       }
       
-      /* ================================================================= */
-      /* DROPDOWN MENU STYLING */
-      /* ================================================================= */
+      /* Dropdown menu styling */
       .navbar-nav > li > .dropdown-menu {
         background: white;
         border: 1px solid #e0e0e0;
@@ -190,7 +178,6 @@ ui <- navbarPage(
         padding: 8px 0;
       }
       
-      /* Dropdown items */
       .navbar-nav > li > .dropdown-menu > li > a {
         padding: 12px 20px;
         color: #2c3e50;
@@ -199,21 +186,18 @@ ui <- navbarPage(
         font-weight: 500;
       }
       
-      /* Hover effect with slide animation */
       .navbar-nav > li > .dropdown-menu > li > a:hover {
         background: #f8f9fa;
         color: #0033A0;
         padding-left: 25px;
       }
       
-      /* Active dropdown item */
       .navbar-nav > li > .dropdown-menu > li.active > a {
         background: linear-gradient(135deg, #0033A0 0%, #003D82 100%);
         color: white;
         font-weight: 600;
       }
       
-      /* Icon spacing in dropdown */
       .dropdown-menu i {
         margin-right: 10px;
         width: 16px;
@@ -221,25 +205,9 @@ ui <- navbarPage(
         color: #0033A0;
       }
       
-      /* Active item icon stays white */
       .dropdown-menu .active i {
         color: white;
       }
-      
-      /* Analysis dropdown toggle */
-      .navbar-nav > li.dropdown > a {
-        font-weight: 600;
-      }
-      
-      /* Dropdown arrow animation */
-      .navbar-nav > li.dropdown.open > a .fa-chevron-down {
-        transform: rotate(180deg);
-        transition: transform 0.2s;
-      }
-      
-      /* ================================================================= */
-      /* GENERAL STYLES */
-      /* ================================================================= */
       
       /* KPI Card Hover Effect */
       .kpi-box:hover {
@@ -266,26 +234,6 @@ ui <- navbarPage(
         from { opacity: 0; }
         to { opacity: 1; }
       }
-      
-      /* ================================================================= */
-      /* MOBILE RESPONSIVE */
-      /* ================================================================= */
-      @media (max-width: 768px) {
-        .navbar-nav > li > .dropdown-menu {
-          border-radius: 0;
-          box-shadow: none;
-          border: none;
-          border-top: 1px solid #e0e0e0;
-        }
-        
-        .navbar-nav > li > .dropdown-menu > li > a {
-          padding-left: 40px;
-        }
-        
-        .navbar-nav > li > .dropdown-menu > li > a:hover {
-          padding-left: 45px;
-        }
-      }
     "))
   )
 )
@@ -295,10 +243,20 @@ ui <- navbarPage(
 # ==============================================================================
 
 server <- function(input, output, session) {
+  
+  cat("\n========================================\n")
+  cat("SHINY SERVER STARTING\n")
+  cat("========================================\n\n")
+  
   # Data reactive
   data <- reactive({
     food_data
   })
+  
+  # Verify data is accessible
+  cat("Data reactive created\n")
+  cat("  Rows:", nrow(food_data), "\n")
+  cat("  Columns:", ncol(food_data), "\n\n")
 
   # Landing page navigation
   observeEvent(input$start_exploring, {
@@ -308,26 +266,55 @@ server <- function(input, output, session) {
   # ============================================================================
   # ACTIVE SERVER MODULES
   # ============================================================================
-  server_overview(input, output, session, data)
-  server_exploration(input, output, session, data)
-  server_analysis(input, output, session, data)
   
-  # Geographic Intelligence - ACTIVE MODULE ✅
-  server_geographic_intelligence(input, output, session, data)
+  cat("Initializing server modules...\n")
+  
+  # Executive Overview
+  tryCatch({
+    server_overview(input, output, session, data)
+    cat("  ✓ Executive Overview\n")
+  }, error = function(e) {
+    cat("  ❌ Executive Overview error:", e$message, "\n")
+  })
+  
+  # Exploration
+  tryCatch({
+    server_exploration(input, output, session, data)
+    cat("  ✓ Exploration\n")
+  }, error = function(e) {
+    cat("  ❌ Exploration error:", e$message, "\n")
+  })
+  
+  # Analysis
+  tryCatch({
+    server_analysis(input, output, session, data)
+    cat("  ✓ Analysis\n")
+  }, error = function(e) {
+    cat("  ❌ Analysis error:", e$message, "\n")
+  })
+  
+  # Geographic Intelligence
+  tryCatch({
+    server_geographic_intelligence(input, output, session, data)
+    cat("  ✓ Geographic Intelligence\n")
+  }, error = function(e) {
+    cat("  ❌ Geographic Intelligence error:", e$message, "\n")
+  })
+  
+  # ✨ CORRELATION ANALYSIS - THE KEY MODULE ✨
+  tryCatch({
+    server_correlation_analysis(input, output, session, data)
+    cat("  ✓ Correlation Analysis\n")
+  }, error = function(e) {
+    cat("  ❌ Correlation Analysis error:", e$message, "\n")
+    cat("     ", e$message, "\n")
+  })
+  
+  cat("\n")
   
   # ============================================================================
   # PLACEHOLDER OUTPUTS FOR REMAINING TABS
   # ============================================================================
-  # These prevent errors when tabs load. Replace with actual server logic.
-  
-  # Correlation Analysis placeholders
-  output$bivariate_r <- renderText({ "--" })
-  output$bivariate_r2 <- renderText({ "--" })
-  output$bivariate_p <- renderText({ "--" })
-  output$sample_size <- renderText({ "--" })
-  output$correlation_strength <- renderUI({ HTML("Run analysis to see results") })
-  output$variance_explained <- renderUI({ HTML("") })
-  output$significance_label <- renderUI({ HTML("") })
   
   # Regression Models placeholders
   output$model_r2 <- renderText({ "--" })
@@ -367,11 +354,14 @@ server <- function(input, output, session) {
   output$people_helped <- renderText({ "--" })
   output$cost_estimate <- renderText({ "--" })
   
-  cat("✓ Server initialized with placeholder outputs\n")
+  cat("========================================\n")
+  cat("✓ SERVER INITIALIZED SUCCESSFULLY\n")
+  cat("========================================\n\n")
 }
 
 # ==============================================================================
 # RUN APPLICATION
 # ==============================================================================
 
+cat("Starting Shiny application...\n\n")
 shinyApp(ui = ui, server = server)
