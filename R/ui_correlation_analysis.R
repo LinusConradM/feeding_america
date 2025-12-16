@@ -1,9 +1,8 @@
 # ==============================================================================
 # UI MODULE: CORRELATION ANALYSIS
 # ==============================================================================
-# PURPOSE: Explore bivariate relationships and correlation patterns
-# CAPABILITIES: Heatmaps, scatterplots, regression lines, time comparisons
-# TEAM: Conrad, Sharon, Ryann, Alex
+# PURPOSE: Interactive bivariate and multivariate correlation analysis
+# FEATURES: Scatter plots, correlation matrices, statistical tests, AI insights
 # ==============================================================================
 
 ui_correlation_analysis <- tabPanel(
@@ -11,282 +10,280 @@ ui_correlation_analysis <- tabPanel(
   value = "correlation",
   
   fluidPage(
-    # Global Controls
-    # global_controls_ui(),  # Removed to prevent duplicate IDs
-    
     # Page Header
     fluidRow(
       column(
         12,
         h2(
-          icon("project-diagram"), " Driver & Correlation Analysis",
+          icon("project-diagram"), " Correlation Analysis",
           style = "color: #2c3e50; font-weight: 600; margin-bottom: 10px;"
         ),
         p(
-          "Understand relationships between food insecurity and socioeconomic factors",
+          "Explore relationships between food insecurity and socioeconomic variables",
           style = "color: #6c757d; font-size: 16px; margin-bottom: 30px;"
         )
       )
     ),
     
     # ========================================================================
-    # CORRELATION HEATMAP
+    # ANALYSIS CONTROLS
     # ========================================================================
     fluidRow(
       column(
-        3,
+        4,
         div(
-          style = "background: white; padding: 20px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
-          h5("Variable Selection", style = "margin-top: 0;"),
+          style = "background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          h4("Analysis Settings", style = "margin-top: 0; color: #0033A0;"),
           
-          checkboxGroupInput(
-            "heatmap_vars",
-            "Include in Heatmap:",
+          # Variable X selection
+          selectInput(
+            "corr_var_x",
+            "X-Axis Variable:",
             choices = c(
-              "Food Insecurity Rate" = "fi_rate",
-              "Poverty Rate" = "poverty",
-              "Median Income" = "income",
-              "Unemployment Rate" = "unemployment",
-              "Uninsured Rate" = "uninsured",
-              "Cost per Meal" = "cost",
-              "SNAP Participation" = "snap",
-              "Education (College+)" = "education"
+              "Food Insecurity Rate" = "overall_food_insecurity_rate",
+              "Child Food Insecurity Rate" = "child_food_insecurity_rate",
+              "Poverty Rate" = "poverty_rate",
+              "Median Income" = "median_income",
+              "Unemployment Rate" = "unemployment_rate",
+              "Cost per Meal" = "cost_per_meal"
             ),
-            selected = c("fi_rate", "poverty", "income", "unemployment")
+            selected = "poverty_rate"
+          ),
+          
+          # Variable Y selection
+          selectInput(
+            "corr_var_y",
+            "Y-Axis Variable:",
+            choices = c(
+              "Food Insecurity Rate" = "overall_food_insecurity_rate",
+              "Child Food Insecurity Rate" = "child_food_insecurity_rate",
+              "Poverty Rate" = "poverty_rate",
+              "Median Income" = "median_income",
+              "Unemployment Rate" = "unemployment_rate",
+              "Cost per Meal" = "cost_per_meal"
+            ),
+            selected = "overall_food_insecurity_rate"
+          ),
+          
+          # Correlation method
+          selectInput(
+            "corr_method",
+            "Correlation Method:",
+            choices = c(
+              "Pearson (linear)" = "pearson",
+              "Spearman (rank)" = "spearman",
+              "Kendall (rank)" = "kendall"
+            ),
+            selected = "pearson"
           ),
           
           hr(),
           
-          h5("Display Options"),
-          selectInput(
-            "correlation_method",
-            "Method:",
-            choices = c("Pearson" = "pearson", "Spearman" = "spearman"),
-            selected = "pearson"
+          # Year filter
+          sliderInput(
+            "corr_year",
+            "Year:",
+            min = 2009,
+            max = 2023,
+            value = 2023,
+            step = 1,
+            sep = ""
           ),
           
-          checkboxInput("show_values", "Show Correlation Values", TRUE),
-          checkboxInput("cluster_vars", "Cluster Variables", FALSE)
+          # Geography filter
+          selectInput(
+            "corr_geography",
+            "Geographic Level:",
+            choices = c("All Counties", "State", "Region"),
+            selected = "All Counties"
+          ),
+          
+          # State filter (conditional)
+          conditionalPanel(
+            condition = "input.corr_geography == 'State'",
+            selectInput(
+              "corr_state",
+              "Select State:",
+              choices = c("All States" = "all"),
+              selected = "all"
+            )
+          ),
+          
+          hr(),
+          
+          # Run analysis button
+          actionButton(
+            "run_correlation",
+            "Run Analysis",
+            icon = icon("play"),
+            style = "width: 100%; background: #0033A0; color: white; border: none; padding: 12px;
+                     font-weight: 600; border-radius: 8px;"
+          )
         )
       ),
       
       column(
-        9,
+        8,
+        # Scatter plot
         div(
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          style = "background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                   margin-bottom: 20px;",
           h4(
-            icon("th"), " Correlation Heatmap",
+            icon("chart-scatter"), " Bivariate Scatter Plot",
             style = "margin-top: 0; color: #2c3e50;"
           ),
-          hr(),
-          
-          # Heatmap placeholder
-          div(
-            style = "height: 500px; display: flex; align-items: center; 
-                     justify-content: center; background: #f8f9fa; 
-                     border-radius: 8px; border: 2px dashed #dee2e6;",
-            div(
-              style = "text-align: center;",
-              icon("th", style = "font-size: 60px; color: #0033A0; margin-bottom: 20px;"),
-              h4("Interactive Correlation Matrix", 
-                 style = "color: #495057; margin-bottom: 10px;"),
-              p("Color-coded heatmap showing pairwise correlations",
-                style = "color: #6c757d; margin-bottom: 20px;"),
-              tags$div(
-                tags$strong("Features:", style = "color: #0033A0;"),
-                tags$ul(
-                  style = "text-align: left; display: inline-block; color: #6c757d;",
-                  tags$li("Custom variable selection (2-15 variables)"),
-                  tags$li("Pearson or Spearman correlation"),
-                  tags$li("Interactive tooltips with significance tests"),
-                  tags$li("Hierarchical clustering option"),
-                  tags$li("Export to PNG/CSV")
-                )
-              )
-            )
-          )
+          plotOutput("correlation_scatter", height = "450px")
         )
       )
     ),
     
     # ========================================================================
-    # BIVARIATE SCATTERPLOT EXPLORER
-    # ========================================================================
-    fluidRow(
-      style = "margin-top: 30px;",
-      column(
-        12,
-        div(
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
-          h4(
-            icon("braille"), " Bivariate Scatterplot Explorer",
-            style = "margin-top: 0; color: #2c3e50;"
-          ),
-          hr(),
-          
-          fluidRow(
-            column(
-              3,
-              selectInput(
-                "scatter_x",
-                "X-Axis Variable:",
-                choices = c(
-                  "Poverty Rate" = "poverty",
-                  "Median Income" = "income",
-                  "Unemployment Rate" = "unemployment",
-                  "Uninsured Rate" = "uninsured",
-                  "SNAP Participation" = "snap"
-                ),
-                selected = "poverty"
-              ),
-              
-              selectInput(
-                "scatter_y",
-                "Y-Axis Variable:",
-                choices = c(
-                  "Food Insecurity Rate" = "fi_rate",
-                  "Child FI Rate" = "child_fi",
-                  "Budget Shortfall" = "shortfall"
-                ),
-                selected = "fi_rate"
-              ),
-              
-              selectInput(
-                "scatter_color",
-                "Color By:",
-                choices = c(
-                  "None" = "none",
-                  "Region" = "region",
-                  "Metro/Rural" = "metro",
-                  "Year" = "year"
-                ),
-                selected = "region"
-              ),
-              
-              hr(),
-              
-              checkboxInput("show_regression", "Show Regression Line", TRUE),
-              checkboxInput("show_ci", "Show Confidence Interval", TRUE),
-              checkboxInput("log_scale_x", "Log Scale (X-axis)", FALSE),
-              checkboxInput("log_scale_y", "Log Scale (Y-axis)", FALSE)
-            ),
-            
-            column(
-              9,
-              # Scatterplot placeholder
-              div(
-                style = "height: 450px; display: flex; align-items: center; 
-                         justify-content: center; background: #f8f9fa; 
-                         border-radius: 8px; border: 2px dashed #dee2e6;",
-                div(
-                  style = "text-align: center;",
-                  icon("braille", style = "font-size: 60px; color: #C41E3A; margin-bottom: 20px;"),
-                  h4("Interactive Scatterplot with Regression", 
-                     style = "color: #495057; margin-bottom: 10px;"),
-                  p("Explore bivariate relationships with statistical overlays",
-                    style = "color: #6c757d;")
-                )
-              )
-            )
-          )
-        )
-      )
-    ),
-    
-    # ========================================================================
-    # CORRELATION STATISTICS CARDS
+    # STATISTICS CARDS
     # ========================================================================
     fluidRow(
       style = "margin-top: 20px;",
       
+      # Correlation coefficient
       column(
         3,
         div(
           style = "background: linear-gradient(135deg, #0033A0 0%, #003D82 100%);
                    padding: 25px; border-radius: 10px; color: white;
                    box-shadow: 0 4px 15px rgba(0, 51, 160, 0.3);",
-          h5("Correlation (r)", style = "margin: 0 0 10px 0;"),
-          h2(textOutput("bivariate_r"), style = "margin: 0; font-size: 48px;"),
-          p(htmlOutput("correlation_strength"), 
-            style = "margin-top: 15px; font-size: 14px; opacity: 0.9;")
+          div(icon("link", style = "font-size: 2.5em; margin-bottom: 10px;")),
+          h5("Correlation (r)", style = "margin: 10px 0 5px 0;"),
+          h3(textOutput("bivariate_r"), style = "margin: 0; font-size: 36px;"),
+          p("Strength of relationship", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
         )
       ),
       
-      column(
-        3,
-        div(
-          style = "background: linear-gradient(135deg, #C41E3A 0%, #A01830 100%);
-                   padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);",
-          h5("R-Squared (R²)", style = "margin: 0 0 10px 0;"),
-          h2(textOutput("bivariate_r2"), style = "margin: 0; font-size: 48px;"),
-          p(htmlOutput("variance_explained"), 
-            style = "margin-top: 15px; font-size: 14px; opacity: 0.9;")
-        )
-      ),
-      
-      column(
-        3,
-        div(
-          style = "background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-                   padding: 25px; border-radius: 10px; color: white;
-                   box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);",
-          h5("P-Value", style = "margin: 0 0 10px 0;"),
-          h2(textOutput("bivariate_p"), style = "margin: 0; font-size: 48px;"),
-          p(htmlOutput("significance_label"), 
-            style = "margin-top: 15px; font-size: 14px; opacity: 0.9;")
-        )
-      ),
-      
+      # R-squared
       column(
         3,
         div(
           style = "background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
                    padding: 25px; border-radius: 10px; color: white;
                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);",
-          h5("Sample Size", style = "margin: 0 0 10px 0;"),
-          h2(textOutput("sample_size"), style = "margin: 0; font-size: 48px;"),
-          p("Counties in analysis", 
-            style = "margin-top: 15px; font-size: 14px; opacity: 0.9;")
+          div(icon("percentage", style = "font-size: 2.5em; margin-bottom: 10px;")),
+          h5("R² (Variance)", style = "margin: 10px 0 5px 0;"),
+          h3(textOutput("bivariate_r2"), style = "margin: 0; font-size: 36px;"),
+          p("Variance explained", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+        )
+      ),
+      
+      # P-value
+      column(
+        3,
+        div(
+          style = "background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+                   padding: 25px; border-radius: 10px; color: white;
+                   box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);",
+          div(icon("chart-line", style = "font-size: 2.5em; margin-bottom: 10px;")),
+          h5("P-Value", style = "margin: 10px 0 5px 0;"),
+          h3(textOutput("bivariate_p"), style = "margin: 0; font-size: 36px;"),
+          p("Statistical significance", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
+        )
+      ),
+      
+      # Sample size
+      column(
+        3,
+        div(
+          style = "background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);
+                   padding: 25px; border-radius: 10px; color: white;
+                   box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);",
+          div(icon("database", style = "font-size: 2.5em; margin-bottom: 10px;")),
+          h5("Sample Size", style = "margin: 10px 0 5px 0;"),
+          h3(textOutput("sample_size"), style = "margin: 0; font-size: 36px;"),
+          p("Number of observations", style = "margin-top: 10px; font-size: 13px; opacity: 0.9;")
         )
       )
     ),
     
     # ========================================================================
-    # YEAR-BY-YEAR CORRELATION COMPARISON
+    # INTERPRETATION CARDS
     # ========================================================================
     fluidRow(
-      style = "margin-top: 30px;",
+      style = "margin-top: 20px;",
+      
+      column(
+        4,
+        div(
+          style = "background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          h5(icon("info-circle"), " Correlation Strength", style = "color: #0033A0; margin-top: 0;"),
+          htmlOutput("correlation_strength")
+        )
+      ),
+      
+      column(
+        4,
+        div(
+          style = "background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          h5(icon("percentage"), " Variance Explained", style = "color: #28a745; margin-top: 0;"),
+          htmlOutput("variance_explained")
+        )
+      ),
+      
+      column(
+        4,
+        div(
+          style = "background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          h5(icon("chart-bar"), " Significance", style = "color: #ffc107; margin-top: 0;"),
+          htmlOutput("significance_label")
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # CORRELATION MATRIX HEATMAP
+    # ========================================================================
+    fluidRow(
+      style = "margin-top: 20px;",
       column(
         12,
         div(
-          style = "background: white; padding: 25px; border-radius: 10px;
-                   box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
+          style = "background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);",
           h4(
-            icon("calendar-alt"), " Correlation Stability Over Time",
+            icon("th"), " Correlation Matrix",
             style = "margin-top: 0; color: #2c3e50;"
           ),
-          p("Track how the relationship between variables changes across years",
-            style = "color: #6c757d; margin-bottom: 20px;"),
-          hr(),
+          p(
+            "Pairwise correlations between all key variables",
+            style = "color: #6c757d; margin-bottom: 20px;"
+          ),
+          plotOutput("correlation_matrix", height = "500px")
+        )
+      )
+    ),
+    
+    # ========================================================================
+    # AI-POWERED INTERPRETATION
+    # ========================================================================
+    fluidRow(
+      style = "margin-top: 20px;",
+      column(
+        12,
+        div(
+          style = "background: linear-gradient(135deg, #06D6A0 0%, #04A777 100%);
+                   padding: 30px; border-radius: 10px; color: white;
+                   box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);",
           
-          # Time-series correlation plot placeholder
           div(
-            style = "height: 300px; display: flex; align-items: center; 
-                     justify-content: center; background: #f8f9fa; 
-                     border-radius: 8px; border: 2px dashed #dee2e6;",
-            div(
-              style = "text-align: center;",
-              icon("chart-line", style = "font-size: 50px; color: #6f42c1; margin-bottom: 15px;"),
-              h4("Year-by-Year Correlation Trend (2009-2023)", 
-                 style = "color: #495057; margin-bottom: 10px;"),
-              p("Shows if relationships strengthen/weaken over time",
-                style = "color: #6c757d;")
+            style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;",
+            h3(
+              icon("robot"), " AI-Powered Interpretation",
+              style = "margin: 0; font-weight: 600;"
+            ),
+            actionButton(
+              "generate_correlation_interpretation",
+              "Generate AI Interpretation",
+              icon = icon("magic"),
+              style = "background: rgba(255,255,255,0.2); color: white; border: 2px solid white;
+                       padding: 10px 20px; font-weight: 600; border-radius: 8px;"
             )
-          )
+          ),
+          
+          htmlOutput("correlation_ai_interpretation")
         )
       )
     )

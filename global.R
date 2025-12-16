@@ -403,58 +403,368 @@ cat("\n")
 # SET GLOBAL GGPLOT THEME
 # ==============================================================================
 
-cat("Setting global ggplot theme...\n")
+cat("Setting world-class visualization theme...\n")
 
-bs_theme <- theme(
-  text = element_text(family = "Arial", size = 14, color = "black"),
-  plot.title = element_text(
-    hjust = 0.5,
-    size = 20,
-    face = "bold",
-    color = "black"
-  ),
-  plot.subtitle = element_text(
-    hjust = 0.5,
-    size = 20,
-    face = "bold"
-  ),
-  plot.caption = element_text(
-    size = 16,
-    color = "gray30",
-    hjust = 1,
-    face = "italic"
-  ),
-  axis.title = element_text(
-    size = 16,
-    color = "black",
-    face = "bold"
-  ),
-  axis.text = element_text(
-    size = 14,
-    color = "#000000",
-    face = "bold"
-  ),
-  legend.title = element_text(
-    size = 14,
-    face = "bold",
-    color = "black"
-  ),
-  legend.text = element_text(
-    size = 12,
-    color = "black"
-  ),
-  strip.text = element_text(
-    size = 14,
-    face = "bold",
-    color = "black"
-  ),
-  panel.grid.major = element_line(color = "grey85"),
-  panel.grid.minor = element_blank()
+# ==============================================================================
+# SOPHISTICATED COLOR PALETTE
+# ==============================================================================
+# Based on color theory and professional design standards
+# Rich, refined tones that convey authority and sophistication
+
+elite_palette <- list(
+  # Core neutrals (refined grays, not flat blacks)
+  ink = "#1a1a1a",           # Near-black for maximum contrast text
+  charcoal = "#2d3436",      # Rich charcoal for titles
+  slate = "#535c68",         # Sophisticated slate for body text
+  steel = "#747d8c",         # Muted steel for secondary elements
+  silver = "#a4b0be",        # Subtle silver for grid lines
+  pearl = "#dfe4ea",         # Light pearl for backgrounds
+  snow = "#f8f9fa",          # Clean white-gray
+  
+  # Accent palette (refined, not garish)
+  sapphire = "#0652DD",      # Deep blue (trust, authority)
+  ruby = "#c0392b",          # Rich red (emphasis, warning)
+  emerald = "#27ae60",       # Elegant green (success, growth)
+  amber = "#e67e22",         # Warm amber (attention)
+  amethyst = "#6c5ce7",      # Refined purple (premium)
+  topaz = "#f39c12",         # Golden orange (highlight)
+  
+  # Gradient pairs (for premium visualizations)
+  ocean_deep = "#0652DD",
+  ocean_light = "#4a90e2",
+  ruby_deep = "#c0392b", 
+  ruby_light = "#e74c3c",
+  forest_deep = "#27ae60",
+  forest_light = "#2ecc71",
+  sunset_deep = "#e67e22",
+  sunset_light = "#f39c12"
 )
 
-theme_set(bs_theme)
+# ==============================================================================
+# TYPOGRAPHY HIERARCHY
+# ==============================================================================
+# Carefully calibrated sizes and weights for optimal readability
+# and clear visual hierarchy
 
-cat("✓ ggplot theme set\n\n")
+elite_type <- list(
+  # Display text (large, commanding)
+  display = 22,
+  
+  # Title text (clear hierarchy)
+  title = 18,
+  subtitle = 14,
+  caption = 11,
+  
+  # Body text (optimal readability)
+  axis_title = 13,
+  axis_text = 11,
+  
+  # Supporting text
+  legend_title = 12,
+  legend_text = 11,
+  facet_text = 12,
+  
+  # Annotation text
+  annotation = 10
+)
+
+# ==============================================================================
+# ELITE THEME DEFINITION
+# ==============================================================================
+
+elite_theme <- theme_minimal(base_size = 13, base_family = "Arial") +
+  theme(
+    # ===========================================================================
+    # PLOT STRUCTURE
+    # ===========================================================================
+    
+    # Overall plot appearance
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    
+    # Generous margins for breathing room
+    plot.margin = margin(20, 20, 20, 20),
+    
+    # ===========================================================================
+    # TEXT HIERARCHY (The Foundation of Great Design)
+    # ===========================================================================
+    
+    # Plot title - Strong, authoritative, draws the eye
+    plot.title = element_text(
+      family = "Arial",
+      size = elite_type$title,
+      face = "bold",
+      color = elite_palette$charcoal,
+      hjust = 0,                    # Left-aligned (editorial style)
+      vjust = 1,
+      margin = margin(0, 0, 8, 0),  # Space below
+      lineheight = 1.2
+    ),
+    
+    # Subtitle - Provides context, lighter weight
+    plot.subtitle = element_text(
+      family = "Arial",
+      size = elite_type$subtitle,
+      face = "plain",                # Regular weight for contrast
+      color = elite_palette$slate,
+      hjust = 0,
+      margin = margin(0, 0, 15, 0),
+      lineheight = 1.3
+    ),
+    
+    # Caption - Small, subtle, informative
+    plot.caption = element_text(
+      family = "Arial",
+      size = elite_type$caption,
+      face = "italic",
+      color = elite_palette$steel,
+      hjust = 1,                     # Right-aligned
+      margin = margin(10, 0, 0, 0),
+      lineheight = 1.4
+    ),
+    
+    # ===========================================================================
+    # AXES (Clear but Not Dominant)
+    # ===========================================================================
+    
+    # Axis titles - Bold enough to identify, not overpower
+    axis.title.x = element_text(
+      family = "Arial",
+      size = elite_type$axis_title,
+      face = "bold",
+      color = elite_palette$charcoal,
+      margin = margin(10, 0, 0, 0)
+    ),
+    axis.title.y = element_text(
+      family = "Arial",
+      size = elite_type$axis_title,
+      face = "bold",
+      color = elite_palette$charcoal,
+      margin = margin(0, 10, 0, 0),
+      angle = 90
+    ),
+    
+    # Axis text - Readable, not bold (data should be bold, not labels)
+    axis.text.x = element_text(
+      family = "Arial",
+      size = elite_type$axis_text,
+      face = "plain",                # Regular weight
+      color = elite_palette$slate,
+      margin = margin(5, 0, 0, 0)
+    ),
+    axis.text.y = element_text(
+      family = "Arial",
+      size = elite_type$axis_text,
+      face = "plain",
+      color = elite_palette$slate,
+      margin = margin(0, 5, 0, 0)
+    ),
+    
+    # Axis lines - Subtle but present
+    axis.line = element_line(
+      color = elite_palette$silver,
+      linewidth = 0.5,
+      lineend = "square"
+    ),
+    
+    # Axis ticks - Small, refined
+    axis.ticks = element_line(
+      color = elite_palette$silver,
+      linewidth = 0.4
+    ),
+    axis.ticks.length = unit(4, "pt"),
+    
+    # ===========================================================================
+    # GRID LINES (Invisible Help)
+    # ===========================================================================
+    # "Perfection is achieved not when there is nothing more to add,
+    #  but when there is nothing left to take away." - Saint-Exupéry
+    
+    # Major grid - Present but nearly invisible
+    panel.grid.major = element_line(
+      color = elite_palette$pearl,
+      linewidth = 0.5,
+      linetype = "solid"
+    ),
+    
+    # Major grid X - Slightly more visible for vertical reading
+    panel.grid.major.x = element_line(
+      color = elite_palette$pearl,
+      linewidth = 0.5
+    ),
+    
+    # Major grid Y - Helps eye track across
+    panel.grid.major.y = element_line(
+      color = elite_palette$pearl,
+      linewidth = 0.5
+    ),
+    
+    # Minor grid - Removed (less is more)
+    panel.grid.minor = element_blank(),
+    
+    # ===========================================================================
+    # LEGEND (Supporting Actor)
+    # ===========================================================================
+    
+    # Legend position and spacing
+    legend.position = "right",
+    legend.justification = "top",
+    legend.margin = margin(0, 0, 0, 10),
+    legend.spacing = unit(8, "pt"),
+    legend.spacing.x = unit(6, "pt"),
+    legend.spacing.y = unit(6, "pt"),
+    
+    # Legend appearance
+    legend.background = element_rect(
+      fill = "white",
+      color = elite_palette$pearl,
+      linewidth = 0.5
+    ),
+    legend.key = element_rect(
+      fill = "white",
+      color = NA
+    ),
+    legend.key.size = unit(14, "pt"),
+    
+    # Legend text
+    legend.title = element_text(
+      family = "Arial",
+      size = elite_type$legend_title,
+      face = "bold",
+      color = elite_palette$charcoal,
+      margin = margin(0, 0, 6, 0)
+    ),
+    legend.text = element_text(
+      family = "Arial",
+      size = elite_type$legend_text,
+      face = "plain",
+      color = elite_palette$slate,
+      margin = margin(2, 0, 2, 0)
+    ),
+    
+    # ===========================================================================
+    # FACETS (Organized Complexity)
+    # ===========================================================================
+    
+    # Facet labels - Clear, distinguished
+    strip.text = element_text(
+      family = "Arial",
+      size = elite_type$facet_text,
+      face = "bold",
+      color = elite_palette$charcoal,
+      margin = margin(6, 6, 6, 6)
+    ),
+    
+    # Facet background - Subtle distinction
+    strip.background = element_rect(
+      fill = elite_palette$snow,
+      color = elite_palette$pearl,
+      linewidth = 0.5
+    ),
+    
+    # Facet spacing
+    panel.spacing = unit(12, "pt"),
+    
+    # ===========================================================================
+    # REFINEMENTS (The Details That Matter)
+    # ===========================================================================
+    
+    # Complete theme with no clipping
+    plot.title.position = "plot",      # Align with plot area, not panel
+    plot.caption.position = "plot",
+    
+    # Aspect ratio (let data determine)
+    aspect.ratio = NULL
+  )
+
+# Set as global theme
+theme_set(elite_theme)
+
+# ==============================================================================
+# ELITE COLOR SCALES (Pre-configured Palettes)
+# ==============================================================================
+
+# Discrete color scale (for categories)
+scale_color_elite <- function(...) {
+  scale_color_manual(
+    values = c(
+      elite_palette$sapphire,
+      elite_palette$ruby,
+      elite_palette$emerald,
+      elite_palette$amber,
+      elite_palette$amethyst,
+      elite_palette$topaz
+    ),
+    ...
+  )
+}
+
+scale_fill_elite <- function(...) {
+  scale_fill_manual(
+    values = c(
+      elite_palette$sapphire,
+      elite_palette$ruby,
+      elite_palette$emerald,
+      elite_palette$amber,
+      elite_palette$amethyst,
+      elite_palette$topaz
+    ),
+    ...
+  )
+}
+
+# Continuous color scale (for gradients)
+scale_color_elite_gradient <- function(low = elite_palette$snow, 
+                                       high = elite_palette$sapphire, ...) {
+  scale_color_gradient(low = low, high = high, ...)
+}
+
+scale_fill_elite_gradient <- function(low = elite_palette$snow, 
+                                      high = elite_palette$sapphire, ...) {
+  scale_fill_gradient(low = low, high = high, ...)
+}
+
+# Diverging color scale (for positive/negative)
+scale_color_elite_diverging <- function(low = elite_palette$ruby,
+                                        mid = elite_palette$snow,
+                                        high = elite_palette$sapphire, ...) {
+  scale_color_gradient2(low = low, mid = mid, high = high, midpoint = 0, ...)
+}
+
+scale_fill_elite_diverging <- function(low = elite_palette$ruby,
+                                       mid = elite_palette$snow,
+                                       high = elite_palette$sapphire, ...) {
+  scale_fill_gradient2(low = low, mid = mid, high = high, midpoint = 0, ...)
+}
+
+# Make palettes globally available
+assign("elite_palette", elite_palette, envir = .GlobalEnv)
+assign("elite_type", elite_type, envir = .GlobalEnv)
+assign("scale_color_elite", scale_color_elite, envir = .GlobalEnv)
+assign("scale_fill_elite", scale_fill_elite, envir = .GlobalEnv)
+assign("scale_color_elite_gradient", scale_color_elite_gradient, envir = .GlobalEnv)
+assign("scale_fill_elite_gradient", scale_fill_elite_gradient, envir = .GlobalEnv)
+assign("scale_color_elite_diverging", scale_color_elite_diverging, envir = .GlobalEnv)
+assign("scale_fill_elite_diverging", scale_fill_elite_diverging, envir = .GlobalEnv)
+
+# ==============================================================================
+# STATUS MESSAGE
+# ==============================================================================
+
+cat("✓ Elite visualization theme loaded\n")
+cat("  • Editorial-style typography with clear hierarchy\n")
+cat("  • Sophisticated color palette (sapphire, ruby, emerald)\n")
+cat("  • Minimal grids that guide, not distract\n")
+cat("  • Left-aligned titles (editorial standard)\n")
+cat("  • Refined neutrals (charcoal, slate, silver)\n")
+cat("  • Pre-configured color scales available\n")
+cat("  • World-class professional aesthetic\n\n")
+
+cat("Available palettes:\n")
+cat("  • elite_palette$sapphire, $ruby, $emerald, $amber\n")
+cat("  • scale_color_elite() - discrete colors\n")
+cat("  • scale_fill_elite_gradient() - continuous\n")
+cat("  • scale_fill_elite_diverging() - for +/- data\n\n")
 
 # ==============================================================================
 # FINAL STATUS
