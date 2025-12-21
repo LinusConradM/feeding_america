@@ -55,7 +55,7 @@ server_analysis <- function(input, output, session, data) {
   })
 
   observe({
-    updateSelectInput(session, "reg_independent", choices = numeric_vars())
+    updateSelectInput(session, "analysis_independent", choices = numeric_vars())
   })
 
   observe({
