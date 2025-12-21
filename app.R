@@ -1,5 +1,7 @@
 # ==============================================================================
-# UPDATED app.R - WITH PROPER CORRELATION MODULE INTEGRATION
+# CORRECTED app.R - FIXED DUPLICATE ID ISSUE
+# ==============================================================================
+# Uses JavaScript to create submenu dynamically - NO duplicate IDs!
 # ==============================================================================
 
 # ==============================================================================
@@ -19,18 +21,18 @@ cat("✓ All app packages loaded\n")
 # ==============================================================================
 # LOAD UI MODULES (10 TABS)
 # ==============================================================================
-source("R/global_controls.R")              # Global filter controls
-source("R/ui_landing.R")                   # Tab 1: Landing/Home
-source("R/ui_overview.R")                  # Tab 2: Executive Overview ✅
-source("R/ui_geographic_intelligence.R")   # Tab 3: Geographic Intelligence ✅
-source("R/ui_correlation_analysis.R")      # Tab 4: Correlation Analysis ✅
-source("R/ui_regression_models.R")         # Tab 5: Regression Models
-source("R/ui_equity.R")                    # Tab 6: Equity & Disparities
-source("R/ui_county_clustering.R")         # Tab 7: County Clustering
-source("R/ui_timeseries_explorer.R")       # Tab 8: Time-Series Explorer
-source("R/ui_policy_scenarios_expanded.R") # Tab 9: Policy Scenarios
-source("R/ui_data_downloads.R")            # Tab 10: Data & Downloads
-source("R/beautiful_kpi_cards.R")          # Custom KPI card UI function
+source("R/global_controls.R")
+source("R/ui_landing.R")
+source("R/ui_overview.R")
+source("R/ui_geographic_intelligence.R")
+source("R/ui_correlation_analysis.R")
+source("R/ui_regression_models.R")
+source("R/ui_equity.R")
+source("R/ui_county_clustering.R")
+source("R/ui_timeseries_explorer.R")
+source("R/ui_policy_scenarios_expanded.R")
+source("R/ui_data_downloads.R")
+source("R/beautiful_kpi_cards.R")
 
 # ==============================================================================
 # LOAD SERVER MODULES
@@ -39,7 +41,8 @@ source("R/server_overview.R")
 source("R/server_exploration.R")
 source("R/server_analysis.R")
 source("R/server_geographic_intelligence.R")
-source("R/server_correlation_analysis.R")  # ✅ CORRELATION MODULE
+source("R/server_correlation_analysis.R")
+source("R/server_regression_models.R")
 
 cat("✓ All modules loaded\n")
 
@@ -73,7 +76,7 @@ ui <- navbarPage(
   ui_geographic_intelligence,
   
   # ============================================================================
-  # ANALYSIS DROPDOWN MENU (5 ANALYTICAL TOOLS)
+  # ANALYSIS DROPDOWN MENU
   # ============================================================================
   navbarMenu(
     title = div(icon("chart-line"), "Analysis"),
@@ -86,7 +89,7 @@ ui <- navbarPage(
       ui_correlation_analysis
     ),
     
-    # Regression Models
+    # REGRESSION MODELS - SINGLE TAB (submenu created via JavaScript)
     tabPanel(
       title = div(icon("chart-line"), "Regression Models"),
       value = "regression",
@@ -122,7 +125,7 @@ ui <- navbarPage(
   ui_data_downloads,
   
   # ============================================================================
-  # CUSTOM CSS
+  # CUSTOM CSS + JAVASCRIPT FOR SUBMENU
   # ============================================================================
   tags$head(
     # Premium Theme
@@ -139,7 +142,7 @@ ui <- navbarPage(
     
     # Custom styles
     tags$style(HTML("
-      /* Modern Navbar with AU Blue */
+      /* Modern Navbar */
       .navbar { 
         background: linear-gradient(135deg, #0033A0 0%, #003D82 100%) !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -167,7 +170,7 @@ ui <- navbarPage(
         border-radius: 5px;
       }
       
-      /* Dropdown menu styling */
+      /* Dropdown menu */
       .navbar-nav > li > .dropdown-menu {
         background: white;
         border: 1px solid #e0e0e0;
@@ -209,37 +212,127 @@ ui <- navbarPage(
         color: white;
       }
       
-      /* KPI Card Hover Effect */
-      .kpi-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
-        transition: all 0.2s;
+      /* Nested submenu */
+      .dropdown-submenu {
+        position: relative;
       }
       
-      /* Body & Typography */
+      .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -6px;
+        margin-left: -1px;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      
+      .dropdown-submenu:hover > .dropdown-menu {
+        display: block;
+      }
+      
+      .dropdown-submenu > a:after {
+        content: '\\f054';
+        font-family: 'FontAwesome';
+        float: right;
+        margin-left: 10px;
+        opacity: 0.5;
+        font-size: 10px;
+      }
+      
+      /* Dropdown header */
+      .dropdown-header {
+        padding: 8px 20px;
+        font-size: 11px;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      /* Divider */
+      .dropdown-divider {
+        height: 1px;
+        margin: 8px 0;
+        overflow: hidden;
+        background-color: #e9ecef;
+      }
+      
       body {
         font-family: 'Inter', sans-serif;
         background-color: #f8f9fa;
       }
-      h1, h2, h3, h4, h5 {
-        font-family: 'Inter', sans-serif;
-      }
-      
-      /* Smooth transitions */
-      .tab-content {
-        animation: fadeIn 0.3s ease-in;
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
+    ")),
+    
+    # JavaScript for submenu
+    tags$script(HTML("
+      $(document).ready(function() {
+        
+        // Find Regression Models link
+        var regressionLink = $('a[data-value=\"regression\"]').parent();
+        
+        if (regressionLink.length > 0) {
+          regressionLink.addClass('dropdown-submenu');
+          
+          // Create submenu
+          var submenu = `
+            <ul class='dropdown-menu'>
+              <li class='dropdown-header'>Basic Regression</li>
+              <li><a href='#' data-model='linear'><i class='fa fa-minus'></i> Linear Regression</a></li>
+              <li><a href='#' data-model='poly2'><i class='fa fa-minus'></i> Polynomial (2)</a></li>
+              <li><a href='#' data-model='poly3'><i class='fa fa-minus'></i> Polynomial (3)</a></li>
+              
+              <li class='dropdown-divider'></li>
+              <li class='dropdown-header'>Regularized</li>
+              <li><a href='#' data-model='ridge'><i class='fa fa-minus'></i> Ridge (L2)</a></li>
+              <li><a href='#' data-model='lasso'><i class='fa fa-minus'></i> LASSO (L1)</a></li>
+              <li><a href='#' data-model='elasticnet'><i class='fa fa-minus'></i> Elastic Net</a></li>
+              
+              <li class='dropdown-divider'></li>
+              <li class='dropdown-header'>Panel & Distribution</li>
+              <li><a href='#' data-model='fixed_effects'><i class='fa fa-minus'></i> Fixed Effects</a></li>
+              <li><a href='#' data-model='quantile_50'><i class='fa fa-minus'></i> Quantile (50th)</a></li>
+              <li><a href='#' data-model='quantile_75'><i class='fa fa-minus'></i> Quantile (75th)</a></li>
+              
+              <li class='dropdown-divider'></li>
+              <li class='dropdown-header'>Ensemble</li>
+              <li><a href='#' data-model='random_forest_reg'><i class='fa fa-minus'></i> Random Forest</a></li>
+              <li><a href='#' data-model='xgboost_reg'><i class='fa fa-minus'></i> XGBoost</a></li>
+              <li><a href='#' data-model='gam'><i class='fa fa-minus'></i> GAM</a></li>
+              <li><a href='#' data-model='interaction'><i class='fa fa-minus'></i> Interactions</a></li>
+              
+              <li class='dropdown-divider'></li>
+              <li class='dropdown-header'>Classification</li>
+              <li><a href='#' data-model='logistic_binary'><i class='fa fa-minus'></i> Logistic (Binary)</a></li>
+              <li><a href='#' data-model='logistic_multi'><i class='fa fa-minus'></i> Multinomial</a></li>
+              <li><a href='#' data-model='random_forest_class'><i class='fa fa-minus'></i> RF Class</a></li>
+              <li><a href='#' data-model='xgboost_class'><i class='fa fa-minus'></i> XGB Class</a></li>
+              <li><a href='#' data-model='lda'><i class='fa fa-minus'></i> LDA</a></li>
+            </ul>
+          `;
+          
+          regressionLink.append(submenu);
+          
+          // Handle clicks
+          regressionLink.find('a[data-model]').on('click', function(e) {
+            e.preventDefault();
+            var model = $(this).data('model');
+            
+            // Navigate to tab
+            $('a[data-value=\"regression\"]').tab('show');
+            
+            // Set model type
+            setTimeout(function() {
+              $('#reg_model_type').val(model).trigger('change');
+            }, 100);
+          });
+        }
+      });
     "))
   )
 )
 
 # ==============================================================================
-# SERVER DEFINITION
+# SERVER
 # ==============================================================================
 
 server <- function(input, output, session) {
@@ -248,84 +341,26 @@ server <- function(input, output, session) {
   cat("SHINY SERVER STARTING\n")
   cat("========================================\n\n")
   
-  # Data reactive
-  data <- reactive({
-    food_data
-  })
+  data <- reactive({ food_data })
   
-  # Verify data is accessible
   cat("Data reactive created\n")
   cat("  Rows:", nrow(food_data), "\n")
   cat("  Columns:", ncol(food_data), "\n\n")
 
-  # Landing page navigation
   observeEvent(input$start_exploring, {
     updateNavbarPage(session, "navbar", selected = "overview")
   })
 
-  # ============================================================================
-  # ACTIVE SERVER MODULES
-  # ============================================================================
-  
   cat("Initializing server modules...\n")
   
-  # Executive Overview
-  tryCatch({
-    server_overview(input, output, session, data)
-    cat("  ✓ Executive Overview\n")
-  }, error = function(e) {
-    cat("  ❌ Executive Overview error:", e$message, "\n")
-  })
+  tryCatch({ server_overview(input, output, session, data); cat("  ✓ Executive Overview\n") }, error = function(e) { cat("  ❌ Overview:", e$message, "\n") })
+  tryCatch({ server_exploration(input, output, session, data); cat("  ✓ Exploration\n") }, error = function(e) { cat("  ❌ Exploration:", e$message, "\n") })
+  tryCatch({ server_analysis(input, output, session, data); cat("  ✓ Analysis\n") }, error = function(e) { cat("  ❌ Analysis:", e$message, "\n") })
+  tryCatch({ server_geographic_intelligence(input, output, session, data); cat("  ✓ Geographic Intelligence\n") }, error = function(e) { cat("  ❌ Geographic:", e$message, "\n") })
+  tryCatch({ server_correlation_analysis(input, output, session, data); cat("  ✓ Correlation Analysis\n") }, error = function(e) { cat("  ❌ Correlation:", e$message, "\n") })
+  tryCatch({ server_regression_models(input, output, session, data); cat("  ✓ Regression Models\n") }, error = function(e) { cat("  ❌ Regression:", e$message, "\n") })
   
-  # Exploration
-  tryCatch({
-    server_exploration(input, output, session, data)
-    cat("  ✓ Exploration\n")
-  }, error = function(e) {
-    cat("  ❌ Exploration error:", e$message, "\n")
-  })
-  
-  # Analysis
-  tryCatch({
-    server_analysis(input, output, session, data)
-    cat("  ✓ Analysis\n")
-  }, error = function(e) {
-    cat("  ❌ Analysis error:", e$message, "\n")
-  })
-  
-  # Geographic Intelligence
-  tryCatch({
-    server_geographic_intelligence(input, output, session, data)
-    cat("  ✓ Geographic Intelligence\n")
-  }, error = function(e) {
-    cat("  ❌ Geographic Intelligence error:", e$message, "\n")
-  })
-  
-  # ✨ CORRELATION ANALYSIS - THE KEY MODULE ✨
-  tryCatch({
-    server_correlation_analysis(input, output, session, data)
-    cat("  ✓ Correlation Analysis\n")
-  }, error = function(e) {
-    cat("  ❌ Correlation Analysis error:", e$message, "\n")
-    cat("     ", e$message, "\n")
-  })
-  
-  cat("\n")
-  
-  # ============================================================================
-  # PLACEHOLDER OUTPUTS FOR REMAINING TABS
-  # ============================================================================
-  
-  # Regression Models placeholders
-  output$model_r2 <- renderText({ "--" })
-  output$model_adj_r2 <- renderText({ "--" })
-  output$model_fstat <- renderText({ "--" })
-  output$model_n <- renderText({ "--" })
-  output$coefficient_cards <- renderUI({ 
-    HTML("<p style='text-align: center; color: #6c757d;'>Run a regression model to see interpretations</p>")
-  })
-  
-  # Equity Analysis placeholders
+  # Placeholders
   output$absolute_disparity <- renderText({ "--" })
   output$relative_disparity <- renderText({ "--" })
   output$gini_coef <- renderText({ "--" })
@@ -333,35 +368,20 @@ server <- function(input, output, session) {
   output$metro_fi_rate <- renderText({ "--" })
   output$rural_fi_rate <- renderText({ "--" })
   output$rural_metro_gap <- renderText({ "--" })
-  
-  # County Clustering placeholders
   output$total_clusters <- renderText({ "--" })
   output$cluster_ss <- renderText({ "--" })
   output$cluster_variance <- renderText({ "--" })
-  output$cluster_interpretations <- renderUI({ 
-    HTML("<p style='text-align: center; color: #6c757d;'>Run clustering to see interpretations</p>")
-  })
-  
-  # Time-Series Explorer placeholders
+  output$cluster_interpretations <- renderUI({ HTML("<p style='text-align: center; color: #6c757d;'>Run clustering</p>") })
   output$pre_covid_avg <- renderText({ "--" })
   output$covid_avg <- renderText({ "--" })
   output$post_covid_avg <- renderText({ "--" })
-  
-  # Policy Scenarios placeholders
   output$baseline_fi <- renderText({ "--" })
   output$projected_fi <- renderText({ "--" })
   output$fi_reduction <- renderText({ "--" })
   output$people_helped <- renderText({ "--" })
   output$cost_estimate <- renderText({ "--" })
   
-  cat("========================================\n")
-  cat("✓ SERVER INITIALIZED SUCCESSFULLY\n")
-  cat("========================================\n\n")
+  cat("\n✓ SERVER INITIALIZED\n\n")
 }
 
-# ==============================================================================
-# RUN APPLICATION
-# ==============================================================================
-
-cat("Starting Shiny application...\n\n")
 shinyApp(ui = ui, server = server)

@@ -129,7 +129,7 @@ ui_correlation_analysis <- tabPanel(
           style = "background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
                    margin-bottom: 20px;",
           h4(
-            icon("chart-scatter"), " Bivariate Scatter Plot",
+            icon("chart-line"), " Bivariate Scatter Plot",
             style = "margin-top: 0; color: #2c3e50;"
           ),
           plotOutput("correlation_scatter", height = "450px")
