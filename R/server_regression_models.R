@@ -18,6 +18,55 @@ server_regression_models <- function(input, output, session, data) {
   cat("========================================\n")
   
   # ==========================================================================
+  # OUTPUT: CURRENT MODEL TYPE DISPLAY
+  # ==========================================================================
+  
+  output$current_model_display <- renderUI({
+    req(input$reg_model_type)
+    
+    model_name <- switch(
+      input$reg_model_type,
+      "linear" = "Linear Regression",
+      "poly2" = "Polynomial Regression (Degree 2)",
+      "poly3" = "Polynomial Regression (Degree 3)",
+      "ridge" = "Ridge Regression (L2 Regularization)",
+      "lasso" = "LASSO Regression (L1 Regularization)",
+      "elasticnet" = "Elastic Net (L1 + L2 Regularization)",
+      "fixed_effects" = "Fixed Effects Panel Model",
+      "quantile_50" = "Quantile Regression (50th Percentile)",
+      "quantile_75" = "Quantile Regression (75th Percentile)",
+      "random_forest_reg" = "Random Forest Regression",
+      "xgboost_reg" = "XGBoost Regression",
+      "gam" = "Generalized Additive Model (GAM)",
+      "interaction" = "Interaction Effects Model",
+      "logistic_binary" = "Logistic Regression (Binary Classification)",
+      "logistic_multi" = "Multinomial Logistic Regression",
+      "random_forest_class" = "Random Forest Classification",
+      "xgboost_class" = "XGBoost Classification",
+      "lda" = "Linear Discriminant Analysis",
+      "Unknown Model"
+    )
+    
+    model_color <- switch(
+      input$reg_model_type,
+      "linear" = "#0033A0",
+      "poly2" = "#28a745",
+      "poly3" = "#ffc107",
+      "ridge" = "#6f42c1",
+      "lasso" = "#dc3545",
+      "elasticnet" = "#fd7e14",
+      "#17a2b8"  # default
+    )
+    
+    div(
+      style = paste0("background: ", model_color, "; color: white; padding: 15px; ",
+                    "border-radius: 8px; margin-bottom: 15px; text-align: center;"),
+      h5(icon("check-circle"), " Currently Selected Model:", style = "margin: 0 0 5px 0; font-weight: 400; opacity: 0.9;"),
+      h4(model_name, style = "margin: 0; font-weight: 600;")
+    )
+  })
+  
+  # ==========================================================================
   # POPULATE INDEPENDENT VARIABLE CHOICES
   # ==========================================================================
   
@@ -188,18 +237,58 @@ server_regression_models <- function(input, output, session, data) {
     cat("Scaling:", input$reg_scale, "\n")
     cat("Working with", nrow(df), "rows\n")
     
-    # Select only needed columns and drop NAs BEFORE building model
+    # Select only needed columns
     model_vars <- c(input$reg_dependent, input$reg_independent)
     df <- df %>%
-      select(all_of(model_vars)) %>%
-      drop_na()
+      select(all_of(model_vars))
     
-    cat("After removing NAs:", nrow(df), "complete observations\n")
+    cat("Working with", nrow(df), "rows and", ncol(df), "variables\n")
+    
+    # Check for missing data BEFORE dropping
+    missing_counts <- sapply(df, function(x) sum(is.na(x)))
+    vars_with_missing <- missing_counts[missing_counts > 0]
+    
+    if (length(vars_with_missing) > 0) {
+      cat("\n⚠️  MISSING DATA DETECTED:\n")
+      for (var in names(vars_with_missing)) {
+        pct_missing <- round(100 * vars_with_missing[var] / nrow(df), 1)
+        cat("  ", var, ":", vars_with_missing[var], "missing (", pct_missing, "%)\n", sep="")
+      }
+      cat("\n")
+    }
+    
+    # Now remove rows with ANY missing values
+    df_complete <- df %>% drop_na()
+    
+    cat("After removing rows with missing values:", nrow(df_complete), "complete observations\n")
     
     # Check if we have enough data
-    if (nrow(df) < 10) {
-      return(list(error = "Insufficient data after removing missing values (need at least 10 observations)"))
+    if (nrow(df_complete) < 10) {
+      error_msg <- paste0(
+        "Insufficient complete data! Started with ", nrow(df), " rows, ",
+        "but only ", nrow(df_complete), " have complete data across all ", length(model_vars), " variables.\n\n",
+        "SUGGESTIONS:\n",
+        "1. Select fewer independent variables (you have ", length(input$reg_independent), " selected)\n",
+        "2. Remove variables with high missing data:\n"
+      )
+      
+      # List top problematic variables
+      if (length(vars_with_missing) > 0) {
+        top_missing <- sort(vars_with_missing, decreasing = TRUE)[1:min(5, length(vars_with_missing))]
+        for (var in names(top_missing)) {
+          pct <- round(100 * top_missing[var] / nrow(df), 1)
+          error_msg <- paste0(error_msg, "   • ", var, " (", pct, "% missing)\n")
+        }
+      }
+      
+      cat("❌ ERROR:", error_msg, "\n")
+      return(list(error = error_msg))
     }
+    
+    # Use complete data for modeling
+    df <- df_complete
+    
+    cat("✅ Proceeding with", nrow(df), "complete observations\n")
     
     # Scale variables if requested
     if (input$reg_scale) {
@@ -233,8 +322,163 @@ server_regression_models <- function(input, output, session, data) {
                           paste0("poly(", input$reg_independent, ", 3)", collapse = " + "))
       
     } else if (model_type == "ridge") {
-      # ===== RIDGE REGRESSION (PLACEHOLDER) =====
-      return(list(error = "Ridge Regression is not yet implemented. Coming soon! For now, please use Linear, Polynomial (2), or Polynomial (3)."))
+      # ===== RIDGE REGRESSION (L2 REGULARIZATION) =====
+      cat("Building: Ridge Regression (L2 Regularization)\n")
+      
+      # Prepare data for glmnet
+      X <- as.matrix(df[, input$reg_independent, drop = FALSE])
+      y <- df[[input$reg_dependent]]
+      
+      cat("  Using glmnet with alpha = 0 (Ridge)\n")
+      cat("  Running 10-fold cross-validation to find optimal lambda\n")
+      
+      # Cross-validation to find optimal lambda
+      set.seed(123)  # For reproducibility
+      cv_model <- glmnet::cv.glmnet(
+        x = X,
+        y = y,
+        alpha = 0,  # Ridge regression (alpha=0)
+        nfolds = 10,
+        standardize = !input$reg_scale  # Don't re-standardize if already scaled
+      )
+      
+      # Get optimal lambdas
+      lambda_min <- cv_model$lambda.min
+      lambda_1se <- cv_model$lambda.1se
+      
+      cat("  Optimal lambda (min CV error):", sprintf("%.6f", lambda_min), "\n")
+      cat("  Lambda 1-SE (within 1 SE):", sprintf("%.6f", lambda_1se), "\n")
+      
+      # Fit final model with optimal lambda (lambda.min)
+      model <- glmnet::glmnet(
+        x = X,
+        y = y,
+        alpha = 0,
+        lambda = lambda_min,
+        standardize = !input$reg_scale
+      )
+      
+      # Also fit model with full lambda sequence for plotting
+      model_full <- glmnet::glmnet(
+        x = X,
+        y = y,
+        alpha = 0,
+        standardize = !input$reg_scale
+      )
+      
+      # Make predictions with lambda.min
+      y_pred <- predict(model, newx = X, s = lambda_min)[,1]
+      
+      # Calculate metrics
+      residuals_vec <- y - y_pred
+      train_rmse <- sqrt(mean(residuals_vec^2))
+      train_mae <- mean(abs(residuals_vec))
+      
+      if (all(y != 0)) {
+        mape <- mean(abs(residuals_vec / y)) * 100
+      } else {
+        mape <- NA
+      }
+      
+      # Training R-squared
+      ss_res <- sum(residuals_vec^2)
+      ss_tot <- sum((y - mean(y))^2)
+      r_squared <- 1 - (ss_res / ss_tot)
+      
+      # Cross-validated metrics
+      cv_rmse <- sqrt(min(cv_model$cvm))  # Min cross-validated MSE
+      cv_r_squared <- 1 - (min(cv_model$cvm) / var(y))
+      
+      # Deviance Ratio (proportion of null deviance explained)
+      # For Ridge, this is essentially the same as R²
+      null_deviance <- sum((y - mean(y))^2)
+      model_deviance <- ss_res
+      deviance_ratio <- 1 - (model_deviance / null_deviance)
+      
+      # Get coefficients (excluding intercept for L2 norm)
+      coefs <- as.numeric(coef(model, s = lambda_min))
+      coef_names <- rownames(coef(model, s = lambda_min))
+      
+      # Calculate L2 Norm (sqrt of sum of squared coefficients, excluding intercept)
+      l2_norm <- sqrt(sum(coefs[-1]^2))
+      
+      # Count non-zero coefficients (excluding intercept)
+      # For Ridge, this is always all of them (they shrink but don't become 0)
+      nonzero_count <- sum(abs(coefs[-1]) > 1e-10)  # Use small threshold for numerical precision
+      
+      # Prepare data frame with predictions
+      df <- df %>%
+        mutate(
+          fitted = y_pred,
+          residuals = residuals_vec
+        )
+      
+      cat("✓ Ridge model built successfully\n")
+      cat("  Training R²:", round(r_squared, 4), "\n")
+      cat("  CV R²:", round(cv_r_squared, 4), "\n")
+      cat("  Deviance Ratio:", round(deviance_ratio, 4), "\n")
+      cat("  Optimal lambda:", sprintf("%.6f", lambda_min), "\n")
+      cat("  Lambda 1-SE:", sprintf("%.6f", lambda_1se), "\n")
+      cat("  L2 Norm:", round(l2_norm, 4), "\n")
+      cat("  Non-zero coefficients:", nonzero_count, "of", length(coefs)-1, "\n")
+      cat("  Training RMSE:", round(train_rmse, 4), "\n")
+      cat("  CV RMSE:", round(cv_rmse, 4), "\n")
+      cat("  Training MAE:", round(train_mae, 4), "\n")
+      
+      # Create summary object compatible with downstream code
+      ridge_summary <- list(
+        coefficients = cbind(
+          Estimate = coefs,
+          `Std. Error` = rep(NA, length(coefs)),
+          `t value` = rep(NA, length(coefs)),
+          `Pr(>|t|)` = rep(NA, length(coefs))
+        ),
+        r.squared = r_squared,
+        adj.r.squared = NA,  # Not applicable for Ridge
+        fstatistic = c(NA, NA, NA)
+      )
+      rownames(ridge_summary$coefficients) <- coef_names
+      
+      cat("\n✅ RIDGE MODEL BUILD COMPLETE\n")
+      cat("Returning results with:\n")
+      cat("  - Model type: Ridge Regression\n")
+      cat("  - Training R²:", round(r_squared, 4), "\n")
+      cat("  - CV R²:", round(cv_r_squared, 4), "\n")
+      cat("  - Deviance Ratio:", round(deviance_ratio, 4), "\n")
+      cat("  - Lambda (min):", sprintf("%.6f", lambda_min), "\n")
+      cat("  - Lambda (1-SE):", sprintf("%.6f", lambda_1se), "\n")
+      cat("  - L2 Norm:", round(l2_norm, 4), "\n")
+      cat("  - RMSE:", round(train_rmse, 4), "\n")
+      cat("========================================\n\n")
+      
+      return(list(
+        model = model,
+        model_full = model_full,  # Full lambda sequence for plotting
+        cv_model = cv_model,
+        summary = ridge_summary,
+        data = df,
+        formula = paste(input$reg_dependent, "~", paste(input$reg_independent, collapse = " + "), "(Ridge, L2)"),
+        model_type = "ridge",
+        lambda_min = lambda_min,
+        lambda_1se = lambda_1se,
+        l2_norm = l2_norm,
+        r_squared = r_squared,
+        cv_r_squared = cv_r_squared,
+        deviance_ratio = deviance_ratio,
+        nonzero_coefs = nonzero_count,
+        total_coefs = length(coefs) - 1,
+        train_rmse = train_rmse,
+        train_mae = train_mae,
+        rmse = train_rmse,  # For compatibility
+        mae = train_mae,    # For compatibility
+        mape = mape,
+        cv_rmse = cv_rmse,
+        cv_mae = NA,  # Could calculate if needed
+        cv_folds = 10,
+        condition_index = NA,  # Not applicable for regularized models
+        max_vif = NA,
+        error = NULL
+      ))
       
     } else if (model_type == "lasso") {
       # ===== LASSO REGRESSION (PLACEHOLDER) =====
@@ -322,10 +566,25 @@ server_regression_models <- function(input, output, session, data) {
           residuals = residuals(model)
         )
       
+      # Calculate additional error metrics
+      rmse <- sqrt(mean((df$residuals)^2))
+      mae <- mean(abs(df$residuals))
+      
+      # MAPE (Mean Absolute Percentage Error) - only if no zeros in actual values
+      actual_vals <- df[[input$reg_dependent]]
+      if (all(actual_vals != 0)) {
+        mape <- mean(abs(df$residuals / actual_vals)) * 100
+      } else {
+        mape <- NA
+      }
+      
       cat("\n✅ MODEL BUILD COMPLETE\n")
       cat("Returning results with:\n")
       cat("  - Model object: ", class(model)[1], "\n")
       cat("  - R²: ", round(summary(model)$r.squared, 4), "\n")
+      cat("  - RMSE: ", round(rmse, 4), "\n")
+      cat("  - MAE: ", round(mae, 4), "\n")
+      if (!is.na(mape)) cat("  - MAPE: ", round(mape, 2), "%\n")
       cat("  - Data rows: ", nrow(df), "\n")
       cat("  - Error: NULL\n")
       cat("========================================\n\n")
@@ -338,6 +597,9 @@ server_regression_models <- function(input, output, session, data) {
         model_type = model_type,
         condition_index = condition_index,
         max_vif = max_vif,
+        rmse = rmse,
+        mae = mae,
+        mape = mape,
         error = NULL
       )
       
@@ -383,8 +645,14 @@ server_regression_models <- function(input, output, session, data) {
     
     cat(">>> No error, formatting equation\n")
     
-    # Format equation
-    coefs <- coef(results$model)
+    # Get coefficients based on model type
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      # For regularized models, get coefficients from summary
+      coefs <- results$summary$coefficients[, "Estimate"]
+    } else {
+      # For regular regression models
+      coefs <- coef(results$model)
+    }
     
     # Dependent variable label
     dep_label <- switch(
@@ -417,6 +685,9 @@ server_regression_models <- function(input, output, session, data) {
       "linear" = "<span style='background: #0033A0; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>LINEAR</span>",
       "poly2" = "<span style='background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>POLYNOMIAL (2)</span>",
       "poly3" = "<span style='background: #ffc107; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>POLYNOMIAL (3)</span>",
+      "ridge" = "<span style='background: #6f42c1; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>RIDGE (L2)</span>",
+      "lasso" = "<span style='background: #dc3545; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>LASSO (L1)</span>",
+      "elasticnet" = "<span style='background: #fd7e14; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin-left: 10px;'>ELASTIC NET</span>",
       ""
     )
     
@@ -532,6 +803,334 @@ server_regression_models <- function(input, output, session, data) {
   })
   
   # ==========================================================================
+  # OUTPUT: ERROR METRICS (RMSE, MAE, MAPE)
+  # ==========================================================================
+  
+  output$model_rmse <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    sprintf("%.4f", results$rmse)
+  })
+  
+  output$model_mae <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    sprintf("%.4f", results$mae)
+  })
+  
+  output$model_mape <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (is.na(results$mape)) {
+      return("N/A")
+    }
+    
+    sprintf("%.2f%%", results$mape)
+  })
+  
+  # ==========================================================================
+  # OUTPUT: REGULARIZED MODEL METRICS (Ridge, LASSO, Elastic Net)
+  # ==========================================================================
+  
+  output$reg_r2 <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.3f", results$r_squared)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_cv_r2 <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.3f", results$cv_r_squared)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_deviance_ratio <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.3f", results$deviance_ratio)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_n_obs <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      format(nrow(results$data), big.mark = ",")
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_lambda <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.6f", results$lambda_min)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_lambda_1se <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.6f", results$lambda_1se)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_l2_norm <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.2f", results$l2_norm)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_nonzero <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      paste0(results$nonzero_coefs, " / ", results$total_coefs)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_train_rmse <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.4f", results$train_rmse)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_cv_rmse <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.4f", results$cv_rmse)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_train_mae <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      sprintf("%.4f", results$train_mae)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_cv_mae <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet") && !is.na(results$cv_mae)) {
+      sprintf("%.4f", results$cv_mae)
+    } else {
+      "--"
+    }
+  })
+  
+  output$reg_cv_folds <- renderText({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error)) {
+      return("--")
+    }
+    
+    if (results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      as.character(results$cv_folds)
+    } else {
+      "--"
+    }
+  })
+  
+  # ==========================================================================
+  # OUTPUT: LAMBDA PATH PLOT (Ridge coefficient shrinkage)
+  # ==========================================================================
+  
+  output$lambda_path_plot <- renderPlot({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error) || !results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      plot.new()
+      text(0.5, 0.5, "Build a regularized model to see coefficient paths", 
+           cex = 1.2, col = "#6c757d")
+      return()
+    }
+    
+    # Plot lambda path from the full model
+    plot(results$model_full, 
+         xvar = "lambda",
+         label = TRUE,
+         main = "",
+         xlab = "Log(Lambda)",
+         ylab = "Coefficients")
+    
+    # Add vertical line at optimal lambda
+    abline(v = log(results$lambda_min), col = "#0033A0", lwd = 2, lty = 2)
+    abline(v = log(results$lambda_1se), col = "#28a745", lwd = 2, lty = 2)
+    
+    # Add legend
+    legend("topright", 
+           legend = c("Lambda (min)", "Lambda (1-SE)"),
+           col = c("#0033A0", "#28a745"),
+           lty = 2, lwd = 2,
+           cex = 0.8)
+  }, res = 96)
+  
+  # ==========================================================================
+  # OUTPUT: CV ERROR VS LAMBDA PLOT
+  # ==========================================================================
+  
+  output$cv_lambda_plot <- renderPlot({
+    req(model_results())
+    results <- model_results()
+    
+    if (!is.null(results$error) || !results$model_type %in% c("ridge", "lasso", "elasticnet")) {
+      plot.new()
+      text(0.5, 0.5, "Build a regularized model to see CV error plot", 
+           cex = 1.2, col = "#6c757d")
+      return()
+    }
+    
+    # Plot CV error from cv.glmnet
+    plot(results$cv_model,
+         main = "",
+         xlab = "Log(Lambda)",
+         ylab = "Mean-Squared Error (10-Fold CV)")
+    
+  }, res = 96)
+  
+  # ==========================================================================
+  # OUTPUT: CLASSIFICATION METRICS (PLACEHOLDERS)
+  # ==========================================================================
+  
+  output$class_accuracy <- renderText({ "--" })
+  output$class_precision <- renderText({ "--" })
+  output$class_recall <- renderText({ "--" })
+  output$class_f1 <- renderText({ "--" })
+  output$class_auc <- renderText({ "AUC: --" })
+  
+  output$confusion_matrix <- renderPlot({
+    plot.new()
+    text(0.5, 0.5, "Build a classification model to see confusion matrix", 
+         cex = 1.2, col = "#6c757d")
+  }, res = 96)
+  
+  output$roc_curve <- renderPlot({
+    plot.new()
+    text(0.5, 0.5, "Build a classification model to see ROC curve", 
+         cex = 1.2, col = "#6c757d")
+  }, res = 96)
+  
+  # ==========================================================================
+  # OUTPUT: QUANTILE REGRESSION METRICS (PLACEHOLDERS)
+  # ==========================================================================
+  
+  output$quant_tau <- renderText({ "--" })
+  output$quant_pseudo_r2 <- renderText({ "--" })
+  output$quant_mad <- renderText({ "--" })
+  
+  # ==========================================================================
   # OUTPUT: MULTICOLLINEARITY DIAGNOSTICS
   # ==========================================================================
   
@@ -578,7 +1177,10 @@ server_regression_models <- function(input, output, session, data) {
     }
     
     # Get coefficient summary
-    coef_summary <- summary(results$model)$coefficients
+    coef_summary <- results$summary$coefficients
+    
+    # Check if we have p-values (regularized models don't)
+    has_pvalues <- !all(is.na(coef_summary[, "Pr(>|t|)"]))
     
     # Create cards for each coefficient (skip intercept)
     cards <- lapply(2:nrow(coef_summary), function(i) {
@@ -588,26 +1190,61 @@ server_regression_models <- function(input, output, session, data) {
       t_value <- coef_summary[i, "t value"]
       p_value <- coef_summary[i, "Pr(>|t|)"]
       
-      # Significance stars
-      sig_stars <- if (p_value < 0.001) {
-        "***"
-      } else if (p_value < 0.01) {
-        "**"
-      } else if (p_value < 0.05) {
-        "*"
+      if (has_pvalues && !is.na(p_value)) {
+        # Standard regression with p-values
+        sig_stars <- if (p_value < 0.001) {
+          "***"
+        } else if (p_value < 0.01) {
+          "**"
+        } else if (p_value < 0.05) {
+          "*"
+        } else {
+          ""
+        }
+        
+        sig_color <- if (p_value < 0.001) {
+          "#28a745"
+        } else if (p_value < 0.01) {
+          "#0033A0"
+        } else if (p_value < 0.05) {
+          "#ffc107"
+        } else {
+          "#dc3545"
+        }
+        
+        sig_label <- if (p_value < 0.001) {
+          "Highly Significant"
+        } else if (p_value < 0.01) {
+          "Very Significant"
+        } else if (p_value < 0.05) {
+          "Significant"
+        } else {
+          "Not Significant"
+        }
       } else {
-        ""
-      }
-      
-      # Significance color
-      sig_color <- if (p_value < 0.001) {
-        "#28a745"
-      } else if (p_value < 0.01) {
-        "#0033A0"
-      } else if (p_value < 0.05) {
-        "#ffc107"
-      } else {
-        "#dc3545"
+        # Regularized regression - show magnitude instead
+        sig_stars <- ""
+        abs_coef <- abs(coef_value)
+        
+        sig_color <- if (abs_coef > 0.1) {
+          "#28a745"
+        } else if (abs_coef > 0.05) {
+          "#0033A0"
+        } else if (abs_coef > 0.01) {
+          "#ffc107"
+        } else {
+          "#dc3545"
+        }
+        
+        sig_label <- if (abs_coef > 0.1) {
+          "Strong Effect"
+        } else if (abs_coef > 0.05) {
+          "Moderate Effect"
+        } else if (abs_coef > 0.01) {
+          "Weak Effect"
+        } else {
+          "Very Weak"
+        }
       }
       
       # Format coefficient name
@@ -645,15 +1282,7 @@ server_regression_models <- function(input, output, session, data) {
           div(
             style = paste0("background: ", sig_color, "; color: white; padding: 5px 12px; ",
                           "border-radius: 20px; font-size: 12px; font-weight: 600;"),
-            if (p_value < 0.001) {
-              "Highly Significant"
-            } else if (p_value < 0.01) {
-              "Very Significant"
-            } else if (p_value < 0.05) {
-              "Significant"
-            } else {
-              "Not Significant"
-            }
+            sig_label
           )
         ),
         hr(style = "margin: 10px 0; border-color: #dee2e6;"),
@@ -664,21 +1293,45 @@ server_regression_models <- function(input, output, session, data) {
             p(sprintf("%.4f %s", coef_value, sig_stars), 
               style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
           ),
-          div(
-            p("Std. Error", style = "margin: 0; font-size: 11px; color: #6c757d;"),
-            p(sprintf("%.4f", std_error), 
-              style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
-          ),
-          div(
-            p("t-value", style = "margin: 0; font-size: 11px; color: #6c757d;"),
-            p(sprintf("%.3f", t_value), 
-              style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
-          ),
-          div(
-            p("p-value", style = "margin: 0; font-size: 11px; color: #6c757d;"),
-            p(if (p_value < 0.001) "< 0.001" else sprintf("%.4f", p_value), 
-              style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
-          )
+          if (has_pvalues && !is.na(std_error)) {
+            div(
+              p("Std. Error", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(sprintf("%.4f", std_error), 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          } else {
+            div(
+              p("Abs. Value", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(sprintf("%.4f", abs(coef_value)), 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          },
+          if (has_pvalues && !is.na(t_value)) {
+            div(
+              p("t-value", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(sprintf("%.3f", t_value), 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          } else {
+            div(
+              p("Direction", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(if (coef_value > 0) "Positive ↑" else "Negative ↓", 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          },
+          if (has_pvalues && !is.na(p_value)) {
+            div(
+              p("p-value", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(if (p_value < 0.001) "< 0.001" else sprintf("%.4f", p_value), 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          } else {
+            div(
+              p("% of Max", style = "margin: 0; font-size: 11px; color: #6c757d;"),
+              p(sprintf("%.1f%%", abs(coef_value) / max(abs(coef_summary[-1, "Estimate"])) * 100), 
+                style = "margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #2c3e50;")
+            )
+          }
         ),
         p(
           interpretation_text,
@@ -905,6 +1558,6 @@ server_regression_models <- function(input, output, session, data) {
   })
   
   cat("✓ Regression Models module initialized\n")
-  cat("✓ Currently supporting: Linear, Polynomial (2), Polynomial (3)\n")
-  cat("✓ Additional models (Ridge, LASSO, etc.) coming soon!\n")
+  cat("✓ Currently supporting: Linear, Polynomial (2), Polynomial (3), Ridge (L2)\n")
+  cat("✓ Additional models (LASSO, Elastic Net, etc.) coming soon!\n")
 }
