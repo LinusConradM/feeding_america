@@ -89,17 +89,35 @@ if "urban_rural" in year_data.columns:
     col1, col2 = st.columns([3, 2])
 
     with col1:
-        fig_urban = px.bar(
-            urban_fi, x="Category", y="Mean",
-            color="Category",
-            color_discrete_sequence=[COLORS["emerald"], COLORS["amber"], COLORS["sapphire"]],
-            error_y="Std Dev",
-        )
+        # Ridgeline Joyplot
+        fig_urban = go.Figure()
+        
+        categories = ["Metro", "Non-metro", "Rural"]
+        joy_colors = [COLORS["sapphire"], COLORS["amber"], COLORS["emerald"]]
+        
+        for i, cat in enumerate(categories):
+            cat_data = year_data[year_data["urban_rural"] == cat]["overall_food_insecurity_rate"].dropna()
+            
+            if len(cat_data) > 0:
+                fig_urban.add_trace(go.Violin(
+                    x=cat_data,
+                    name=cat,
+                    line_color=joy_colors[i],
+                    side='positive', # creates the ridge/mountain effect
+                    orientation='h',
+                    width=2,
+                    points=False, # cleaner look without scatter dots
+                    meanline_visible=True, # shows true distribution mean inside the violin
+                ))
+                
         fig_urban.update_layout(
-            **PLOTLY_LAYOUT, title="", height=400,
+            **PLOTLY_LAYOUT, 
+            title="Distribution Density (Joyplot)", 
+            height=400,
             showlegend=False,
-            yaxis_tickformat=".0%",
-            yaxis_title="Avg Food Insecurity Rate",
+            xaxis_tickformat=".0%",
+            xaxis_title="Food Insecurity Rate Distribution",
+            violingap=0, violingroupgap=0, violinmode='overlay'
         )
         st.plotly_chart(fig_urban, width='stretch')
 

@@ -7,6 +7,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import warnings
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
@@ -227,3 +229,122 @@ fig_box.update_layout(
     xaxis_title="Year",
 )
 st.plotly_chart(fig_box, width='stretch')
+
+# --- FORECASTING (SARIMAX) ---
+section_header("Predictive Forecasting", "Projected 3-year forecast using SARIMAX statistical modeling", "chart-line")
+
+st.markdown(
+    '<p class="text-sm text-gray-600 mb-4">This module uses a Seasonal Auto-Regressive Integrated Moving Average (SARIMAX) model to project historical temporal data into the future, complete with 95% confidence intervals.</p>',
+    unsafe_allow_html=True
+)
+
+target_data = None
+forecast_name = ""
+
+if compare_states:
+    if len(compare_states) == 1:
+        st_name = compare_states[0]
+        target_data = filtered[filtered["state"] == st_name].groupby("year", observed=True)[ts_variable].mean().reset_index()
+        forecast_name = STATE_NAMES.get(st_name, st_name)
+    else:
+        info_banner("Forecasting is disabled when comparing multiple states. Please clear the state comparison or select a single state.", "info")
+else:
+    target_data = nat_trend[["Year", "Mean"]].rename(columns={"Year": "year", "Mean": ts_variable})
+    forecast_name = "National Average"
+
+if target_data is not None and len(target_data) >= 10:
+    target_data = target_data.sort_values("year").set_index("year")
+    
+    with st.spinner(f"Training SARIMAX model for {forecast_name}..."):
+        try:
+            # Suppress specific statsmodels index warnings for clean UI
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                
+                # Fit standard ARIMA(1,1,0) - simplified for dashboard speed
+                mod = SARIMAX(target_data[ts_variable], order=(1, 1, 0), enforce_stationarity=False, enforce_invertibility=False)
+                res = mod.fit(disp=False)
+                
+                # Predict 3 years out
+                forecast_steps = 3
+                forecast = res.get_forecast(steps=forecast_steps)
+                pred_mean = forecast.predicted_mean
+                pred_ci = forecast.conf_int(alpha=0.05)
+                
+                last_year = target_data.index[-1]
+                future_years = np.arange(last_year + 1, last_year + 1 + forecast_steps)
+                
+                # Create Forecast Figure
+                fig_forecast = go.Figure()
+
+                # Historical Data
+                fig_forecast.add_trace(go.Scatter(
+                    x=target_data.index, y=target_data[ts_variable],
+                    mode="lines+markers",
+                    line=dict(color=COLORS["sapphire"], width=3),
+                    marker=dict(size=8),
+                    name="Historical",
+                    hovertemplate="<b>%{x}</b><br>Actual: %{y:.1%}<extra></extra>" if is_rate else "<b>%{x}</b><br>Actual: %{y:,.2f}<extra></extra>",
+                ))
+
+                # Confidence Interval Band
+                fig_forecast.add_trace(go.Scatter(
+                    x=list(future_years) + list(future_years)[::-1],
+                    y=list(pred_ci.iloc[:, 1]) + list(pred_ci.iloc[:, 0])[::-1],
+                    fill="toself",
+                    fillcolor="rgba(231, 76, 60, 0.15)",
+                    line=dict(color="rgba(255,255,255,0)"),
+                    hoverinfo="skip",
+                    name="95% Confidence Interval",
+                ))
+
+                # Forecast Line
+                fig_forecast.add_trace(go.Scatter(
+                    x=future_years, y=pred_mean,
+                    mode="lines+markers",
+                    line=dict(color=COLORS["ruby"], width=3, dash="dot"),
+                    marker=dict(size=8),
+                    name="Forecast",
+                    hovertemplate="<b>%{x}</b><br>Projected: %{y:.1%}<extra></extra>" if is_rate else "<b>%{x}</b><br>Projected: %{y:,.2f}<extra></extra>",
+                ))
+
+                # Connect last historical to first forecast
+                fig_forecast.add_trace(go.Scatter(
+                    x=[last_year, future_years[0]],
+                    y=[target_data[ts_variable].iloc[-1], pred_mean.iloc[0]],
+                    mode="lines",
+                    line=dict(color=COLORS["ruby"], width=3, dash="dot"),
+                    showlegend=False,
+                    hoverinfo="skip",
+                ))
+
+                fig_forecast.update_layout(
+                    **PLOTLY_LAYOUT, title=f"3-Year Projection: {forecast_name}", height=450,
+                    yaxis_title=get_variable_label(ts_variable),
+                    xaxis_title="Year",
+                    yaxis_tickformat=".0%" if is_rate else "",
+                )
+                
+                st.plotly_chart(fig_forecast, width="stretch")
+                
+                # Metrics
+                st.markdown("<div class='h-2'></div>", unsafe_allow_html=True)
+                col1, col2, col3 = st.columns(3)
+                
+                end_hist = target_data[ts_variable].iloc[-1]
+                end_proj = pred_mean.iloc[-1]
+                proj_change = (end_proj - end_hist) / end_hist if end_hist != 0 else 0
+                
+                with col1:
+                    stat_card(f"Current ({last_year})", fmt_val(end_hist), color="blue")
+                with col2:
+                    stat_card(f"Projected ({future_years[-1]})", fmt_val(end_proj), color="purple")
+                with col3:
+                    is_bad = (is_rate and proj_change > 0) or (not is_rate and "income" in ts_variable and proj_change < 0)
+                    stat_card("Estimated Trajectory", f"{proj_change:+.1%}", color="red" if is_bad else "green")
+
+        except Exception as e:
+            st.error(f"Could not generate forecast: {e}")
+elif target_data is not None:
+    info_banner("Insufficient historical data to generate a reliable statistical forecast (minimum 10 years required).", "warning")
+

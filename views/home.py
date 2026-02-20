@@ -25,13 +25,6 @@ hero_html = """
                 <span style="background:rgba(34,81,255,.25);color:#74B9FF;font-size:.68rem;
                              font-weight:700;padding:.3rem .85rem;border-radius:9999px;
                              letter-spacing:.06em;text-transform:uppercase">
-                    County-Level Analysis
-                </span>
-                <span style="background:rgba(0,184,148,.2);color:#55EFC4;font-size:.68rem;
-                             font-weight:700;padding:.3rem .85rem;border-radius:9999px;
-                             letter-spacing:.06em;text-transform:uppercase">
-                    2009 – 2023
-                </span>
             </div>
 
             
@@ -229,7 +222,7 @@ footer_html = """
             Built by <strong style="color:#051C2C">Conrad Linus Muhirwe</strong>
         </p>
         <p style="color:#A3B1BF;font-size:.72rem;margin:.3rem 0 0">
-            Data Science Practicum &middot; American University &middot; 2025
+            MS Analytics & AI &middot; American University &middot; 2026
         </p>
     </div>
 """

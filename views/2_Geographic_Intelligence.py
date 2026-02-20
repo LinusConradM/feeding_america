@@ -22,10 +22,17 @@ with st.sidebar:
     st.markdown('<p class="text-white font-semibold text-sm mb-2">Map Controls</p>', unsafe_allow_html=True)
 
     map_variable = st.selectbox(
-        "Variable",
+        "Primary Variable",
         ["overall_food_insecurity_rate", "child_food_insecurity_rate",
          "poverty_rate", "unemployment_rate", "median_income", "cost_per_meal"],
         format_func=get_variable_label,
+    )
+    
+    map_variable_secondary = st.selectbox(
+        "Secondary Variable (Bivariate Map)",
+        ["None", "overall_food_insecurity_rate", "child_food_insecurity_rate",
+         "poverty_rate", "unemployment_rate", "median_income", "cost_per_meal"],
+        format_func=lambda x: "None (Standard Map)" if x == "None" else get_variable_label(x)
     )
 
     map_year = st.slider("Year", int(data["year"].min()), int(data["year"].max()),
@@ -98,33 +105,97 @@ context_dict = {
 llm_explainer_ui("Geographic Intelligence", context_dict)
 
 # --- STATE CHOROPLETH MAP ---
-section_header("State-Level Map", f"{get_variable_label(map_variable)} ({map_year})", "map")
+is_bivariate = map_variable_secondary != "None" and map_variable_secondary != map_variable
+map_title = f"{get_variable_label(map_variable)} ({map_year})" if not is_bivariate else f"Bivariate: {get_variable_label(map_variable)} + {get_variable_label(map_variable_secondary)}"
+section_header("State-Level Map", map_title, "map")
 
-state_agg = (year_data.groupby("state", observed=True)[map_variable].mean().reset_index())
-state_agg.columns = ["State", "Value"]
-state_agg["State Name"] = state_agg["State"].map(STATE_NAMES)
+if not is_bivariate:
+    # Standard Univariate Map
+    state_agg = (year_data.groupby("state", observed=True)[map_variable].mean().reset_index())
+    state_agg.columns = ["State", "Value"]
+    state_agg["State Name"] = state_agg["State"].map(STATE_NAMES)
 
-# Choose color scale direction
-if map_variable == "median_income":
-    color_scale = [COLORS["ruby"], COLORS["amber"], COLORS["emerald"]]
+    # Choose color scale direction
+    if map_variable == "median_income":
+        color_scale = [COLORS["ruby"], COLORS["amber"], COLORS["emerald"]]
+    else:
+        color_scale = [COLORS["emerald"], COLORS["amber"], COLORS["ruby"]]
+
+    fig_map = px.choropleth(
+        state_agg, locations="State", locationmode="USA-states",
+        color="Value", color_continuous_scale=color_scale,
+        scope="usa", hover_name="State Name",
+        labels={"Value": get_variable_label(map_variable)},
+    )
+    fig_map.update_layout(
+        **PLOTLY_LAYOUT, title="", height=550,
+        geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="rgba(0,0,0,0)",
+                 showlakes=True),
+        coloraxis_colorbar=dict(
+            tickformat=".0%" if is_rate else "$,.0f" if "income" in map_variable else ",.0f",
+            title=get_variable_label(map_variable),
+        ),
+    )
 else:
-    color_scale = [COLORS["emerald"], COLORS["amber"], COLORS["ruby"]]
-
-fig_map = px.choropleth(
-    state_agg, locations="State", locationmode="USA-states",
-    color="Value", color_continuous_scale=color_scale,
-    scope="usa", hover_name="State Name",
-    labels={"Value": get_variable_label(map_variable)},
-)
-fig_map.update_layout(
-    **PLOTLY_LAYOUT, title="", height=550,
-    geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="rgba(0,0,0,0)",
-             showlakes=True),
-    coloraxis_colorbar=dict(
-        tickformat=".0%" if is_rate else "$,.0f" if "income" in map_variable else ",.0f",
-        title=get_variable_label(map_variable),
-    ),
-)
+    # Bivariate Application
+    state_agg = (year_data.groupby("state", observed=True)[[map_variable, map_variable_secondary]].mean().reset_index())
+    state_agg.columns = ["State", "Var1", "Var2"]
+    state_agg["State Name"] = state_agg["State"].map(STATE_NAMES)
+    
+    # Needs to handle inverse scales like Income (High Income is actually 'Low' vulnerability)
+    invert_1 = map_variable == "median_income"
+    invert_2 = map_variable_secondary == "median_income"
+    
+    # 3x3 Bins
+    try:
+        # qcut fails if there are duplicate bin edges, we drop duplicates or add jitter
+        v1_quantiles = pd.qcut(state_agg["Var1"].rank(method='first'), 3, labels=[1, 2, 3])
+        v2_quantiles = pd.qcut(state_agg["Var2"].rank(method='first'), 3, labels=[1, 2, 3])
+        
+        # Invert the rank integer logic if higher is "better" (Income)
+        if invert_1: v1_quantiles = 4 - v1_quantiles.astype(int)
+        else: v1_quantiles = v1_quantiles.astype(int)
+            
+        if invert_2: v2_quantiles = 4 - v2_quantiles.astype(int)
+        else: v2_quantiles = v2_quantiles.astype(int)
+            
+        state_agg["Bivariate_Class"] = v1_quantiles.astype(str) + "-" + v2_quantiles.astype(str)
+    
+        # 3x3 Color Matrix (Teal/Pink schema is standard for Bivariate)
+        bi_colors = {
+            "1-1": "#e8e8e8", "1-2": "#ace4e4", "1-3": "#5ac8c8", # Low Var1
+            "2-1": "#dfb0d6", "2-2": "#a5add3", "2-3": "#5698b9", # Med Var1
+            "3-1": "#be64ac", "3-2": "#8c62aa", "3-3": "#3b4994"  # High Var1 (High Overlap = Dark Blue)
+        }
+        
+        # Helper string for hover text
+        def get_rating(val):
+            return "Low" if val == "1" else ("Med" if val == "2" else "High")
+            
+        state_agg["Profile"] = state_agg["Bivariate_Class"].apply(lambda x: f"{get_variable_label(map_variable)}: {get_rating(x[0])}<br>{get_variable_label(map_variable_secondary)}: {get_rating(x[2])}")
+        state_agg["Color"] = state_agg["Bivariate_Class"].map(bi_colors)
+        
+        fig_map = go.Figure()
+        for b_class in bi_colors.keys():
+            df_sub = state_agg[state_agg["Bivariate_Class"] == b_class]
+            if len(df_sub) > 0:
+                fig_map.add_trace(go.Choropleth(
+                    locations=df_sub["State"], locationmode="USA-states",
+                    z=np.ones(len(df_sub)),
+                    colorscale=[[0, bi_colors[b_class]], [1, bi_colors[b_class]]],
+                    showscale=False,
+                    text=df_sub["State Name"] + "<br><br>" + df_sub["Profile"],
+                    hoverinfo="text",
+                    name=f"Overlap Tier: {b_class}"
+                ))
+    
+        fig_map.update_layout(
+            **PLOTLY_LAYOUT, title="", height=550,
+            geo=dict(scope="usa", bgcolor="rgba(0,0,0,0)", lakecolor="rgba(0,0,0,0)", showlakes=True),
+        )
+    except Exception as e:
+        info_banner("Not enough variance to compute a 3x3 bivariate matrix.", "warning")
+        fig_map = go.Figure()
 
 # Add state initials as a text overlay
 fig_map.add_trace(go.Scattergeo(

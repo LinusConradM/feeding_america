@@ -51,6 +51,10 @@ reg_page = st.Page("views/4_Regression_Models.py", title="Regression Models", ic
 equity_page = st.Page("views/5_Equity_Disparities.py", title="Equity Disparities", icon="⚖️")
 cluster_page = st.Page("views/6_County_Clustering.py", title="County Clustering", icon="🧩")
 time_page = st.Page("views/7_Time_Series_Explorer.py", title="Time Series Explorer", icon="⏳")
+anomaly_page = st.Page("views/11_Anomaly_Detection.py", title="Anomaly Detection", icon="📡")
+
+# Advanced AI
+ai_page = st.Page("views/10_AI_Data_Analyst.py", title="AI Data Analyst", icon="🤖")
 
 # Planning & Data group
 policy_page = st.Page("views/8_Policy_Scenarios.py", title="Policy Scenarios", icon="🔮")
@@ -59,7 +63,8 @@ data_page = st.Page("views/9_Data_Downloads.py", title="Data Downloads", icon="�
 # Define the router without Streamlit's default flat visuals
 pg = st.navigation([
     home_page, exec_page, geo_page,
-    corr_page, reg_page, equity_page, cluster_page, time_page,
+    corr_page, reg_page, equity_page, cluster_page, anomaly_page, time_page,
+    ai_page, # Added ai_page to the navigation list
     policy_page, data_page
 ], position="hidden")
 
@@ -74,7 +79,11 @@ with st.sidebar:
         st.page_link(reg_page, label="Regression Models", icon="📉")
         st.page_link(equity_page, label="Equity Disparities", icon="⚖️")
         st.page_link(cluster_page, label="County Clustering", icon="🧩")
+        st.page_link(anomaly_page, label="Anomaly Detection", icon="📡")
         st.page_link(time_page, label="Time Series Explorer", icon="⏳")
+
+    with st.expander("Agentic AI", expanded=False, icon="🤖"): # New expander for Agentic AI
+        st.page_link(ai_page, label="AI Data Analyst", icon="🤖")
         
     st.page_link(policy_page, label="Policy Scenarios", icon="🔮")
     st.page_link(data_page, label="Data Downloads", icon="💾")

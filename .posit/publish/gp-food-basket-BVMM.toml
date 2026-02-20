@@ -13,7 +13,8 @@ files = [
   '/.posit/publish/deployments/deployment-QJG0.toml',
   '/data',
   '/utils',
-  '/views'
+  '/views',
+  '/.env'
 ]
 title = 'gp-food-basket'
 
