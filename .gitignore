@@ -36,3 +36,4 @@ README.html
 README_files/
 .env
 .env
+tests/testthat/_snaps/
