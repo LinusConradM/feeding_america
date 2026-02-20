@@ -55,7 +55,7 @@ def kpi_card(
 
 def kpi_row(cards: list[dict]):
     """Render a row of KPI cards using a CSS Grid layout for perfect responsiveness."""
-    cards_html = f'<div style="display:grid;grid-template-columns:repeat({len(cards)},1fr);gap:1.5rem;margin-bottom:2rem">'
+    cards_html = f'<div style="display:grid;grid-template-columns:repeat({len(cards)},1fr);gap:1.5rem;margin-bottom:1.5rem">'
     
     for card in cards:
         title = card.get("title", "")
@@ -198,7 +198,6 @@ def empty_state(message: str, icon: str = "chart-bar"):
     )
 
 # ── LLM Explainer UI ──────────────────────────────────────────────────────────
-from utils.llm import generate_insights
 
 def llm_explainer_ui(page_name: str, context_dict: dict):
     """
@@ -213,5 +212,9 @@ def llm_explainer_ui(page_name: str, context_dict: dict):
         )
         if st.button("Generate Insights", key=f"btn_llm_{page_name.replace(' ', '_')}", type="primary"):
             with st.spinner("Analyzing data with Google Gemini..."):
-                response = generate_insights(page_name, context_dict)
-                st.info(response, icon="💡")
+                try:
+                    from utils.llm import generate_insights
+                    response = generate_insights(page_name, context_dict)
+                    st.info(response, icon="💡")
+                except Exception as e:
+                    st.error(f"⚠️ Unable to load AI dependencies: {e}", icon="🚨")

@@ -112,7 +112,7 @@ else:
 fig_scatter = px.scatter(
     scatter_data, x=x_var, y=y_var,
     color=color_col if color_col else None,
-    color_discrete_sequence=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"], "#8B0000"],
+    color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["rose"], "#8B0000"],
     opacity=0.6,
     trendline="ols",
     labels={x_var: get_variable_label(x_var), y_var: get_variable_label(y_var)},
@@ -132,7 +132,7 @@ fig_scatter.add_annotation(
     x=0.02, y=0.98, xref="paper", yref="paper",
     text=f"r = {r:.3f} | R² = {r2:.3f} | p = {p_str}",
     showarrow=False,
-    font=dict(size=13, color=COLORS["charcoal"]),
+    font=dict(size=13, color=COLORS["slate"]),
     bgcolor="rgba(255,255,255,0.9)",
     bordercolor=COLORS["pearl"],
     borderwidth=1,
@@ -155,7 +155,7 @@ if len(matrix_data) > 10:
     fig_matrix = go.Figure(data=go.Heatmap(
         z=corr_matrix.values,
         x=labels, y=labels,
-        colorscale=[[0, COLORS["ruby"]], [0.5, "white"], [1, COLORS["sapphire"]]],
+        colorscale=[[0, COLORS["rose"]], [0.5, "white"], [1, COLORS["blue"]]],
         zmid=0, zmin=-1, zmax=1,
         text=np.round(corr_matrix.values, 2),
         texttemplate="%{text}",

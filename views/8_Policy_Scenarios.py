@@ -174,7 +174,7 @@ with st.spinner("Constructing Control Group and running DiD Regression..."):
             f"""
             <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 mt-6">
                 <h3 class="text-sm font-bold text-gray-800 mb-3">
-                    <i class="fas fa-microscope text-blue-500 mr-2"></i>Statistical Interpretation
+                    <i class="fas fa-microscope text-blue-500 mr-2"></i>Interpretation
                 </h3>
                 <p class="text-gray-600 text-sm leading-relaxed mb-4">
                     The Difference-in-Differences (DiD) model isolates the causal effect of an intervention by comparing the 
@@ -244,7 +244,7 @@ with col1:
     fig_impact = px.bar(
         impact_data, x="FI Impact", y="Policy Lever", orientation="h",
         color="FI Impact",
-        color_continuous_scale=[[0, COLORS["emerald"]], [1, COLORS["sapphire"]]],
+        color_continuous_scale=[[0, COLORS["teal"]], [1, COLORS["blue"]]],
     )
     fig_impact.update_layout(
         **PLOTLY_LAYOUT, title="Contribution Breakdown", height=300,
@@ -272,7 +272,7 @@ with col2:
         scenario_df, x="Scenario", y="Projected FI Rate",
         color="Scenario",
         color_discrete_sequence=[COLORS["steel"], COLORS["amber"],
-                                 COLORS["sapphire"], COLORS["emerald"], COLORS["amethyst"]],
+                                 COLORS["blue"], COLORS["teal"], COLORS["violet"]],
     )
     fig_scenario.update_layout(
         **PLOTLY_LAYOUT, title="Magnitude Comparison", height=300,
@@ -280,7 +280,7 @@ with col2:
         yaxis_tickformat=".0%",
         yaxis_title="Projected Food Insecurity Rate",
     )
-    fig_scenario.add_hline(y=baseline_fi, line_dash="dash", line_color=COLORS["ruby"],
+    fig_scenario.add_hline(y=baseline_fi, line_dash="dash", line_color=COLORS["rose"],
                            annotation_text="Current Baseline")
     st.plotly_chart(fig_scenario, width='stretch')
 
@@ -303,7 +303,7 @@ with col1:
     fig_proj_map = px.choropleth(
         state_baseline, locations="state", locationmode="USA-states",
         color="Projected", scope="usa",
-        color_continuous_scale=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"]],
+        color_continuous_scale=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
         hover_name="State Name",
         labels={"Projected": "Projected FI Rate"},
     )
@@ -318,7 +318,7 @@ with col2:
     top_impact = state_baseline.nlargest(10, "People Helped")
     fig_top = px.bar(
         top_impact, x="People Helped", y="State Name", orientation="h",
-        color_discrete_sequence=[COLORS["emerald"]],
+        color_discrete_sequence=[COLORS["teal"]],
     )
     fig_top.update_layout(
         **PLOTLY_LAYOUT, title="Top 10 States by People Helped", height=450,

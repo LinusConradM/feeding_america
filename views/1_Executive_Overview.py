@@ -12,6 +12,8 @@ from utils.components import kpi_row, section_header, stat_card, llm_explainer_u
 from utils.data_loader import load_data, STATE_NAMES
 
 
+
+
 data = load_data()
 
 # Sidebar controls
@@ -48,6 +50,10 @@ prev_fi = prev_data["overall_food_insecurity_rate"].mean() if prev_data is not N
 prev_persons = prev_data["no_of_food_insecure_persons_overall"].sum() if prev_data is not None else None
 prev_child = prev_data["child_food_insecurity_rate"].mean() if prev_data is not None else None
 prev_cost = prev_data["cost_per_meal"].mean() if prev_data is not None else None
+prev_poverty = prev_data["poverty_rate"].mean() if prev_data is not None else None
+prev_med_income = prev_data["median_income"].median() if prev_data is not None else None
+prev_unemp = prev_data["unemployment_rate"].mean() if prev_data is not None else None
+prev_shortfall = prev_data["weighted_annual_food_budget_shortfall"].mean() if prev_data is not None else None
 
 kpi_row([
     {"title": "National FI Rate", "value": f"{fi_rate:.1%}" if pd.notna(fi_rate) else "N/A", "change": safe_pct_change(fi_rate, prev_fi),
@@ -63,10 +69,10 @@ kpi_row([
 st.markdown("<div class='h-4'></div>", unsafe_allow_html=True)
 
 kpi_row([
-    {"title": "Poverty Rate", "value": f"{poverty:.1%}" if pd.notna(poverty) else "N/A", "icon": "hand-holding-usd", "gradient": "sapphire"},
-    {"title": "Median Income", "value": f"${med_income:,.0f}" if pd.notna(med_income) else "N/A", "icon": "wallet", "gradient": "emerald"},
-    {"title": "Unemployment", "value": f"{unemp:.1%}" if pd.notna(unemp) else "N/A", "icon": "briefcase", "gradient": "coral"},
-    {"title": "Budget Shortfall", "value": f"${shortfall:,.0f}" if pd.notna(shortfall) else "N/A", "icon": "exclamation-triangle", "gradient": "navy"},
+    {"title": "Poverty Rate", "value": f"{poverty:.1%}" if pd.notna(poverty) else "N/A", "change": safe_pct_change(poverty, prev_poverty), "icon": "hand-holding-usd", "gradient": "sapphire"},
+    {"title": "Median Income", "value": f"${med_income:,.0f}" if pd.notna(med_income) else "N/A", "change": safe_pct_change(med_income, prev_med_income), "icon": "wallet", "gradient": "emerald"},
+    {"title": "Unemployment", "value": f"{unemp:.1%}" if pd.notna(unemp) else "N/A", "change": safe_pct_change(unemp, prev_unemp), "icon": "briefcase", "gradient": "coral"},
+    {"title": "Budget Shortfall", "value": f"${shortfall:,.0f}" if pd.notna(shortfall) else "N/A", "change": safe_pct_change(shortfall, prev_shortfall), "icon": "exclamation-triangle", "gradient": "navy"},
 ])
 
 st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
@@ -95,8 +101,8 @@ fig_trend = go.Figure()
 fig_trend.add_trace(go.Scatter(
     x=trend["Year"], y=trend["FI Rate"],
     mode="lines+markers",
-    line=dict(color=COLORS["sapphire"], width=3),
-    marker=dict(size=8, color=COLORS["sapphire"]),
+    line=dict(color=COLORS["blue"], width=3),
+    marker=dict(size=8, color=COLORS["blue"]),
     fill="tozeroy",
     fillcolor="rgba(34, 81, 255, 0.08)",
     name="Food Insecurity Rate",
@@ -135,7 +141,7 @@ with col1:
         fig_reg = px.bar(
             regional, x="FI Rate", y="Region", orientation="h",
             color="FI Rate",
-            color_continuous_scale=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"]],
+            color_continuous_scale=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
         )
         fig_reg.update_layout(
             **PLOTLY_LAYOUT, title="", height=300, showlegend=False,
@@ -150,12 +156,15 @@ with col1:
 with col2:
     section_header("Key Statistics", icon="calculator")
     fi_vals = year_data["overall_food_insecurity_rate"].dropna()
-    c1, c2 = st.columns(2)
+    c1, c2 = st.columns(2, gap="medium")
     with c1:
         stat_card("Median FI Rate", f"{fi_vals.median():.1%}", color="blue")
     with c2:
         stat_card("Std Deviation", f"{fi_vals.std():.1%}", color="purple")
-    c3, c4 = st.columns(2)
+        
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    c3, c4 = st.columns(2, gap="medium")
     with c3:
         stat_card("Range", f"{fi_vals.min():.1%} - {fi_vals.max():.1%}", color="amber")
     with c4:
@@ -205,7 +214,7 @@ state_map["State Name"] = state_map["State"].map(STATE_NAMES)
 
 fig_map = px.choropleth(
     state_map, locations="State", locationmode="USA-states",
-    color="FI Rate", color_continuous_scale=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"]],
+    color="FI Rate", color_continuous_scale=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
     scope="usa", hover_name="State Name",
     labels={"FI Rate": "Food Insecurity Rate"},
 )
@@ -230,7 +239,7 @@ if "urban_rural" in year_data.columns:
     fig_urban = px.bar(
         urban, x="Category", y="FI Rate",
         color="Category",
-        color_discrete_sequence=[COLORS["emerald"], COLORS["amber"], COLORS["sapphire"]],
+        color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["blue"]],
     )
     fig_urban.update_layout(
         **PLOTLY_LAYOUT, title="", height=350, showlegend=False,

@@ -11,8 +11,8 @@ id = '019c78bc-f972-4318-8e1f-d9a2281838ea'
 dashboard_url = 'https://connect.posit.cloud/conradlinusmuhirwe/content/019c78bc-f972-4318-8e1f-d9a2281838ea'
 direct_url = 'https://019c78bc-f972-4318-8e1f-d9a2281838ea.share.connect.posit.cloud'
 logs_url = 'https://connect.posit.cloud/conradlinusmuhirwe/content/019c78bc-f972-4318-8e1f-d9a2281838ea/history'
-deployed_at = '2026-02-19T21:04:10-05:00'
-bundle_id = '019c78ca-447c-24fd-153f-5f6353a5bcd4'
+deployed_at = '2026-02-20T17:46:41-05:00'
+bundle_id = '019c7d3b-c1d3-f07f-9e5c-88af10780a87'
 files = [
   '.env',
   '.posit/publish/deployments/deployment-QJG0.toml',
@@ -26,6 +26,9 @@ files = [
   'utils/data_loader.py',
   'utils/llm.py',
   'utils/theme.py',
+  'views/0_Data_Explorer.py',
+  'views/10_AI_Data_Analyst.py',
+  'views/11_Anomaly_Detection.py',
   'views/1_Executive_Overview.py',
   'views/2_Geographic_Intelligence.py',
   'views/3_Correlation_Analysis.py',
@@ -35,7 +38,13 @@ files = [
   'views/7_Time_Series_Explorer.py',
   'views/8_Policy_Scenarios.py',
   'views/9_Data_Downloads.py',
-  'views/home.py'
+  'views/home.css',
+  'views/home.py',
+  'views/templates/bento.html',
+  'views/templates/footer.html',
+  'views/templates/hero.html',
+  'views/templates/kpi.html',
+  'views/templates/marquee.html'
 ]
 requirements = [
   'streamlit>=1.31.0',

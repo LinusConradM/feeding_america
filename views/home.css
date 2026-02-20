@@ -1,0 +1,402 @@
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+
+/* 1. THOUGHTSPOT DEEP SPACE CANVAS & ORB GLOW */
+html,
+body,
+[data-testid="stAppViewContainer"],
+.stApp {
+    background-color: #050505 !important;
+    background-image: linear-gradient(180deg, rgba(17, 20, 42, 0.85) 0%, rgba(5, 5, 5, 1) 100%), ___BG_URL___ !important;
+    background-position: center top, center 20% !important;
+    background-repeat: no-repeat !important;
+    background-size: cover, 110% auto !important;
+    background-attachment: fixed !important;
+}
+
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    height: 80vh;
+    background: radial-gradient(ellipse at center, rgba(38, 208, 206, 0.15) 0%, rgba(11, 14, 38, 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Base typography corrections */
+h1,
+h2,
+h3,
+h4,
+p,
+span,
+li {
+    color: #f8fafc;
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. GEIST MONO TYPOGRAPHY ENGINE (Hero Section) */
+.hero-title {
+    font-family: 'Geist Mono', monospace !important;
+    font-size: clamp(3.5rem, 8vw, 6.5rem) !important;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.hero-subtitle {
+    font-family: 'Geist', sans-serif;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: #94a3b8 !important;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
+    text-align: center;
+}
+
+.title-gradient {
+    background: linear-gradient(90deg, #26d0ce 0%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 3. KPI Top Row */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 3rem 0 4rem 0;
+    position: relative;
+    z-index: 10;
+}
+
+.kpi-glass {
+    background: rgba(11, 14, 38, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kpi-glass:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(38, 208, 206, 0.25);
+    border-color: rgba(38, 208, 206, 0.4);
+}
+
+.kpi-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    margin-top: 0.75rem;
+    font-weight: 600;
+}
+
+.kpi-val {
+    font-family: 'Geist', sans-serif;
+    font-size: 3rem;
+    /* Outstandingly large */
+    font-weight: 800;
+    /* Extra bold */
+    color: #FFFFFF;
+    /* Bright */
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    /* Glow effect */
+}
+
+.kpi-trend.positive {
+    color: #26d0ce;
+}
+
+.kpi-trend.negative {
+    color: #f43f5e;
+}
+
+/* 4. INFINITE MARQUEE STRIP */
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(11, 14, 38, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.25rem 0;
+    position: relative;
+    z-index: 5;
+    margin: 4rem 0;
+}
+
+.marquee-content {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 40s linear infinite;
+    gap: 3rem;
+}
+
+.marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Geist Mono', monospace;
+    font-size: 1.05rem;
+    /* Slightly larger */
+    color: #f8fafc;
+    /* Bright white text */
+    letter-spacing: 0.05em;
+    font-weight: 600;
+
+    /* Illuminated Ribbon Card Effect */
+    background: rgba(11, 14, 38, 0.8);
+    /* Deep glass bg */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.75rem 1.5rem;
+    /* Padding to create the card shape */
+    border-radius: 50px;
+    /* Pill shape for ribbon look */
+    border: 1px solid rgba(38, 208, 206, 0.5);
+    /* Cyan border */
+    box-shadow: 0 0 15px rgba(38, 208, 206, 0.3),
+        /* Aqua glow */
+        inset 0 0 10px rgba(56, 189, 248, 0.2);
+    /* Inner blue glow */
+    transition: all 0.3s ease;
+}
+
+.marquee-item:hover {
+    border-color: rgba(38, 208, 206, 1);
+    box-shadow: 0 0 25px rgba(38, 208, 206, 0.6),
+        inset 0 0 15px rgba(56, 189, 248, 0.5);
+    color: #2AD5FF;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-33.33%);
+    }
+}
+
+/* 5. TS V2 VIBRANT BENTO GRID */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(200px, auto);
+    gap: 1.5rem;
+    margin-bottom: 5rem;
+}
+
+.aurora-card {
+    background: rgba(11, 14, 38, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aurora-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-title {
+    font-family: 'Geist', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    z-index: 1;
+}
+
+.card-desc {
+    font-family: 'Geist', sans-serif;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.5;
+    z-index: 1;
+}
+
+.bento-icon {
+    font-size: 2.2rem;
+    margin-bottom: auto;
+    /* Push content to bottom */
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Card-specific vivid border flares */
+.card-geo::before {
+    background: linear-gradient(90deg, #2AD5FF, #26d0ce);
+}
+
+.card-ml::before {
+    background: linear-gradient(90deg, #f472b6, #e11d48);
+}
+
+.card-time::before {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.card-agent::before {
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+}
+
+/* Glow pools inside cards */
+.bg-glow {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.card-geo .bg-glow {
+    background: #26d0ce;
+}
+
+.card-ml .bg-glow {
+    background: #e11d48;
+}
+
+.card-agent .bg-glow {
+    background: #8b5cf6;
+}
+
+.bento-card h3 {
+    font-family: 'Geist', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    z-index: 1;
+}
+
+.bento-card p {
+    font-family: 'Geist', sans-serif;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.5;
+    z-index: 1;
+}
+
+/* 6. CLEAN FOOTER */
+.site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 3rem 0;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 4rem;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.footer-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #2AD5FF;
+}
+
+/* 7. CUSTOM STREAMLIT PRIMARY BUTTON STYLING */
+div[data-testid="stButton"] button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 0 !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+div[data-testid="stButton"] button:hover {
+    background: rgba(38, 208, 206, 0.1) !important;
+    border-color: #26d0ce !important;
+    color: #26d0ce !important;
+    box-shadow: 0 0 15px rgba(38, 208, 206, 0.2) !important;
+}
+
+@media (max-width: 1024px) {
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento-large,
+    .bento-wide {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .kpi-row {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-large,
+    .bento-wide,
+    .bento-tall {
+        grid-column: span 1;
+        grid-row: auto;
+    }
+}
+
+</style>

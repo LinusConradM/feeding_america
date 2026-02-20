@@ -117,9 +117,9 @@ if not is_bivariate:
 
     # Choose color scale direction
     if map_variable == "median_income":
-        color_scale = [COLORS["ruby"], COLORS["amber"], COLORS["emerald"]]
+        color_scale = [COLORS["rose"], COLORS["amber"], COLORS["teal"]]
     else:
-        color_scale = [COLORS["emerald"], COLORS["amber"], COLORS["ruby"]]
+        color_scale = [COLORS["teal"], COLORS["amber"], COLORS["rose"]]
 
     fig_map = px.choropleth(
         state_agg, locations="State", locationmode="USA-states",
@@ -278,7 +278,7 @@ fig_time = go.Figure()
 fig_time.add_trace(go.Scatter(
     x=nat_trend["Year"], y=nat_trend["Value"],
     mode="lines+markers",
-    line=dict(color=COLORS["sapphire"], width=3),
+    line=dict(color=COLORS["blue"], width=3),
     marker=dict(size=8),
     fill="tozeroy", fillcolor="rgba(34,81,255,0.06)",
     name="National Average",
@@ -290,7 +290,7 @@ if selected_state != "All States":
     fig_time.add_trace(go.Scatter(
         x=state_trend["year"], y=state_trend[map_variable],
         mode="lines+markers",
-        line=dict(color=COLORS["ruby"], width=2, dash="dash"),
+        line=dict(color=COLORS["rose"], width=2, dash="dash"),
         marker=dict(size=6),
         name=STATE_NAMES.get(selected_state, selected_state),
     ))
@@ -311,7 +311,7 @@ col_hist, col_box = st.columns(2)
 with col_hist:
     fig_hist = px.histogram(
         focus_data, x=map_variable, nbins=40,
-        color_discrete_sequence=[COLORS["sapphire"]],
+        color_discrete_sequence=[COLORS["blue"]],
         labels={map_variable: get_variable_label(map_variable)},
     )
     fig_hist.update_layout(
@@ -327,8 +327,8 @@ with col_box:
             focus_data.dropna(subset=[map_variable, "census_region"]),
             x="census_region", y=map_variable,
             color="census_region",
-            color_discrete_sequence=[COLORS["sapphire"], COLORS["ruby"],
-                                     COLORS["emerald"], COLORS["amber"]],
+            color_discrete_sequence=[COLORS["blue"], COLORS["rose"],
+                                     COLORS["teal"], COLORS["amber"]],
         )
         fig_box.update_layout(
             **PLOTLY_LAYOUT, title="By Region", height=350,

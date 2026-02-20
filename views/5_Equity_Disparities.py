@@ -65,7 +65,7 @@ if len(race_cols) > 1:
         fig_race = px.bar(
             race_df, x="FI Rate", y="Group", orientation="h",
             color="FI Rate",
-            color_continuous_scale=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"]],
+            color_continuous_scale=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
         )
         fig_race.update_layout(
             **PLOTLY_LAYOUT, title="", height=300,
@@ -93,7 +93,7 @@ if "urban_rural" in year_data.columns:
         fig_urban = go.Figure()
         
         categories = ["Metro", "Non-metro", "Rural"]
-        joy_colors = [COLORS["sapphire"], COLORS["amber"], COLORS["emerald"]]
+        joy_colors = [COLORS["blue"], COLORS["amber"], COLORS["teal"]]
         
         for i, cat in enumerate(categories):
             cat_data = year_data[year_data["urban_rural"] == cat]["overall_food_insecurity_rate"].dropna()
@@ -156,7 +156,7 @@ if "income_category" in year_data.columns:
     fig_income = px.bar(
         income_fi, x="Income Category", y="FI Rate",
         color="Income Category",
-        color_discrete_sequence=[COLORS["ruby"], COLORS["amber"], COLORS["emerald"]],
+        color_discrete_sequence=[COLORS["rose"], COLORS["amber"], COLORS["teal"]],
     )
     fig_income.update_layout(
         **PLOTLY_LAYOUT, title="FI Rate by Income Category", height=350,
@@ -190,7 +190,7 @@ if "gini" in year_data.columns:
         # Gini distribution
         fig_gini_hist = px.histogram(
             year_data.dropna(subset=["gini"]), x="gini", nbins=40,
-            color_discrete_sequence=[COLORS["amethyst"]],
+            color_discrete_sequence=[COLORS["violet"]],
         )
         fig_gini_hist.update_layout(
             **PLOTLY_LAYOUT, title="Gini Distribution", height=400,
@@ -210,7 +210,7 @@ if "education_category" in year_data.columns:
     fig_edu = px.bar(
         edu_fi, x="Education Level", y="FI Rate",
         color="Education Level",
-        color_discrete_sequence=[COLORS["emerald"], COLORS["amber"], COLORS["ruby"]],
+        color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
     )
     fig_edu.update_layout(
         **PLOTLY_LAYOUT, title="FI Rate by Education Level", height=350,
@@ -229,7 +229,7 @@ if "urban_rural" in data.columns:
     fig_trend = px.line(
         urban_trend.dropna(), x="Year", y="FI Rate", color="Category",
         markers=True,
-        color_discrete_sequence=[COLORS["emerald"], COLORS["amber"], COLORS["sapphire"]],
+        color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["blue"]],
     )
     fig_trend.update_layout(
         **PLOTLY_LAYOUT, title="Urban-Rural Gap Over Time", height=400,
@@ -237,3 +237,245 @@ if "urban_rural" in data.columns:
         yaxis_title="Avg Food Insecurity Rate",
     )
     st.plotly_chart(fig_trend, width='stretch')
+
+st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
+
+# ── NEW: RACIAL COMPOSITION vs FOOD INSECURITY ────────────────────────────────
+demo_vars = [v for v in ["black_pct", "hispanic_pct"] if v in year_data.columns]
+if demo_vars:
+    section_header("Racial Demographics & Food Insecurity", "How racial composition correlates with county-level FI rates", "users")
+
+    demo_col1, demo_col2 = st.columns(2)
+
+    with demo_col1:
+        if "black_pct" in year_data.columns:
+            fig_black = px.scatter(
+                year_data.dropna(subset=["black_pct", "overall_food_insecurity_rate"]),
+                x="black_pct", y="overall_food_insecurity_rate",
+                color="urban_rural" if "urban_rural" in year_data.columns else None,
+                size="population" if "population" in year_data.columns else None,
+                size_max=20,
+                opacity=0.55,
+                trendline="ols",
+                labels={
+                    "black_pct": "Black Population (%)",
+                    "overall_food_insecurity_rate": "Food Insecurity Rate",
+                    "urban_rural": "Area Type",
+                },
+                color_discrete_sequence=[COLORS["violet"], COLORS["amber"], COLORS["teal"]],
+            )
+            fig_black.update_layout(
+                **PLOTLY_LAYOUT, title="Black Population % vs FI Rate",
+                height=400, xaxis_tickformat=".0%", yaxis_tickformat=".0%",
+            )
+            st.plotly_chart(fig_black, width='stretch')
+
+    with demo_col2:
+        if "hispanic_pct" in year_data.columns:
+            fig_hisp = px.scatter(
+                year_data.dropna(subset=["hispanic_pct", "overall_food_insecurity_rate"]),
+                x="hispanic_pct", y="overall_food_insecurity_rate",
+                color="urban_rural" if "urban_rural" in year_data.columns else None,
+                size="population" if "population" in year_data.columns else None,
+                size_max=20,
+                opacity=0.55,
+                trendline="ols",
+                labels={
+                    "hispanic_pct": "Hispanic Population (%)",
+                    "overall_food_insecurity_rate": "Food Insecurity Rate",
+                    "urban_rural": "Area Type",
+                },
+                color_discrete_sequence=[COLORS["orange"], COLORS["amber"], COLORS["teal"]],
+            )
+            fig_hisp.update_layout(
+                **PLOTLY_LAYOUT, title="Hispanic Population % vs FI Rate",
+                height=400, xaxis_tickformat=".0%", yaxis_tickformat=".0%",
+            )
+            st.plotly_chart(fig_hisp, width='stretch')
+
+    # Racial composition disparity trend over time
+    if "black_pct" in data.columns:
+        # Bin counties by black_pct quartile for the selected year and track over time
+        try:
+            year_data_copy = year_data.dropna(subset=["black_pct"]).copy()
+            year_data_copy["black_pct_group"] = pd.qcut(
+                year_data_copy["black_pct"], q=4,
+                labels=["Q1 (Lowest)", "Q2", "Q3", "Q4 (Highest)"]
+            )
+            group_fips = year_data_copy.groupby("black_pct_group", observed=True)["fips"].apply(list).to_dict()
+
+            trend_rows = []
+            for yr in sorted(data["year"].dropna().unique()):
+                yr_d = data[data["year"] == yr]
+                for grp, fips_list in group_fips.items():
+                    val = yr_d[yr_d["fips"].isin(fips_list)]["overall_food_insecurity_rate"].mean()
+                    if pd.notna(val):
+                        trend_rows.append({"Year": yr, "Black Population Quartile": str(grp), "FI Rate": val})
+
+            if trend_rows:
+                trend_df = pd.DataFrame(trend_rows)
+                fig_btrend = px.line(
+                    trend_df, x="Year", y="FI Rate", color="Black Population Quartile",
+                    markers=True,
+                    color_discrete_sequence=[COLORS["teal"], COLORS["blue"], COLORS["amber"], COLORS["rose"]],
+                )
+                fig_btrend.update_layout(
+                    **PLOTLY_LAYOUT,
+                    title="FI Rate Trend by Black Population Quartile",
+                    height=380, yaxis_tickformat=".0%",
+                )
+                st.plotly_chart(fig_btrend, width='stretch')
+        except Exception:
+            pass
+
+st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
+
+# ── NEW: FEMALE-HEADED HOUSEHOLDS ─────────────────────────────────────────────
+if "female_headed" in year_data.columns:
+    section_header("Female-Headed Households & Food Insecurity",
+                   "Single-parent female-led households are a key structural vulnerability indicator", "female")
+
+    fh_col1, fh_col2 = st.columns([3, 2])
+
+    with fh_col1:
+        fig_fh = px.scatter(
+            year_data.dropna(subset=["female_headed", "overall_food_insecurity_rate"]),
+            x="female_headed", y="overall_food_insecurity_rate",
+            color="income_category" if "income_category" in year_data.columns else None,
+            opacity=0.55, trendline="ols",
+            labels={
+                "female_headed": "Female-Headed Households (%)",
+                "overall_food_insecurity_rate": "Food Insecurity Rate",
+                "income_category": "Income Level",
+            },
+            color_discrete_sequence=[COLORS["rose"], COLORS["amber"], COLORS["teal"]],
+        )
+        fig_fh.update_layout(
+            **PLOTLY_LAYOUT, title="Female-Headed Households vs FI Rate",
+            height=420, xaxis_tickformat=".0%", yaxis_tickformat=".0%",
+        )
+        st.plotly_chart(fig_fh, width='stretch')
+
+    with fh_col2:
+        # Box plot of FI rate by income × female_headed quintile
+        try:
+            fh_data = year_data.dropna(subset=["female_headed", "overall_food_insecurity_rate"]).copy()
+            fh_data["fh_group"] = pd.qcut(
+                fh_data["female_headed"], q=3,
+                labels=["Low (0–33%)", "Medium (33–66%)", "High (66–100%)"]
+            )
+            fig_fh_box = px.box(
+                fh_data, x="fh_group", y="overall_food_insecurity_rate",
+                color="fh_group",
+                color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
+                labels={
+                    "fh_group": "Female-Headed Household Concentration",
+                    "overall_food_insecurity_rate": "FI Rate",
+                },
+                points="outliers",
+            )
+            fig_fh_box.update_layout(
+                **PLOTLY_LAYOUT, title="FI Rate by Female-Headed Household Tier",
+                height=420, yaxis_tickformat=".0%", showlegend=False,
+            )
+            st.plotly_chart(fig_fh_box, width='stretch')
+        except Exception:
+            pass
+
+    # KPIs
+    fh_clean = year_data.dropna(subset=["female_headed", "overall_food_insecurity_rate"])
+    if len(fh_clean) > 10:
+        from scipy import stats as sp_stats
+        r_fh, p_fh = sp_stats.pearsonr(fh_clean["female_headed"], fh_clean["overall_food_insecurity_rate"])
+        kpi_row([
+            {"title": "Correlation (r)", "value": f"{r_fh:.3f}", "icon": "link", "gradient": "sapphire"},
+            {"title": "P-value", "value": f"{p_fh:.2e}" if p_fh < 0.001 else f"{p_fh:.4f}",
+             "icon": "flask", "gradient": "emerald" if p_fh < 0.05 else "coral"},
+            {"title": "Mean FI (High FH%)", "value": f"{fh_clean.nlargest(int(len(fh_clean)*0.25), 'female_headed')['overall_food_insecurity_rate'].mean():.1%}",
+             "icon": "arrow-up", "gradient": "ruby"},
+            {"title": "Mean FI (Low FH%)", "value": f"{fh_clean.nsmallest(int(len(fh_clean)*0.25), 'female_headed')['overall_food_insecurity_rate'].mean():.1%}",
+             "icon": "arrow-down", "gradient": "emerald"},
+        ])
+
+st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
+
+# ── NEW: TRANSPORTATION ACCESS (NO VEHICLE HOUSEHOLDS) ────────────────────────
+if "no_vehicle" in year_data.columns:
+    section_header("Transportation Access & Food Insecurity",
+                   "Households without a vehicle face compounding barriers to food access", "car")
+
+    nv_col1, nv_col2 = st.columns(2)
+
+    with nv_col1:
+        fig_nv = px.scatter(
+            year_data.dropna(subset=["no_vehicle", "overall_food_insecurity_rate"]),
+            x="no_vehicle", y="overall_food_insecurity_rate",
+            color="urban_rural" if "urban_rural" in year_data.columns else None,
+            opacity=0.5, trendline="ols",
+            labels={
+                "no_vehicle": "No Vehicle (%)",
+                "overall_food_insecurity_rate": "Food Insecurity Rate",
+                "urban_rural": "Area Type",
+            },
+            color_discrete_sequence=[COLORS["violet"], COLORS["amber"], COLORS["teal"]],
+        )
+        fig_nv.update_layout(
+            **PLOTLY_LAYOUT, title="No Vehicle Households vs FI Rate",
+            height=400, xaxis_tickformat=".0%", yaxis_tickformat=".0%",
+        )
+        st.plotly_chart(fig_nv, width='stretch')
+
+    with nv_col2:
+        # Bar chart: top 15 states by average no_vehicle rate
+        state_nv = (year_data.groupby("state")[["no_vehicle", "overall_food_insecurity_rate"]]
+                    .mean().reset_index().dropna())
+        state_nv = state_nv.nlargest(15, "no_vehicle")
+
+        fig_nv_bar = px.bar(
+            state_nv.sort_values("no_vehicle", ascending=True),
+            x="no_vehicle", y="state", orientation="h",
+            color="overall_food_insecurity_rate",
+            color_continuous_scale=[[0, COLORS["teal"]], [0.5, COLORS["amber"]], [1, COLORS["rose"]]],
+            labels={
+                "no_vehicle": "No Vehicle (%)",
+                "state": "State",
+                "overall_food_insecurity_rate": "FI Rate",
+            },
+        )
+        fig_nv_bar.update_layout(
+            **PLOTLY_LAYOUT, title="Top 15 States — No Vehicle Rate (colored by FI Rate)",
+            height=400, xaxis_tickformat=".0%",
+        )
+        st.plotly_chart(fig_nv_bar, width='stretch')
+
+    # Trend: no_vehicle vs FI over time nationally
+    if "no_vehicle" in data.columns:
+        nv_trend = (data.groupby("year")[["no_vehicle", "overall_food_insecurity_rate"]]
+                    .mean().reset_index().dropna())
+
+        fig_nv_dual = go.Figure()
+        fig_nv_dual.add_trace(go.Scatter(
+            x=nv_trend["year"], y=nv_trend["overall_food_insecurity_rate"],
+            name="Food Insecurity Rate", mode="lines+markers",
+            line=dict(color=COLORS["rose"], width=2),
+            yaxis="y1",
+        ))
+        fig_nv_dual.add_trace(go.Scatter(
+            x=nv_trend["year"], y=nv_trend["no_vehicle"],
+            name="No Vehicle Rate", mode="lines+markers",
+            line=dict(color=COLORS["violet"], width=2, dash="dash"),
+            yaxis="y2",
+        ))
+        fig_nv_dual.update_layout(
+            **PLOTLY_LAYOUT,
+            title="No Vehicle Rate vs Food Insecurity Over Time",
+            height=380,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        )
+        fig_nv_dual.update_layout(
+            yaxis=dict(title="Food Insecurity Rate", tickformat=".0%", side="left"),
+            yaxis2=dict(title="No Vehicle Rate", tickformat=".0%", side="right",
+                        overlaying="y", showgrid=False),
+        )
+        st.plotly_chart(fig_nv_dual, width='stretch')
+

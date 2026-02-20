@@ -154,16 +154,38 @@ if run_model or "reg_results" in st.session_state:
 
     st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
 
-    # LLM Insight Engine
+    # Build model-type specific context for LLM
     context_dict = {
         "Year": model_year,
         "Model Type": MODEL_TYPES.get(model_type, model_type),
         "Dependent Variable (Target)": get_variable_label(dep_var),
-        "Predictors": [get_variable_label(v) for v in selected_predictors],
+        "Independent Variables": ", ".join([get_variable_label(v) for v in selected_predictors]),
         "R-Squared": f"{res['r2']:.4f}",
+        "Adjusted R-Squared": f"{res['adj_r2']:.4f}",
         "RMSE": f"{res['rmse']:.4f}",
-        "Observations (n)": f"{res['n']:,}"
+        "MAE": f"{res['mae']:.4f}",
+        "Cross-Validated R²": f"{res['cv_r2']:.4f}" if res['cv_r2'] is not None else "N/A",
+        "Observations (n)": f"{res['n']:,}",
+        "Number of Predictors": f"{res['p']}",
     }
+    if res["ols_summary"] is not None:
+        ols = res["ols_summary"]
+        context_dict["F-Statistic"] = f"{ols.fvalue:.2f}"
+        context_dict["Prob(F-statistic)"] = f"{ols.f_pvalue:.2e}"
+        context_dict["AIC"] = f"{ols.aic:.2f}"
+        context_dict["BIC"] = f"{ols.bic:.2f}"
+        context_dict["Durbin-Watson"] = f"{ols.durbin_watson:.3f}" if hasattr(ols, 'durbin_watson') else "N/A"
+        # Add individual coefficient p-values
+        pvals = ols.pvalues[1:]  # skip const
+        sig_vars = [get_variable_label(v) for v, p in zip(selected_predictors, pvals) if p < 0.05]
+        insig_vars = [get_variable_label(v) for v, p in zip(selected_predictors, pvals) if p >= 0.05]
+        context_dict["Statistically Significant Predictors (p<0.05)"] = ", ".join(sig_vars) if sig_vars else "None"
+        context_dict["Insignificant Predictors"] = ", ".join(insig_vars) if insig_vars else "None"
+    if model_type == "random_forest":
+        importances = dict(zip([get_variable_label(v) for v in selected_predictors],
+                               res["model"].feature_importances_))
+        top3 = sorted(importances.items(), key=lambda x: x[1], reverse=True)[:3]
+        context_dict["Top 3 Feature Importances"] = ", ".join([f"{k}: {v:.3f}" for k, v in top3])
     llm_explainer_ui("Regression Models", context_dict)
 
     # Fitted vs Actual
@@ -175,7 +197,7 @@ if run_model or "reg_results" in st.session_state:
         fig_fit.add_trace(go.Scatter(
             x=res["y"], y=res["y_pred"],
             mode="markers",
-            marker=dict(color=COLORS["sapphire"], opacity=0.5, size=5),
+            marker=dict(color=COLORS["blue"], opacity=0.5, size=5),
             name="Predictions",
             hovertemplate="Actual: %{x:.3f}<br>Predicted: %{y:.3f}<extra></extra>",
         ))
@@ -183,7 +205,7 @@ if run_model or "reg_results" in st.session_state:
         min_v, max_v = min(res["y"].min(), res["y_pred"].min()), max(res["y"].max(), res["y_pred"].max())
         fig_fit.add_trace(go.Scatter(
             x=[min_v, max_v], y=[min_v, max_v],
-            mode="lines", line=dict(color=COLORS["ruby"], dash="dash", width=2),
+            mode="lines", line=dict(color=COLORS["rose"], dash="dash", width=2),
             name="Perfect Fit",
         ))
         fig_fit.update_layout(
@@ -198,7 +220,7 @@ if run_model or "reg_results" in st.session_state:
         residuals = res["y"] - res["y_pred"]
         fig_res = px.histogram(
             x=residuals, nbins=40,
-            color_discrete_sequence=[COLORS["amethyst"]],
+            color_discrete_sequence=[COLORS["violet"]],
             labels={"x": "Residual"},
         )
         fig_res.update_layout(
@@ -218,7 +240,7 @@ if run_model or "reg_results" in st.session_state:
         fig_coef = px.bar(
             coefs, x="Coefficient", y="Variable", orientation="h",
             color="Coefficient",
-            color_continuous_scale=[[0, COLORS["ruby"]], [0.5, COLORS["pearl"]], [1, COLORS["sapphire"]]],
+            color_continuous_scale=[[0, COLORS["rose"]], [0.5, COLORS["pearl"]], [1, COLORS["blue"]]],
             color_continuous_midpoint=0,
         )
         fig_coef.update_layout(
@@ -237,19 +259,223 @@ if run_model or "reg_results" in st.session_state:
 
         fig_imp = px.bar(
             importances, x="Importance", y="Variable", orientation="h",
-            color_discrete_sequence=[COLORS["emerald"]],
+            color_discrete_sequence=[COLORS["teal"]],
         )
         fig_imp.update_layout(
             **PLOTLY_LAYOUT, title="", height=max(300, len(selected_predictors) * 40),
         )
         st.plotly_chart(fig_imp, width='stretch')
 
-    # OLS Summary
+    # OLS Summary — side-by-side with LLM interpretation
     if res["ols_summary"] is not None:
         section_header("OLS Model Summary", icon="file-alt")
-        st.code(res["ols_summary"].summary().as_text(), language=None)
+        sum_col, interp_col = st.columns([1.1, 0.9])
+
+        with sum_col:
+            st.code(res["ols_summary"].summary().as_text(), language=None)
+
+        with interp_col:
+            from utils.llm import generate_insights
+
+            # Build a model-type-specific interpretation prompt
+            ols = res["ols_summary"]
+            pvals = ols.pvalues[1:]
+            coefs = ols.params[1:]
+            sig_pairs = [(get_variable_label(v), c, p)
+                         for v, c, p in zip(selected_predictors, coefs, pvals)]
+            sig_text = "; ".join(
+                [f"{name}: coef={coef:.4f}, p={pv:.3f}" for name, coef, pv in sig_pairs]
+            )
+
+            interp_context = {
+                "Model": "OLS Ordinary Least Squares Regression",
+                "Target Variable": get_variable_label(dep_var),
+                "Year": model_year,
+                "R-Squared": f"{res['r2']:.4f}",
+                "Adjusted R-Squared": f"{res['adj_r2']:.4f}",
+                "F-Statistic": f"{ols.fvalue:.2f}",
+                "Prob(F-statistic)": f"{ols.f_pvalue:.2e}",
+                "AIC": f"{ols.aic:.2f}",
+                "BIC": f"{ols.bic:.2f}",
+                "Observations": f"{res['n']:,}",
+                "Predictor Coefficients and P-values": sig_text,
+            }
+
+            st.markdown(
+                """
+                <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;
+                            padding:1.25rem;height:100%;">
+                    <div style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;
+                                letter-spacing:0.05em;margin-bottom:0.75rem;">
+                        <i class="fas fa-robot" style="color:#5C45FD;margin-right:0.4rem;"></i>
+                        AI Model Interpretation
+                    </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            interp_key = f"ols_interp_{model_year}_{dep_var}_{model_type}"
+            if interp_key not in st.session_state:
+                st.session_state[interp_key] = None
+
+            if st.button("✨ Explain This Output", key=f"btn_interp_{interp_key}", type="primary"):
+                with st.spinner("Gemini is reading the model output..."):
+                    st.session_state[interp_key] = generate_insights(
+                        f"OLS Regression Model for {get_variable_label(dep_var)}",
+                        interp_context
+                    )
+
+            if st.session_state.get(interp_key):
+                st.markdown(
+                    f"""
+                    <div style="font-size:0.85rem;color:#374151;line-height:1.65;margin-top:0.5rem;">
+                        {st.session_state[interp_key].replace(chr(10), "<br>")}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    """
+                    <div style="font-size:0.83rem;color:#9CA3AF;margin-top:0.5rem;font-style:italic;">
+                        Click <strong>Explain This Output</strong> above to get a plain-English
+                        interpretation of the R², coefficient significance, F-statistic,
+                        and model diagnostics — powered by Google Gemini.
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # Non-OLS model summary + LLM interpretation (Polynomial, Ridge, LASSO, ElasticNet, RF)
+    if res["ols_summary"] is None:
+        from utils.llm import generate_insights
+
+        section_header(f"{MODEL_TYPES.get(model_type, model_type)} — Model Summary", icon="file-alt")
+        sum_col2, interp_col2 = st.columns([1.1, 0.9])
+
+        with sum_col2:
+            cv_text2 = f"{res['cv_r2']:.4f}" if res["cv_r2"] is not None else "N/A"
+            # Build a formatted model output card for non-OLS models
+            coef_rows = ""
+            if hasattr(res["model"], "coef_") and model_type not in ["poly2", "poly3"]:
+                for v, c in zip(selected_predictors, res["model"].coef_):
+                    coef_rows += f"  {get_variable_label(v):<35} {c:+.6f}\n"
+            elif model_type == "random_forest":
+                for v, imp in zip(selected_predictors, res["model"].feature_importances_):
+                    coef_rows += f"  {get_variable_label(v):<35} importance: {imp:.4f}\n"
+            elif model_type in ["poly2", "poly3"]:
+                deg = 2 if model_type == "poly2" else 3
+                coef_rows += f"  Degree-{deg} polynomial features: {res['p']} total terms\n"
+                for c in res["model"].coef_[:8]:
+                    coef_rows += f"    coef: {c:+.6f}\n"
+                if res["p"] > 8:
+                    coef_rows += f"  ... ({res['p'] - 8} more terms)\n"
+
+            summary_text = f"""{MODEL_TYPES.get(model_type, model_type).upper()} RESULTS
+{'='*60}
+Dep. Variable:    {get_variable_label(dep_var):<30}
+Observations:     {res['n']:,}
+Predictors:       {res['p']}
+Year:             {model_year}
+{'='*60}
+R-Squared:        {res['r2']:.6f}
+Adjusted R²:      {res['adj_r2']:.6f}
+RMSE:             {res['rmse']:.6f}
+MAE:              {res['mae']:.6f}
+Cross-Val R²:     {cv_text2}
+{'='*60}
+COEFFICIENTS / FEATURE WEIGHTS
+{'-'*60}
+{coef_rows}{'='*60}
+"""
+            st.code(summary_text, language=None)
+
+        with interp_col2:
+            # Build model-type specific LLM context
+            non_ols_context = {
+                "Model Type": MODEL_TYPES.get(model_type, model_type),
+                "Target Variable": get_variable_label(dep_var),
+                "Year": model_year,
+                "R-Squared": f"{res['r2']:.4f}",
+                "Adjusted R-Squared": f"{res['adj_r2']:.4f}",
+                "RMSE": f"{res['rmse']:.4f}",
+                "MAE": f"{res['mae']:.4f}",
+                "Cross-Validated R²": cv_text2,
+                "Observations": f"{res['n']:,}",
+                "Predictors Used": ", ".join([get_variable_label(v) for v in selected_predictors]),
+            }
+
+            if model_type == "random_forest":
+                top3 = sorted(
+                    zip([get_variable_label(v) for v in selected_predictors], res["model"].feature_importances_),
+                    key=lambda x: x[1], reverse=True
+                )[:3]
+                non_ols_context["Top 3 Feature Importances"] = ", ".join([f"{k}: {v:.4f}" for k, v in top3])
+            elif model_type in ["ridge", "lasso", "elasticnet"]:
+                non_ols_context["Regularization"] = model_type.upper()
+                if hasattr(res["model"], "coef_"):
+                    coef_summary = sorted(
+                        zip([get_variable_label(v) for v in selected_predictors], res["model"].coef_),
+                        key=lambda x: abs(x[1]), reverse=True
+                    )[:4]
+                    non_ols_context["Top 4 Coefficients (by magnitude)"] = \
+                        ", ".join([f"{k}: {v:+.4f}" for k, v in coef_summary])
+            elif model_type in ["poly2", "poly3"]:
+                deg = 2 if model_type == "poly2" else 3
+                non_ols_context["Polynomial Degree"] = deg
+                non_ols_context["Expanded Feature Count"] = res["p"]
+
+            st.markdown(
+                """
+                <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;
+                            padding:1.25rem;">
+                    <div style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;
+                                letter-spacing:0.05em;margin-bottom:0.75rem;">
+                        <i class="fas fa-robot" style="color:#5C45FD;margin-right:0.4rem;"></i>
+                        AI Model Interpretation
+                    </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            interp_key2 = f"nonols_interp_{model_year}_{dep_var}_{model_type}"
+            if interp_key2 not in st.session_state:
+                st.session_state[interp_key2] = None
+
+            if st.button("✨ Explain This Output", key=f"btn_interp_{interp_key2}", type="primary"):
+                with st.spinner("Gemini is reading the model output..."):
+                    st.session_state[interp_key2] = generate_insights(
+                        f"{MODEL_TYPES.get(model_type, model_type)} for {get_variable_label(dep_var)}",
+                        non_ols_context
+                    )
+
+            if st.session_state.get(interp_key2):
+                st.markdown(
+                    f"""
+                    <div style="font-size:0.85rem;color:#374151;line-height:1.65;margin-top:0.5rem;">
+                        {st.session_state[interp_key2].replace(chr(10), "<br>")}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    """
+                    <div style="font-size:0.83rem;color:#9CA3AF;margin-top:0.5rem;font-style:italic;">
+                        Click <strong>Explain This Output</strong> above to get a plain-English
+                        breakdown of R², RMSE, feature importances or regularization effects
+                        — powered by Google Gemini.
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.markdown("</div>", unsafe_allow_html=True)
 
     # Model info
+
     section_header("Model Information", icon="info-circle")
     cv_text = f"{res['cv_r2']:.4f}" if res["cv_r2"] is not None else "N/A"
     st.markdown(

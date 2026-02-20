@@ -114,9 +114,7 @@ if run_clustering or "cluster_results" in st.session_state:
                 labels_t2 = kmeans.predict(X_combined_t2)
                 merged_flow["Cluster_t2"] = labels_t2
                 
-                # We need the T1 labels precisely for the merged subset
-                # (Since merged_flow might have dropped some counties from cluster_data)
-                merged_flow["Cluster_t1"] = merged_flow["Cluster"] 
+
                 
                 sankey_data = merged_flow.groupby(["Cluster_t1", "Cluster_t2"]).size().reset_index(name="Count")
 
@@ -200,7 +198,7 @@ if run_clustering or "cluster_results" in st.session_state:
         elbow_df = pd.DataFrame(res["inertias"], columns=["K", "Inertia"])
         fig_elbow = px.line(
             elbow_df, x="K", y="Inertia", markers=True,
-            color_discrete_sequence=[COLORS["sapphire"]],
+            color_discrete_sequence=[COLORS["blue"]],
         )
         fig_elbow.update_layout(
             **PLOTLY_LAYOUT, title="", height=300,
@@ -208,7 +206,7 @@ if run_clustering or "cluster_results" in st.session_state:
             yaxis_title="Inertia (Within-Cluster SS)",
         )
         # Mark selected k
-        fig_elbow.add_vline(x=n_clusters, line_dash="dash", line_color=COLORS["ruby"])
+        fig_elbow.add_vline(x=n_clusters, line_dash="dash", line_color=COLORS["rose"])
         st.plotly_chart(fig_elbow, width='stretch')
 
         # Cluster sizes

@@ -33,6 +33,12 @@ COLORS = {
     "amber": "#FDCB6E",
     "amethyst": "#6C5CE7",
     "topaz": "#E17055",
+    # Backward compatibility aliases for dashboard plots
+    "teal": "#00B894",      # emerald
+    "rose": "#D63031",      # ruby
+    "violet": "#6C5CE7",    # amethyst
+    "orange": "#E17055",    # topaz
+    "cyan": "#74B9FF",      # ocean_light
     # Chart sequence
     "ocean_light": "#74B9FF",
     "navy": "#051C2C",
@@ -351,6 +357,8 @@ def inject_tailwind():
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
+            align-items: center;
+            text-align: center;
         }
         .kpi-card:hover {
             transform: translateY(-3px);
@@ -379,6 +387,7 @@ def inject_tailwind():
             margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.35rem;
         }
         .kpi-value {
@@ -393,12 +402,13 @@ def inject_tailwind():
         .kpi-change {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             font-size: 0.75rem;
             font-weight: 600;
             padding: 0.15rem 0.5rem;
             border-radius: 9999px;
             margin-top: 0.25rem;
-            align-self: flex-start;
+            align-self: center;
         }
         .kpi-change.up   { 
             color: #047857; 
@@ -477,12 +487,61 @@ def page_header(title: str, subtitle: str = "", icon: str = ""):
     sub = f'<p style="color:#6B7F95;font-size:.9rem;margin:.3rem 0 0">{subtitle}</p>' if subtitle else ""
     st.markdown(
         f"""
-        <div style="border-bottom:2px solid #051C2C;padding-bottom:.75rem;margin-bottom:1.5rem">
-            <h1 style="font-family:'Inter',sans-serif;font-size:1.6rem;font-weight:700;
-                       color:#051C2C;margin:0;line-height:1.3">
+        <style>
+        @keyframes bg-pan-left {{
+            0% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+        .header-ribbon {{
+            position: relative;
+            padding: 1.2rem 1.2rem;
+            margin-bottom: 1.5rem;
+            background: #0B0E26; /* Deep space bg */
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }}
+        .header-ribbon::before {{
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(80deg, #6C5CE7, #38bdf8, #6C5CE7); /* Purple/cyan */
+            background-size: 200% 200%;
+            animation: bg-pan-left 4s linear infinite;
+        }}
+        .header-title {{
+            font-family: 'Geist', sans-serif !important;
+            font-size: 2.2rem !important;
+            font-weight: 800 !important;
+            color: #FFFFFF !important;
+            margin: 0 !important;
+            line-height: 1.3 !important;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }}
+        .header-subtitle {{
+            color: #E2E8F0 !important; /* Brighter subtitle */
+            font-family: 'Geist Mono', monospace !important;
+            font-size: 1.05rem !important;
+            font-weight: 600 !important;
+            margin: 0.5rem 0 0 0 !important;
+            text-shadow: 0 0 10px rgba(226, 232, 240, 0.3) !important;
+        }}
+        </style>
+        <div class="header-ribbon">
+            <h1 class="header-title">
                 {icon_html}{title}
             </h1>
-            {sub}
+            <div class="header-subtitle">{subtitle}</div>
         </div>
         """,
         unsafe_allow_html=True,

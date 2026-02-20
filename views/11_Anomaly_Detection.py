@@ -102,7 +102,7 @@ with st.spinner("Training Isolation Forest... Scanning for outliers..."):
             clean_ml,
             x="poverty_rate", y="overall_food_insecurity_rate",
             color="is_anomaly",
-            color_continuous_scale=[[0, COLORS["ruby"]], [0.5, COLORS["ruby"]], [0.5, COLORS["emerald"]], [1, COLORS["emerald"]]],
+            color_continuous_scale=[[0, COLORS["rose"]], [0.5, COLORS["rose"]], [0.5, COLORS["teal"]], [1, COLORS["teal"]]],
             hover_name="county",
             hover_data={"state": True, "anomaly_score": True, "is_anomaly": False},
             opacity=0.7
@@ -122,7 +122,7 @@ with st.spinner("Training Isolation Forest... Scanning for outliers..."):
                 x=row['poverty_rate'], y=row['overall_food_insecurity_rate'],
                 text=f"{row['county']}, {row['state']}",
                 showarrow=False, yshift=15,
-                font=dict(color=COLORS["ruby"], size=10)
+                font=dict(color=COLORS["rose"], size=10)
             )
             
         st.plotly_chart(fig, width='stretch')
@@ -153,7 +153,7 @@ with st.spinner("Training Isolation Forest... Scanning for outliers..."):
     fig_map = px.choropleth(
         map_data, locations="State", locationmode="USA-states",
         color="Anomaly Count", 
-        color_continuous_scale=[[0, COLORS["slate"]], [0.5, COLORS["amber"]], [1, COLORS["ruby"]]],
+        color_continuous_scale=[[0, COLORS["slate"]], [0.5, COLORS["amber"]], [1, COLORS["rose"]]],
         scope="usa", hover_name="State Name"
     )
     

@@ -99,14 +99,14 @@ fig_trend.add_trace(go.Scatter(
 fig_trend.add_trace(go.Scatter(
     x=nat_trend["Year"], y=nat_trend["Mean"],
     mode="lines+markers",
-    line=dict(color=COLORS["sapphire"], width=3),
+    line=dict(color=COLORS["blue"], width=3),
     marker=dict(size=8),
     name="Mean",
 ))
 fig_trend.add_trace(go.Scatter(
     x=nat_trend["Year"], y=nat_trend["Median"],
     mode="lines+markers",
-    line=dict(color=COLORS["emerald"], width=2, dash="dash"),
+    line=dict(color=COLORS["teal"], width=2, dash="dash"),
     marker=dict(size=6),
     name="Median",
 ))
@@ -191,9 +191,9 @@ yoy = yoy.dropna(subset=["Change"])
 fig_yoy = go.Figure()
 fig_yoy.add_trace(go.Bar(
     x=yoy["year"], y=yoy["Change"],
-    marker_color=[COLORS["emerald"] if c < 0 and is_rate else
-                  COLORS["ruby"] if c > 0 and is_rate else
-                  COLORS["emerald"] if c > 0 else COLORS["ruby"]
+    marker_color=[COLORS["teal"] if c < 0 and is_rate else
+                  COLORS["rose"] if c > 0 and is_rate else
+                  COLORS["teal"] if c > 0 else COLORS["rose"]
                   for c in yoy["Change"]],
     hovertemplate="<b>%{x}</b><br>Change: %{y:+.1f}%<extra></extra>",
 ))
@@ -281,7 +281,7 @@ if target_data is not None and len(target_data) >= 10:
                 fig_forecast.add_trace(go.Scatter(
                     x=target_data.index, y=target_data[ts_variable],
                     mode="lines+markers",
-                    line=dict(color=COLORS["sapphire"], width=3),
+                    line=dict(color=COLORS["blue"], width=3),
                     marker=dict(size=8),
                     name="Historical",
                     hovertemplate="<b>%{x}</b><br>Actual: %{y:.1%}<extra></extra>" if is_rate else "<b>%{x}</b><br>Actual: %{y:,.2f}<extra></extra>",
@@ -302,7 +302,7 @@ if target_data is not None and len(target_data) >= 10:
                 fig_forecast.add_trace(go.Scatter(
                     x=future_years, y=pred_mean,
                     mode="lines+markers",
-                    line=dict(color=COLORS["ruby"], width=3, dash="dot"),
+                    line=dict(color=COLORS["rose"], width=3, dash="dot"),
                     marker=dict(size=8),
                     name="Forecast",
                     hovertemplate="<b>%{x}</b><br>Projected: %{y:.1%}<extra></extra>" if is_rate else "<b>%{x}</b><br>Projected: %{y:,.2f}<extra></extra>",
@@ -313,7 +313,7 @@ if target_data is not None and len(target_data) >= 10:
                     x=[last_year, future_years[0]],
                     y=[target_data[ts_variable].iloc[-1], pred_mean.iloc[0]],
                     mode="lines",
-                    line=dict(color=COLORS["ruby"], width=3, dash="dot"),
+                    line=dict(color=COLORS["rose"], width=3, dash="dot"),
                     showlegend=False,
                     hoverinfo="skip",
                 ))

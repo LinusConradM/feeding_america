@@ -24,17 +24,16 @@ inject_tailwind()
 with st.sidebar:
     st.markdown(
         """
-        <div style="text-align:center;padding:1.5rem 0 1rem">
-            <div style="font-size:2rem;margin-bottom:.5rem">🌾</div>
-            <div style="font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:700;color:#fff">
+        <div style="text-align:center;padding:2rem 0 1.5rem">
+            <div style="background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.25rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));">🌾</div>
+            <div style="font-family:'SF Pro Display','Inter',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;color:#f8fafc">
                 Food Insecurity
             </div>
-            <div style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
-                        color:rgba(255,255,255,.5);margin-top:.15rem">
-                Analytics Platform
+            <div style="font-family:'Inter',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:#94a3b8;margin-top:0.25rem;font-weight:600;">
+                Analytics Engine
             </div>
         </div>
-        <hr style="border:none;border-top:1px solid rgba(255,255,255,.12);margin:0 0 1rem">
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.05);margin:0 0 1.5rem">
         """,
         unsafe_allow_html=True,
     )
@@ -46,6 +45,7 @@ exec_page = st.Page("views/1_Executive_Overview.py", title="Executive Overview",
 geo_page = st.Page("views/2_Geographic_Intelligence.py", title="Geographic Intelligence", icon="🗺️")
 
 # Analytics group bundle
+explorer_page = st.Page("views/0_Data_Explorer.py", title="Data Explorer", icon="🔬")
 corr_page = st.Page("views/3_Correlation_Analysis.py", title="Correlation Analysis", icon="📈")
 reg_page = st.Page("views/4_Regression_Models.py", title="Regression Models", icon="📉")
 equity_page = st.Page("views/5_Equity_Disparities.py", title="Equity Disparities", icon="⚖️")
@@ -63,8 +63,8 @@ data_page = st.Page("views/9_Data_Downloads.py", title="Data Downloads", icon="�
 # Define the router without Streamlit's default flat visuals
 pg = st.navigation([
     home_page, exec_page, geo_page,
-    corr_page, reg_page, equity_page, cluster_page, anomaly_page, time_page,
-    ai_page, # Added ai_page to the navigation list
+    explorer_page, corr_page, reg_page, equity_page, cluster_page, anomaly_page, time_page,
+    ai_page,
     policy_page, data_page
 ], position="hidden")
 
@@ -75,6 +75,7 @@ with st.sidebar:
     st.page_link(geo_page, label="Geographic Intelligence", icon="🗺️")
     
     with st.expander("Analytics", expanded=False, icon="🧠"):
+        st.page_link(explorer_page, label="Data Explorer", icon="🔬")
         st.page_link(corr_page, label="Correlation Analysis", icon="📈")
         st.page_link(reg_page, label="Regression Models", icon="📉")
         st.page_link(equity_page, label="Equity Disparities", icon="⚖️")

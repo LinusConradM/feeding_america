@@ -142,7 +142,7 @@ with col_q2:
     import plotly.express as px
     fig_cov = px.bar(
         coverage, x="Year", y="Counties",
-        color_discrete_sequence=[COLORS["sapphire"]],
+        color_discrete_sequence=[COLORS["blue"]],
     )
     fig_cov.update_layout(
         paper_bgcolor="white", plot_bgcolor="white",
