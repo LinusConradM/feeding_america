@@ -1,10 +1,35 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-.pdf
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Data artifacts
+*.pkl
+*.parquet
+
+# Misc
 README.html
-.DS_Store
 README_files/
-.DS_Store
-tempCodeRunnerFile.R
