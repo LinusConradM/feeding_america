@@ -139,6 +139,28 @@ st.markdown("""
     font-family: 'Inter', sans-serif; color: #1e293b;
     line-height: 1.6;
 }
+/* ── Mobile: 2x2 card grid ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Card grid: force 2 cards per row */
+    #card-grid-anchor + div [data-testid="stColumn"],
+    #card-grid-anchor ~ div [data-testid="stColumn"] {
+        min-width: calc(50% - 0.5rem) !important;
+        flex: 0 0 calc(50% - 0.5rem) !important;
+        max-width: calc(50% - 0.5rem) !important;
+    }
+    #card-grid-anchor + div [data-testid="stHorizontalBlock"],
+    #card-grid-anchor ~ div [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+    /* Shrink card text on mobile */
+    .q-card-title { font-size: 0.8rem !important; }
+    .q-card-desc  { font-size: 0.72rem !important; }
+    .q-card { min-height: 90px !important; padding: 0.8rem 0.7rem !important; }
+    .q-card-icon { width: 28px !important; height: 28px !important; font-size: 0.8rem !important; }
+    /* Filter row: stack selects vertically */
+    .filter-section { flex-direction: column !important; align-items: stretch !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -320,6 +342,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown('<div id="card-grid-anchor"></div>', unsafe_allow_html=True)
 card_cols = st.columns(3)
 for i, q in enumerate(get_questions(selected_year, selected_state)):
     with card_cols[i % 3]:
