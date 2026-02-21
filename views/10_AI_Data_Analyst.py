@@ -139,20 +139,8 @@ st.markdown("""
     font-family: 'Inter', sans-serif; color: #1e293b;
     line-height: 1.6;
 }
-/* ── Mobile: 2x2 card grid ─────────────────────────────────────────────── */
+/* ── Mobile: ensure 2x3 card grid stays 2 columns ─────────────────────── */
 @media (max-width: 768px) {
-    /* Force Streamlit horizontal blocks to wrap */
-    div[data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 0.4rem !important;
-    }
-    /* Each Streamlit column becomes 48% wide → 2 per row */
-    div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"] {
-        width: calc(50% - 0.4rem) !important;
-        min-width: calc(50% - 0.4rem) !important;
-        max-width: calc(50% - 0.4rem) !important;
-        flex: 0 0 calc(50% - 0.4rem) !important;
-    }
     /* Shrink card content on mobile */
     .q-card-title { font-size: 0.78rem !important; }
     .q-card-desc  { font-size: 0.70rem !important; }
@@ -341,9 +329,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<div id="card-grid-anchor"></div>', unsafe_allow_html=True)
-card_cols = st.columns(3)
+card_cols = st.columns(2)
 for i, q in enumerate(get_questions(selected_year, selected_state)):
-    with card_cols[i % 3]:
+    with card_cols[i % 2]:
         st.markdown(f"""
         <div class="q-card {q['card_class']}">
             <div class="q-card-icon {q['icon_class']}">{q['icon']}</div>
