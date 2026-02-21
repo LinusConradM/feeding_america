@@ -141,25 +141,23 @@ st.markdown("""
 }
 /* ── Mobile: 2x2 card grid ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    /* Card grid: force 2 cards per row */
-    #card-grid-anchor + div [data-testid="stColumn"],
-    #card-grid-anchor ~ div [data-testid="stColumn"] {
-        min-width: calc(50% - 0.5rem) !important;
-        flex: 0 0 calc(50% - 0.5rem) !important;
-        max-width: calc(50% - 0.5rem) !important;
-    }
-    #card-grid-anchor + div [data-testid="stHorizontalBlock"],
-    #card-grid-anchor ~ div [data-testid="stHorizontalBlock"] {
+    /* Force Streamlit horizontal blocks to wrap */
+    div[data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
-        gap: 0.5rem !important;
+        gap: 0.4rem !important;
     }
-    /* Shrink card text on mobile */
-    .q-card-title { font-size: 0.8rem !important; }
-    .q-card-desc  { font-size: 0.72rem !important; }
-    .q-card { min-height: 90px !important; padding: 0.8rem 0.7rem !important; }
-    .q-card-icon { width: 28px !important; height: 28px !important; font-size: 0.8rem !important; }
-    /* Filter row: stack selects vertically */
-    .filter-section { flex-direction: column !important; align-items: stretch !important; }
+    /* Each Streamlit column becomes 48% wide → 2 per row */
+    div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"] {
+        width: calc(50% - 0.4rem) !important;
+        min-width: calc(50% - 0.4rem) !important;
+        max-width: calc(50% - 0.4rem) !important;
+        flex: 0 0 calc(50% - 0.4rem) !important;
+    }
+    /* Shrink card content on mobile */
+    .q-card-title { font-size: 0.78rem !important; }
+    .q-card-desc  { font-size: 0.70rem !important; }
+    .q-card { min-height: 85px !important; padding: 0.7rem 0.65rem !important; }
+    .q-card-icon { width: 26px !important; height: 26px !important; font-size: 0.78rem !important; margin-bottom: 0.4rem !important; }
 }
 </style>
 """, unsafe_allow_html=True)
