@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>U.S. Food Insecurity Analytics Platform</title>
+  <meta name="description" content="A professional interactive analytics platform investigating food insecurity patterns across 3,100+ U.S. counties from 2009–2023. Built by Conrad Linus Muhirwe — American University." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #0D1452;
+      --navy-dark: #07093A;
+      --navy-mid:  #1A237E;
+      --blue:      #2251FF;
+      --indigo:    #7986CB;
+      --indigo-lt: #C5CAE9;
+      --teal:      #2AD5FF;
+      --purple:    #a78bfa;
+      --pink:      #f472b6;
+      --green:     #34d399;
+      --amber:     #fbbf24;
+      --white:     #f8fafc;
+      --muted:     #94a3b8;
+      --card-bg:   rgba(26, 35, 126, 0.45);
+      --border:    rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255,255,255,0.22);
+      --glow:      rgba(121, 134, 203, 0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--navy-dark);
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Deep-space background gradient + subtle grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(26,35,126,0.9) 0%, rgba(7,9,58,1) 100%);
+      z-index: -2;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+      height: 80vh;
+      background: radial-gradient(ellipse at center, rgba(121,134,203,0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(7, 9, 58, 0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.75rem;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Logo */
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: 'Geist Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--indigo), var(--teal));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .nav-logo span {
+      display: none;
+    }
+    @media (min-width: 480px) {
+      .nav-logo span { display: inline; }
+    }
+
+    /* Desktop nav links */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      list-style: none;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .nav-link:hover,
+    .nav-item:hover > .nav-link {
+      color: var(--white);
+      background: rgba(255,255,255,0.06);
+    }
+    .nav-link .chevron {
+      font-size: 0.65rem;
+      transition: transform 0.2s;
+    }
+    .nav-item:hover > .nav-link .chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Mega-menu dropdown */
+    .mega-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 220px;
+      background: rgba(10, 15, 70, 0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 0.6rem;
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-50%) translateY(-6px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+      pointer-events: none;
+    }
+    .mega-menu.wide {
+      min-width: 480px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.1rem;
+    }
+    .nav-item:hover > .mega-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Dropdown items */
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .menu-item:hover {
+      background: rgba(121,134,203,0.15);
+      color: var(--white);
+    }
+    .menu-item .mi-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.07);
+    }
+    .menu-item .mi-text strong {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 1px;
+    }
+    .menu-item .mi-text span {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    /* Nav CTA buttons */
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-shrink: 0;
+    }
+    .btn-ghost {
+      padding: 0.4rem 0.9rem;
+      border-radius: 7px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); }
+
+    .btn-primary {
+      padding: 0.45rem 1.1rem;
+      border-radius: 7px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--navy-mid));
+      border: 1px solid rgba(121,134,203,0.4);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+      box-shadow: 0 0 20px rgba(34,81,255,0.25);
+    }
+    .btn-primary:hover { box-shadow: 0 0 30px rgba(34,81,255,0.5); transform: translateY(-1px); }
+
+    /* Hamburger (mobile) */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .hamburger:hover { background: rgba(255,255,255,0.08); }
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--muted);
+      border-radius: 2px;
+      transition: all 0.25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* Mobile menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 62px; left: 0; right: 0;
+      background: rgba(7, 9, 58, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 999;
+      padding: 1rem 1.5rem 1.5rem;
+      max-height: calc(100vh - 62px);
+      overflow-y: auto;
+    }
+    .mobile-menu.open { display: block; }
+
+    .mob-section { margin-bottom: 1.25rem; }
+    .mob-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--indigo);
+      padding: 0.5rem 0 0.4rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .mob-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.5rem;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .mob-item:hover { background: rgba(121,134,203,0.1); color: var(--white); }
+    .mob-item .mi-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; background: rgba(255,255,255,0.06); flex-shrink: 0; }
+    .mob-cta { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .mob-cta a { flex: 1; text-align: center; padding: 0.7rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+    .mob-cta .m-ghost { border: 1px solid var(--border); color: var(--muted); }
+    .mob-cta .m-primary { background: linear-gradient(135deg, var(--blue), var(--navy-mid)); color: #fff; box-shadow: 0 0 20px rgba(34,81,255,0.25); }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 110px 1.75rem 80px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(121,134,203,0.15);
+      border: 1px solid rgba(121,134,203,0.35);
+      border-radius: 50px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--indigo-lt);
+      letter-spacing: 0.04em;
+      margin-bottom: 1.5rem;
+      width: fit-content;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .hero-title {
+      font-family: 'Geist Mono', monospace;
+      font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.07;
+      letter-spacing: -0.04em;
+      background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.4rem;
+    }
+    .hero-title .gradient-word {
+      background: linear-gradient(90deg, var(--indigo) 0%, var(--indigo-lt) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 2.2rem;
+      max-width: 520px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .hero-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.6rem;
+      background: linear-gradient(135deg, var(--blue), var(--navy-mid));
+      color: #fff;
+      border: 1px solid rgba(121,134,203,0.4);
+      border-radius: 9px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 0 25px rgba(34,81,255,0.3);
+    }
+    .hero-btn-primary:hover { box-shadow: 0 0 40px rgba(34,81,255,0.55); transform: translateY(-2px); }
+
+    .hero-btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.6rem;
+      background: rgba(255,255,255,0.05);
+      color: var(--white);
+      border: 1px solid var(--border-hover);
+      border-radius: 9px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .hero-btn-ghost:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-screen-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .hero-screen-frame {
+      background: rgba(13,20,82,0.7);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 0.65rem 0.65rem 0;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+
+    .hero-screen-bar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      padding: 0 0.2rem;
+    }
+    .dot-r { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
+    .dot-y { width: 10px; height: 10px; border-radius: 50%; background: #eab308; }
+    .dot-g { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; }
+
+    .hero-screen-img {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      display: block;
+      transition: opacity 0.35s ease;
+      min-height: 260px;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .hero-screen-label {
+      position: absolute;
+      bottom: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,15,70,0.95);
+      border: 1px solid rgba(121,134,203,0.4);
+      border-radius: 50px;
+      padding: 0.3rem 1rem;
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.74rem;
+      color: var(--indigo-lt);
+      white-space: nowrap;
+      transition: opacity 0.3s;
+    }
+
+    /* Floating glow behind screen */
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(ellipse, rgba(121,134,203,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: -1;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       KPI STRIP
+    ═══════════════════════════════════════════════════════ */
+    .kpi-section {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.75rem 6rem;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .kpi-glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-glass::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 12px 12px 0 0;
+    }
+    .kpi-glass.k1::before { background: linear-gradient(90deg, var(--blue), var(--indigo)); }
+    .kpi-glass.k2::before { background: linear-gradient(90deg, var(--teal), var(--green)); }
+    .kpi-glass.k3::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+    .kpi-glass.k4::before { background: linear-gradient(90deg, var(--amber), #f97316); }
+
+    .kpi-glass:hover {
+      transform: translateY(-5px);
+      border-color: rgba(121,134,203,0.4);
+      box-shadow: 0 12px 40px -10px rgba(121,134,203,0.3);
+    }
+
+    .kpi-val {
+      font-family: 'Geist Mono', monospace;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(255,255,255,0.15);
+      margin-bottom: 0.55rem;
+    }
+    .kpi-lbl {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .kpi-icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       MARQUEE
+    ═══════════════════════════════════════════════════════ */
+    .marquee-section {
+      background: rgba(26,35,126,0.25);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 0;
+      overflow: hidden;
+      margin-bottom: 7rem;
+    }
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      animation: marqueeSroll 45s linear infinite;
+      gap: 2rem;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marqueeSroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-33.33%); }
+    }
+    .marquee-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--white);
+      background: rgba(26,35,126,0.6);
+      border: 1px solid rgba(121,134,203,0.4);
+      border-radius: 50px;
+      padding: 0.6rem 1.35rem;
+      box-shadow: 0 0 12px rgba(121,134,203,0.2), inset 0 0 8px rgba(197,202,233,0.15);
+      transition: all 0.25s;
+      cursor: default;
+      flex-shrink: 0;
+    }
+    .marquee-pill:hover {
+      border-color: rgba(121,134,203,0.9);
+      box-shadow: 0 0 22px rgba(121,134,203,0.5), inset 0 0 14px rgba(197,202,233,0.35);
+      color: var(--indigo-lt);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SECTION HEADERS
+    ═══════════════════════════════════════════════════════ */
+    .section-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.75rem;
+    }
+
+    .section-title {
+      font-family: 'Geist Mono', monospace;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BENTO GRID
+    ═══════════════════════════════════════════════════════ */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(220px, auto);
+      gap: 1.25rem;
+      margin-bottom: 6rem;
+    }
+
+    .aurora-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .aurora-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+    }
+    .aurora-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .card-icon-lg {
+      font-size: 2rem;
+      margin-bottom: 1.25rem;
+      opacity: 0.85;
+    }
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+      line-height: 1.25;
+    }
+    .card-desc {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .card-desc strong { color: var(--white); }
+
+    /* Bento sizing */
+    .bento-ai     { grid-column: span 7; grid-row: span 2; }
+    .bento-ai::before    { background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
+    .bento-causal { grid-column: span 5; grid-row: span 2; }
+    .bento-causal::before{ background: linear-gradient(90deg, #38bdf8, #2251FF); }
+    .bento-geo    { grid-column: span 4; }
+    .bento-geo::before   { background: linear-gradient(90deg, #2AD5FF, #26d0ce); }
+    .bento-time   { grid-column: span 4; }
+    .bento-time::before  { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .bento-anom   { grid-column: span 4; }
+    .bento-anom::before  { background: linear-gradient(90deg, #fda4af, #e11d48); }
+
+    /* Card glow blobs */
+    .card-glow {
+      position: absolute;
+      top: -30%; right: -15%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      filter: blur(55px);
+      opacity: 0.12;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bento-ai    .card-glow { background: #8b5cf6; }
+    .bento-causal.card-glow { background: #38bdf8; }
+    .bento-geo   .card-glow { background: #26d0ce; }
+
+    /* Terminal mockup inside AI card */
+    .terminal {
+      background: rgba(7,9,58,0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.83rem;
+      color: #A1A1AA;
+      margin-top: auto;
+      padding-top: 1.5rem;
+    }
+    .term-dots { display: flex; gap: 6px; margin-bottom: 0.9rem; }
+    .term-line { line-height: 1.7; }
+    .term-user  { color: #c084fc; }
+    .term-agent { color: #60a5fa; }
+    .term-ok    { color: #34d399; }
+
+    /* ═══════════════════════════════════════════════════════
+       DASHBOARD GALLERY
+    ═══════════════════════════════════════════════════════ */
+    .gallery-section {
+      margin-bottom: 7rem;
+    }
+
+    .gallery-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .gtab {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 50px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .gtab:hover { color: var(--white); border-color: rgba(121,134,203,0.4); background: rgba(121,134,203,0.08); }
+    .gtab.active {
+      color: var(--white);
+      border-color: var(--indigo);
+      background: rgba(121,134,203,0.18);
+    }
+
+    .gallery-frame {
+      background: rgba(13,20,82,0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1rem 1rem 0;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .gallery-bar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .gallery-img {
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+      display: block;
+      object-fit: cover;
+      object-position: top;
+      min-height: 380px;
+      max-height: 520px;
+      transition: opacity 0.3s;
+    }
+    .gallery-caption {
+      padding: 1rem;
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       METHODS SECTION
+    ═══════════════════════════════════════════════════════ */
+    .methods-section { margin-bottom: 7rem; }
+
+    .methods-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .method-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.25s;
+    }
+    .method-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(121,134,203,0.3);
+      box-shadow: 0 8px 30px -8px rgba(121,134,203,0.2);
+    }
+    .method-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 0.9rem;
+    }
+    .method-name {
+      font-size: 0.93rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 0.35rem;
+    }
+    .method-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .method-badge {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(121,134,203,0.15);
+      color: var(--indigo-lt);
+      border: 1px solid rgba(121,134,203,0.25);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DATA SOURCES
+    ═══════════════════════════════════════════════════════ */
+    .sources-section { margin-bottom: 7rem; }
+
+    .sources-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .source-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      transition: all 0.25s;
+    }
+    .source-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(121,134,203,0.3);
+    }
+    .source-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .source-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .source-title { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 0.2rem; }
+    .source-sub   { font-size: 0.78rem; color: var(--muted); }
+    .source-desc  { font-size: 0.86rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+    .source-tags  { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stag {
+      padding: 0.2rem 0.65rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.07);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════ */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 3.5rem 1.75rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    .footer-brand .logo { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.85rem; }
+    .footer-brand .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--indigo), var(--teal)); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+    .footer-brand .logo-name { font-family: 'Geist Mono', monospace; font-size: 0.95rem; font-weight: 700; color: var(--white); }
+    .footer-brand p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+    .footer-col h4 { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo-lt); margin-bottom: 0.85rem; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.5rem; }
+    .footer-col a { font-size: 0.84rem; color: var(--muted); transition: color 0.2s; }
+    .footer-col a:hover { color: var(--white); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 1rem;
+    }
+    .footer-bottom p { font-size: 0.8rem; color: var(--muted); }
+    .footer-bottom .footer-socials { display: flex; gap: 0.75rem; }
+    .footer-social-btn {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .footer-social-btn:hover { color: var(--white); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+
+      .hero-layout { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+      .hero-badge { margin: 0 auto 1.5rem; }
+      .hero-sub { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero-visual { order: -1; }
+
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+
+      .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+      .bento-ai, .bento-causal { grid-column: span 2; grid-row: auto; }
+      .bento-geo, .bento-time, .bento-anom { grid-column: span 1; }
+
+      .methods-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 90px 1.25rem 60px; }
+      .section-wrap { padding: 0 1.25rem; }
+      .kpi-section { padding: 0 1.25rem 4rem; }
+
+      .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+      .kpi-glass { padding: 1.25rem 1rem; }
+      .kpi-val { font-size: 1.7rem; }
+
+      .bento-grid { grid-template-columns: 1fr; }
+      .bento-ai, .bento-causal, .bento-geo, .bento-time, .bento-anom { grid-column: span 1; grid-row: auto; }
+
+      .gallery-tabs { gap: 0.4rem; }
+      .gtab { padding: 0.45rem 0.8rem; font-size: 0.78rem; }
+      .gallery-img { min-height: 220px; max-height: 340px; }
+
+      .methods-grid { grid-template-columns: 1fr; }
+      .sources-grid { grid-template-columns: 1fr; }
+
+      .footer-inner { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+
+      .mega-menu { display: none !important; }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .hero-title { font-size: 2.1rem; }
+      .hero-actions { flex-direction: column; }
+      .hero-btn-primary, .hero-btn-ghost { justify-content: center; }
+    }
+
+    /* Utility */
+    .text-teal   { color: var(--teal); }
+    .text-purple { color: var(--purple); }
+    .text-pink   { color: var(--pink); }
+    .text-amber  { color: var(--amber); }
+    .text-green  { color: var(--green); }
+    .text-indigo { color: var(--indigo-lt); }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════════════════ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav-inner">
+
+      <!-- Logo -->
+      <a href="#hero" class="nav-logo">
+        <div class="nav-logo-icon">🌾</div>
+        <span>FoodInsight<span style="color:var(--indigo-lt);">.us</span></span>
+      </a>
+
+      <!-- Desktop nav -->
+      <ul class="nav-links">
+
+        <!-- Overview -->
+        <li class="nav-item">
+          <a href="#hero" class="nav-link">Overview</a>
+        </li>
+
+        <!-- Dashboard -->
+        <li class="nav-item">
+          <span class="nav-link">Dashboard <i class="fas fa-chevron-down chevron"></i></span>
+          <div class="mega-menu wide"
+               data-img="images/OverviewPage.png"
+               data-label="Executive Overview — National KPIs">
+            <a class="menu-item" href="#gallery"
+               data-img="images/OverviewPage.png"
+               data-label="Executive Overview — KPIs & Trends">
+              <span class="mi-icon" style="color:var(--indigo-lt)"><i class="fas fa-chart-bar"></i></span>
+              <span class="mi-text">
+                <strong>Executive Overview</strong>
+                <span>National KPIs, trend analysis</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#gallery"
+               data-img="images/ExplorationMap.png"
+               data-label="Geographic Intelligence — Choropleth Maps">
+              <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-map-marked-alt"></i></span>
+              <span class="mi-text">
+                <strong>Geographic Intelligence</strong>
+                <span>Interactive choropleth maps</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#gallery"
+               data-img="images/ExplorationDataView.png"
+               data-label="Data Explorer — Raw Longitudinal Data">
+              <span class="mi-icon" style="color:var(--green)"><i class="fas fa-microscope"></i></span>
+              <span class="mi-text">
+                <strong>Data Explorer</strong>
+                <span>Browse 47,000+ observations</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#gallery"
+               data-img="images/UserDataOptions_PlaceHolder.png"
+               data-label="Data Downloads — CSV, Excel, JSON">
+              <span class="mi-icon" style="color:var(--amber)"><i class="fas fa-download"></i></span>
+              <span class="mi-text">
+                <strong>Data Downloads</strong>
+                <span>Export CSV / Excel / JSON</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- Analytics -->
+        <li class="nav-item">
+          <span class="nav-link">Analytics <i class="fas fa-chevron-down chevron"></i></span>
+          <div class="mega-menu wide"
+               data-img="images/AnalysisRegression.png"
+               data-label="Regression Models — OLS, Ridge, LASSO, RF">
+            <a class="menu-item" href="#gallery"
+               data-img="images/AnalysisRegression.png"
+               data-label="Regression Models — OLS, Ridge, LASSO, Random Forest">
+              <span class="mi-icon" style="color:var(--pink)"><i class="fas fa-chart-line"></i></span>
+              <span class="mi-text">
+                <strong>Regression Models</strong>
+                <span>OLS, Ridge, LASSO, Random Forest</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#methods"
+               data-img="images/AnalysisRegression.png"
+               data-label="Correlation Analysis — Pearson, Spearman, Kendall">
+              <span class="mi-icon" style="color:var(--indigo-lt)"><i class="fas fa-project-diagram"></i></span>
+              <span class="mi-text">
+                <strong>Correlation Analysis</strong>
+                <span>Bivariate testing & matrices</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#methods"
+               data-img="images/ExplorationDataView.png"
+               data-label="Equity Disparities — Race, Urban-Rural, Income">
+              <span class="mi-icon" style="color:var(--amber)"><i class="fas fa-balance-scale"></i></span>
+              <span class="mi-text">
+                <strong>Equity Disparities</strong>
+                <span>Racial, urban-rural, income gaps</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#methods"
+               data-img="images/ExplorationMap.png"
+               data-label="County Clustering — K-Means + PCA">
+              <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-sitemap"></i></span>
+              <span class="mi-text">
+                <strong>County Clustering</strong>
+                <span>K-Means + PCA projection</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#gallery"
+               data-img="images/Timeline.png"
+               data-label="Time Series Explorer — SARIMAX Forecasting">
+              <span class="mi-icon" style="color:var(--green)"><i class="fas fa-stream"></i></span>
+              <span class="mi-text">
+                <strong>Time Series Explorer</strong>
+                <span>SARIMAX & trend forecasting</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#bento"
+               data-img="images/OverviewPage.png"
+               data-label="Anomaly Detection — Isolation Forest">
+              <span class="mi-icon" style="color:var(--pink)"><i class="fas fa-bullseye"></i></span>
+              <span class="mi-text">
+                <strong>Anomaly Detection</strong>
+                <span>Isolation forest across 3,142 counties</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- AI -->
+        <li class="nav-item">
+          <span class="nav-link">AI Agent <i class="fas fa-chevron-down chevron"></i></span>
+          <div class="mega-menu"
+               data-img="images/OverviewPage.png"
+               data-label="AI Data Analyst — Gemini 2.5 Flash">
+            <a class="menu-item" href="#bento"
+               data-img="images/OverviewPage.png"
+               data-label="AI Data Analyst — Powered by Gemini 2.5 Flash">
+              <span class="mi-icon" style="color:var(--purple)"><i class="fas fa-robot"></i></span>
+              <span class="mi-text">
+                <strong>AI Data Analyst</strong>
+                <span>Gemini 2.5 Flash with code execution</span>
+              </span>
+            </a>
+            <a class="menu-item" href="#bento"
+               data-img="images/AnalysisRegression.png"
+               data-label="Policy Scenarios — Difference-in-Differences">
+              <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-flask"></i></span>
+              <span class="mi-text">
+                <strong>Policy Scenarios</strong>
+                <span>DiD causal inference simulation</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- Methods -->
+        <li class="nav-item">
+          <a href="#methods" class="nav-link">Methods</a>
+        </li>
+
+      </ul>
+
+      <!-- Desktop CTAs -->
+      <div class="nav-cta">
+        <a href="#sources" class="btn-ghost"><i class="fas fa-database"></i> Data</a>
+        <a href="https://github.com/LinusConradM/gp-food-basket" target="_blank" class="btn-primary">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <div class="mob-section">
+      <div class="mob-section-title">Dashboard</div>
+      <a class="mob-item" href="#gallery" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--indigo-lt)"><i class="fas fa-chart-bar"></i></span> Executive Overview
+      </a>
+      <a class="mob-item" href="#gallery" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-map-marked-alt"></i></span> Geographic Intelligence
+      </a>
+      <a class="mob-item" href="#gallery" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--green)"><i class="fas fa-microscope"></i></span> Data Explorer
+      </a>
+    </div>
+    <div class="mob-section">
+      <div class="mob-section-title">Analytics</div>
+      <a class="mob-item" href="#methods" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--pink)"><i class="fas fa-chart-line"></i></span> Regression Models
+      </a>
+      <a class="mob-item" href="#methods" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--indigo-lt)"><i class="fas fa-project-diagram"></i></span> Correlation Analysis
+      </a>
+      <a class="mob-item" href="#methods" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--amber)"><i class="fas fa-balance-scale"></i></span> Equity Disparities
+      </a>
+      <a class="mob-item" href="#methods" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-sitemap"></i></span> County Clustering
+      </a>
+      <a class="mob-item" href="#gallery" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--green)"><i class="fas fa-stream"></i></span> Time Series Explorer
+      </a>
+      <a class="mob-item" href="#bento" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--pink)"><i class="fas fa-bullseye"></i></span> Anomaly Detection
+      </a>
+    </div>
+    <div class="mob-section">
+      <div class="mob-section-title">AI & Policy</div>
+      <a class="mob-item" href="#bento" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--purple)"><i class="fas fa-robot"></i></span> AI Data Analyst
+      </a>
+      <a class="mob-item" href="#bento" onclick="closeMobileMenu()">
+        <span class="mi-icon" style="color:var(--teal)"><i class="fas fa-flask"></i></span> Policy Scenarios
+      </a>
+    </div>
+    <div class="mob-cta">
+      <a href="#sources" class="m-ghost" onclick="closeMobileMenu()">Data Sources</a>
+      <a href="https://github.com/LinusConradM/gp-food-basket" target="_blank" class="m-primary">
+        <i class="fab fa-github"></i> GitHub
+      </a>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════════════ -->
+  <section id="hero">
+    <div class="hero">
+      <div class="hero-layout">
+
+        <!-- Left: Text -->
+        <div class="hero-text">
+          <div class="hero-badge">
+            <span class="dot"></span>
+            American University · DATA-613 · 2025
+          </div>
+          <h1 class="hero-title">
+            U.S. Food<br>
+            Insecurity<br>
+            <span class="gradient-word">Analytics</span>
+          </h1>
+          <p class="hero-sub">
+            Investigating patterns, disparities, and socioeconomic drivers of food insecurity across
+            <strong style="color:var(--white);">3,100+ U.S. counties</strong> — 15 years of longitudinal data,
+            built for policymakers, researchers, and practitioners.
+          </p>
+          <div class="hero-actions">
+            <a href="#gallery" class="hero-btn-primary">
+              <i class="fas fa-chart-bar"></i> Explore Dashboard
+            </a>
+            <a href="https://github.com/LinusConradM/gp-food-basket" target="_blank" class="hero-btn-ghost">
+              <i class="fab fa-github"></i> View on GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: Reactive screenshot -->
+        <div class="hero-visual">
+          <div class="hero-screen-wrap">
+            <div class="hero-screen-frame">
+              <div class="hero-screen-bar">
+                <span class="dot-r"></span>
+                <span class="dot-y"></span>
+                <span class="dot-g"></span>
+                <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--muted);margin-left:0.5rem;">food-insecurity-analytics · streamlit</span>
+              </div>
+              <img
+                id="hero-img"
+                src="images/OverviewPage.png"
+                alt="Dashboard preview"
+                class="hero-screen-img"
+              />
+            </div>
+            <div class="hero-screen-label" id="hero-label">Executive Overview — National KPIs</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════
+       KPI STRIP
+  ══════════════════════════════════════════════════ -->
+  <div class="kpi-section">
+    <div class="kpi-row">
+      <div class="kpi-glass k1">
+        <div class="kpi-icon text-indigo"><i class="fas fa-users"></i></div>
+        <div class="kpi-val">44.2M</div>
+        <div class="kpi-lbl">Americans Affected</div>
+      </div>
+      <div class="kpi-glass k2">
+        <div class="kpi-icon text-teal"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="kpi-val">3,100+</div>
+        <div class="kpi-lbl">Counties Analyzed</div>
+      </div>
+      <div class="kpi-glass k3">
+        <div class="kpi-icon text-purple"><i class="fas fa-calendar-alt"></i></div>
+        <div class="kpi-val">15 yrs</div>
+        <div class="kpi-lbl">Longitudinal Span</div>
+      </div>
+      <div class="kpi-glass k4">
+        <div class="kpi-icon text-amber"><i class="fas fa-database"></i></div>
+        <div class="kpi-val">47K+</div>
+        <div class="kpi-lbl">County-Year Obs.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       MARQUEE
+  ══════════════════════════════════════════════════ -->
+  <div class="marquee-section">
+    <div class="marquee-track" id="marquee-track">
+      <!-- Items injected 3x for seamless loop -->
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       BENTO GRID — Platform Architecture
+  ══════════════════════════════════════════════════ -->
+  <div class="section-wrap" id="bento">
+    <h2 class="section-title">Platform Architecture</h2>
+    <p class="section-sub">From raw data to causal inference — a fully integrated analytics engine</p>
+
+    <div class="bento-grid">
+
+      <!-- AI Agent (large) -->
+      <div class="aurora-card bento-ai">
+        <div class="card-glow"></div>
+        <div class="card-icon-lg text-purple"><i class="fas fa-robot"></i></div>
+        <div class="card-title">Autonomous Agentic Reasoning</div>
+        <p class="card-desc" style="font-size:1rem;max-width:90%;">
+          The platform is augmented by <strong>Gemini 2.5 Flash</strong> with a secure Python code execution sandbox.
+          It doesn't guess — it writes, tests, and executes Pandas queries directly against the live longitudinal
+          dataframe to mathematically solve plain-English inquiries.
+        </p>
+        <div class="terminal" style="margin-top:auto;">
+          <div class="term-dots">
+            <span style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:block"></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:#eab308;display:block"></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:block"></span>
+          </div>
+          <div class="term-line"><span class="term-user">user&gt;</span> What is the DiD policy effect SE in Texas?</div>
+          <div class="term-line"><span class="term-agent">agent&gt;</span> Extracting regression coefficients...</div>
+          <div class="term-line"><span class="term-ok">agent&gt;</span> Standard error: ±0.042 percentage points</div>
+        </div>
+      </div>
+
+      <!-- Causal Inference -->
+      <div class="aurora-card bento-causal">
+        <div class="card-icon-lg text-teal"><i class="fas fa-chart-line"></i></div>
+        <div class="card-title" style="color:#7dd3fc;">Causal Inference Engine</div>
+        <p class="card-desc" style="font-size:1rem;line-height:1.7;">
+          Pivots from descriptive to prescriptive analytics. Uses
+          <strong>Difference-in-Differences</strong> modeling to isolate the true causal effect of
+          hypothetical policy shocks against controlled baseline groups — proving impact rather than correlation.
+        </p>
+        <div style="margin-top:auto;padding-top:1.5rem;">
+          <div style="background:rgba(42,213,255,0.08);border:1px solid rgba(42,213,255,0.2);border-radius:10px;padding:1rem 1.25rem;">
+            <div style="font-family:'Geist Mono',monospace;font-size:0.8rem;color:var(--muted);margin-bottom:0.4rem;">DiD Estimator</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:1.1rem;color:var(--teal);font-weight:700;">β̂ = (Ȳ₁ᵀ − Ȳ₁ᶜ) − (Ȳ₀ᵀ − Ȳ₀ᶜ)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geospatial -->
+      <div class="aurora-card bento-geo">
+        <div class="card-icon-lg text-teal"><i class="fas fa-map-marked-alt"></i></div>
+        <div class="card-title">Spatially-Weighted Clustering</div>
+        <p class="card-desc">
+          K-Means augmented with GPS coordinates to force geographic contiguity.
+          Tracks regional flow shifts using <strong>Sankey matrices</strong>.
+        </p>
+      </div>
+
+      <!-- Time Series -->
+      <div class="aurora-card bento-time">
+        <div class="card-icon-lg text-amber"><i class="fas fa-stream"></i></div>
+        <div class="card-title">Time Series Forecasting</div>
+        <p class="card-desc">
+          SARIMAX modeling for temporal trend analysis, pre/post COVID impact assessment,
+          and county-level food insecurity forecasts.
+        </p>
+      </div>
+
+      <!-- Anomaly -->
+      <div class="aurora-card bento-anom">
+        <div class="card-icon-lg text-pink"><i class="fas fa-bullseye"></i></div>
+        <div class="card-title">Unsupervised Outlier Detection</div>
+        <p class="card-desc">
+          <strong>Isolation Forests</strong> autonomously scan all 3,142 counties to flag
+          severe multivariate anomalies hidden within the economic matrix.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       DASHBOARD GALLERY
+  ══════════════════════════════════════════════════ -->
+  <div class="section-wrap gallery-section" id="gallery">
+    <h2 class="section-title">Dashboard Gallery</h2>
+    <p class="section-sub">Hover the navigation tabs or click below to preview each module</p>
+
+    <div class="gallery-tabs">
+      <button class="gtab active" onclick="switchGallery(this,'images/OverviewPage.png','Executive Overview — National KPIs & trend analysis')">
+        <i class="fas fa-chart-bar"></i> Overview
+      </button>
+      <button class="gtab" onclick="switchGallery(this,'images/ExplorationMap.png','Geographic Intelligence — County-level choropleth maps')">
+        <i class="fas fa-map"></i> Geography
+      </button>
+      <button class="gtab" onclick="switchGallery(this,'images/ExplorationDataView.png','Data Explorer — 47,000+ county-year observations')">
+        <i class="fas fa-microscope"></i> Data Explorer
+      </button>
+      <button class="gtab" onclick="switchGallery(this,'images/AnalysisRegression.png','Regression Models — OLS, Ridge, LASSO, Random Forest')">
+        <i class="fas fa-chart-line"></i> Regression
+      </button>
+      <button class="gtab" onclick="switchGallery(this,'images/Timeline.png','Time Series Explorer — SARIMAX & trend forecasting')">
+        <i class="fas fa-stream"></i> Time Series
+      </button>
+      <button class="gtab" onclick="switchGallery(this,'images/Critical Path.png','Critical Path — Project workflow & architecture')">
+        <i class="fas fa-project-diagram"></i> Architecture
+      </button>
+    </div>
+
+    <div class="gallery-frame">
+      <div class="gallery-bar">
+        <span class="dot-r"></span>
+        <span class="dot-y"></span>
+        <span class="dot-g"></span>
+        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--muted);margin-left:0.5rem;" id="gallery-url">localhost:8501 · Executive Overview</span>
+      </div>
+      <img id="gallery-img" src="images/OverviewPage.png" alt="Dashboard" class="gallery-img" />
+      <div class="gallery-caption" id="gallery-cap">Executive Overview — National KPIs & trend analysis</div>
+    </div>
+  </div>
+
+  <div style="height:4rem"></div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       STATISTICAL METHODS
+  ══════════════════════════════════════════════════ -->
+  <div class="section-wrap methods-section" id="methods">
+    <h2 class="section-title">Statistical Methods</h2>
+    <p class="section-sub">A rigorous, multi-method analytical framework</p>
+
+    <div class="methods-grid">
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(34,81,255,0.15);color:var(--indigo-lt)">
+          <i class="fas fa-calculator"></i>
+        </div>
+        <div class="method-name">Correlation Testing</div>
+        <div class="method-desc">Pearson, Spearman, and Kendall τ coefficients for bivariate relationship identification across all socioeconomic variables.</div>
+        <span class="method-badge">SciPy · statsmodels</span>
+      </div>
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(244,114,182,0.12);color:var(--pink)">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="method-name">Regularized Regression</div>
+        <div class="method-desc">OLS, Ridge, LASSO, and Elastic Net models with cross-validated hyperparameter tuning and full diagnostic plots.</div>
+        <span class="method-badge">scikit-learn · statsmodels</span>
+      </div>
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(52,211,153,0.12);color:var(--green)">
+          <i class="fas fa-tree"></i>
+        </div>
+        <div class="method-name">Random Forest</div>
+        <div class="method-desc">Non-linear ensemble model capturing interaction effects and non-monotonic relationships, with feature importance ranking.</div>
+        <span class="method-badge">scikit-learn</span>
+      </div>
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(42,213,255,0.12);color:var(--teal)">
+          <i class="fas fa-sitemap"></i>
+        </div>
+        <div class="method-name">K-Means + PCA</div>
+        <div class="method-desc">Spatial K-Means clustering augmented with GPS coordinates. PCA projection for 2D visualization, silhouette scoring.</div>
+        <span class="method-badge">scikit-learn</span>
+      </div>
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(167,139,250,0.12);color:var(--purple)">
+          <i class="fas fa-wave-square"></i>
+        </div>
+        <div class="method-name">SARIMAX Forecasting</div>
+        <div class="method-desc">Seasonal ARIMA with exogenous regressors for temporal trend decomposition and multi-step food insecurity forecasting.</div>
+        <span class="method-badge">statsmodels</span>
+      </div>
+
+      <div class="method-card">
+        <div class="method-icon" style="background:rgba(253,113,133,0.12);color:var(--pink)">
+          <i class="fas fa-bullseye"></i>
+        </div>
+        <div class="method-name">Isolation Forest</div>
+        <div class="method-desc">Unsupervised anomaly detection isolating county-level multivariate outliers across socioeconomic and food insecurity indicators.</div>
+        <span class="method-badge">scikit-learn</span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       DATA SOURCES
+  ══════════════════════════════════════════════════ -->
+  <div class="section-wrap sources-section" id="sources">
+    <h2 class="section-title">Data Sources</h2>
+    <p class="section-sub">Public, de-identified, county-level data — no individual records</p>
+
+    <div class="sources-grid">
+
+      <div class="source-card">
+        <div class="source-header">
+          <div class="source-icon" style="background:rgba(252,163,17,0.15);color:var(--amber)">
+            <i class="fas fa-bread-slice"></i>
+          </div>
+          <div>
+            <div class="source-title">Feeding America</div>
+            <div class="source-sub">Map the Meal Gap (2009 – 2023)</div>
+          </div>
+        </div>
+        <p class="source-desc">
+          Primary dataset providing county-level food insecurity rates, cost per meal, child food insecurity,
+          budget shortfalls, and SNAP participation rates for 3,100+ U.S. counties over 15 years.
+        </p>
+        <div class="source-tags">
+          <span class="stag">Food Insecurity Rate</span>
+          <span class="stag">Cost Per Meal</span>
+          <span class="stag">Child FI Rate</span>
+          <span class="stag">SNAP Participation</span>
+          <span class="stag">Budget Shortfall</span>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-header">
+          <div class="source-icon" style="background:rgba(34,81,255,0.15);color:var(--indigo-lt)">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <div>
+            <div class="source-title">U.S. Census Bureau</div>
+            <div class="source-sub">American Community Survey 5-Year Estimates</div>
+          </div>
+        </div>
+        <p class="source-desc">
+          Secondary dataset providing county-level demographic characteristics, socioeconomic indicators,
+          educational attainment, income distribution, and employment statistics aligned with ACS 5-year windows.
+        </p>
+        <div class="source-tags">
+          <span class="stag">Demographics</span>
+          <span class="stag">Poverty Rate</span>
+          <span class="stag">Unemployment</span>
+          <span class="stag">Education</span>
+          <span class="stag">Income Distribution</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer">
+      <div class="footer-inner">
+
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">🌾</div>
+            <span class="logo-name">FoodInsight.us</span>
+          </div>
+          <p>A professional analytics platform investigating food insecurity patterns across 3,100+ U.S. counties.
+            Built at American University for DATA-613: Data Science Practicum.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#gallery">Executive Overview</a></li>
+            <li><a href="#gallery">Geographic Intelligence</a></li>
+            <li><a href="#gallery">Regression Models</a></li>
+            <li><a href="#gallery">Time Series Explorer</a></li>
+            <li><a href="#bento">AI Data Analyst</a></li>
+            <li><a href="#bento">Policy Scenarios</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Research</h4>
+          <ul>
+            <li><a href="#methods">Statistical Methods</a></li>
+            <li><a href="#sources">Data Sources</a></li>
+            <li><a href="https://github.com/LinusConradM/gp-food-basket" target="_blank">Source Code</a></li>
+            <li><a href="https://www.feedingamerica.org/research/map-the-meal-gap" target="_blank">Feeding America</a></li>
+            <li><a href="https://www.census.gov/programs-surveys/acs" target="_blank">U.S. Census Bureau</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          <p style="font-weight:600;color:var(--white);margin-bottom:0.3rem;">Conrad Linus Muhirwe</p>
+          <p>MS Analytics &amp; AI · American University · 2026 &nbsp;·&nbsp; CC BY 4.0</p>
+        </div>
+        <div class="footer-socials">
+          <a href="https://github.com/LinusConradM/gp-food-basket" target="_blank" class="footer-social-btn" title="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="mailto:linusconradm@gmail.com" class="footer-social-btn" title="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════════════════════ -->
+  <script>
+    /* ── Marquee items ── */
+    const PILLS = [
+      { icon: 'fa-microchip', color: '#a78bfa', label: 'Gemini 2.5 Flash' },
+      { icon: 'fa-project-diagram', color: '#38bdf8', label: 'Difference-in-Differences' },
+      { icon: 'fa-chart-line', color: '#f472b6', label: 'SARIMAX Forecasting' },
+      { icon: 'fa-search-location', color: '#34d399', label: 'Spatial K-Means' },
+      { icon: 'fa-bullseye', color: '#fbbf24', label: 'Isolation Forests' },
+      { icon: 'fa-map', color: '#60a5fa', label: 'Bivariate Mapping' },
+      { icon: 'fa-chart-area', color: '#c084fc', label: 'Density Joyplots' },
+      { icon: 'fa-wave-square', color: '#2AD5FF', label: 'Temporal Analysis' },
+      { icon: 'fa-balance-scale', color: '#fda4af', label: 'Equity Disparities' },
+      { icon: 'fa-sitemap', color: '#86efac', label: 'PCA Projection' },
+    ];
+
+    const track = document.getElementById('marquee-track');
+    const html3x = [...PILLS, ...PILLS, ...PILLS]
+      .map(p => `<span class="marquee-pill"><i class="fas ${p.icon}" style="color:${p.color}"></i>${p.label}</span>`)
+      .join('');
+    track.innerHTML = html3x;
+
+    /* ── Hero reactive image (nav hover) ── */
+    const heroImg   = document.getElementById('hero-img');
+    const heroLabel = document.getElementById('hero-label');
+    const DEFAULT_SRC   = 'images/OverviewPage.png';
+    const DEFAULT_LABEL = 'Executive Overview — National KPIs';
+
+    function setHeroImg(src, label) {
+      heroImg.style.opacity = '0';
+      setTimeout(() => {
+        heroImg.src = src;
+        heroImg.onload = () => { heroImg.style.opacity = '1'; };
+        heroLabel.textContent = label;
+      }, 150);
+    }
+
+    // Attach events to every menu-item with data-img
+    document.querySelectorAll('.menu-item[data-img]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        setHeroImg(el.dataset.img, el.dataset.label);
+      });
+    });
+
+    // Restore default when leaving any nav-item
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('mouseleave', () => {
+        setHeroImg(DEFAULT_SRC, DEFAULT_LABEL);
+      });
+    });
+
+    /* ── Gallery tabs ── */
+    function switchGallery(btn, src, caption) {
+      document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      const img = document.getElementById('gallery-img');
+      const cap = document.getElementById('gallery-cap');
+      const url = document.getElementById('gallery-url');
+
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = src;
+        img.onload = () => { img.style.opacity = '1'; };
+        cap.textContent = caption;
+        url.textContent = 'localhost:8501 · ' + btn.textContent.trim();
+      }, 200);
+    }
+
+    /* ── Mobile menu ── */
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const ham  = document.getElementById('hamburger');
+      menu.classList.toggle('open');
+      ham.classList.toggle('open');
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobile-menu').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    }
+
+    /* ── Sticky nav shadow on scroll ── */
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('main-nav');
+      if (window.scrollY > 40) {
+        nav.style.background = 'rgba(7,9,58,0.97)';
+        nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.4)';
+      } else {
+        nav.style.background = 'rgba(7,9,58,0.85)';
+        nav.style.boxShadow = 'none';
+      }
+    });
+
+    /* ── Close mobile menu on resize ── */
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) closeMobileMenu();
+    });
+  </script>
+
+</body>
+</html>
