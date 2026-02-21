@@ -11,8 +11,8 @@ from utils.theme import inject_tailwind, page_header, COLORS
 from utils.components import section_header, info_banner
 from utils.data_loader import load_data
 from utils.llm import _get_api_key
-from google import genai
-from google.genai import types
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_experimental.agents import create_pandas_dataframe_agent
 
 st.set_page_config(page_title="AI Data Analyst", page_icon="🤖", layout="wide")
 inject_tailwind()
@@ -22,10 +22,8 @@ page_header("AI Data Analyst", "Ask complex questions in plain english. The AI w
 # App State
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "client" not in st.session_state:
-    st.session_state.client = None
-if "chat_session" not in st.session_state:
-    st.session_state.chat_session = None
+if "agent" not in st.session_state:
+    st.session_state.agent = None
 
 api_key = _get_api_key()
 
@@ -33,53 +31,35 @@ if not api_key:
     info_banner("⚠️ A valid GEMINI_API_KEY is required to use the Agentic LLM features.", "warning")
     st.stop()
 
-# Initialize Gemini Client with experimental Code Execution tool
+df = load_data()
+
+# Initialize Langchain Pandas Agent
 try:
-    if st.session_state.client is None:
-        st.session_state.client = genai.Client(api_key=api_key)
+    if st.session_state.agent is None:
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            google_api_key=api_key,
+            temperature=0.0
+        )
         
-    if st.session_state.chat_session is None:
-        st.session_state.chat_session = st.session_state.client.chats.create(
-            model='gemini-2.5-flash',
-            config=types.GenerateContentConfig(
-                tools=[{'code_execution': {}}],
-                temperature=0.0,
-                system_instruction=(
-                    "You are a Senior Data Scientist analyzing a U.S. Food Insecurity dataset. "
-                    "The dataset is loaded in the python environment as a pandas DataFrame named `df`. "
-                    "You MUST use python code execution to analytically answer the user's question by querying `df`. "
-                    "\n\nHere are the columns in `df` along with their types:\n"
-                    "- `year` (Int64): Year of the observation (2009-2023)\n"
-                    "- `state` (object): 2-letter state abbreviation (e.g. 'TX')\n"
-                    "- `state_name` (object): Full state name\n"
-                    "- `county` (object): County name\n"
-                    "- `overall_food_insecurity_rate` (float64): % of total pop food insecure\n"
-                    "- `child_food_insecurity_rate` (float64): % of children food insecure\n"
-                    "- `poverty_rate` (float64): % in poverty\n"
-                    "- `unemployment_rate` (float64): % unemployed\n"
-                    "- `median_income` (float64): Median household income in dollars\n"
-                    "- `cost_per_meal` (float64): Local cost per meal in dollars\n"
-                    "- `snap_rate` (float64): SNAP participation rate\n"
-                    "- `population` (Int64): County population\n"
-                    "- `no_of_food_insecure_persons_overall` (Int64): Raw count\n"
-                    "- `no_of_food_insecure_children` (Int64): Raw count\n"
-                    "- `weighted_annual_food_budget_shortfall` (float64): Total budget shortfall in dollars\n"
-                    "- `fi_category` (category): 'Low', 'Moderate', 'High', 'Very High'\n"
-                    "- `urban_rural` (category): 'Rural', 'Non-metro', 'Metro'\n"
-                    "\nAlways return formatted data in standard professional markdown. Never guess the answer without writing and executing the code first."
-                )
+        st.session_state.agent = create_pandas_dataframe_agent(
+            llm,
+            df,
+            verbose=False,
+            allow_dangerous_code=True,
+            agent_type="tool-calling",
+            return_intermediate_steps=True,
+            prefix=(
+                "You are an AI Data Scientist analyzing a U.S. Food Insecurity dataset. "
+                "The dataset is loaded as a pandas DataFrame named `df`. "
+                "You MUST use the python_repl_ast tool to execute pandas code and answer the user's question. "
+                "Never guess or return a final answer without running code first to calculate it. "
+                "When formatting your final answer, use markdown."
             )
         )
 except Exception as e:
-    st.error(f"Failed to initialize AI Client: {e}")
+    st.error(f"Failed to initialize AI Agent: {e}")
     st.stop()
-
-# The global DF needs to be accessible to the code execution sandbox
-import builtins
-df = load_data()
-builtins.df = df # Gross hack for standard python `exec()` sandbox. The Gemini API tool manages its own state but we specify the prompt schema.
-# Note: Google's GenAI SDK handles the backend sandbox autonomously using its own secure environment. 
-# It does NOT execute code on the user's physical machine or rely on `builtins.df`. It operates on the schema provided.
 
 col1, col2 = st.columns([3, 1])
 
@@ -108,17 +88,21 @@ with col1:
             
             try:
                 # Send message to model
-                response = st.session_state.chat_session.send_message(prompt)
+                response = st.session_state.agent.invoke({"input": prompt})
                 
                 # Extract code snippets if tool was used
                 executed_code = ""
-                for part in response.parts:
-                    if part.executable_code:
-                        executed_code += f"# Code Executed by AI:\n{part.executable_code.code}\n\n"
-                    if part.code_execution_result:
-                        executed_code += f"# Result:\n{part.code_execution_result.output}\n"
+                intermediate_steps = response.get("intermediate_steps", [])
+                for action, observation in intermediate_steps:
+                    # action.tool_input handles the python code string generated by the agent
+                    code_val = action.tool_input
+                    if isinstance(code_val, dict) and 'query' in code_val:
+                        code_val = code_val['query']
+                    executed_code += f"# Code Executed by AI:\n{code_val}\n\n"
+                    executed_code += f"# Result:\n{observation}\n\n"
 
-                placeholder.markdown(response.text)
+                final_answer = response.get("output", "")
+                placeholder.markdown(final_answer)
                 
                 if executed_code:
                     with st.expander("Show AI-Generated Code"):
@@ -127,7 +111,7 @@ with col1:
                 # Save assistant response
                 st.session_state.messages.append({
                     "role": "assistant", 
-                    "content": response.text,
+                    "content": final_answer,
                     "code": executed_code if executed_code else None
                 })
                 
