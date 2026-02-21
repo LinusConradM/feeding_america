@@ -357,26 +357,56 @@ with chat_container:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # Show context separator on first message
+        # Context separator
         filter_label = f"Year: {selected_year}" + (f" · {selected_state}" if selected_state != "All States" else "")
         st.markdown(
-            f'<div style="text-align:center;color:#94a3b8;font-size:0.78rem;margin:0.5rem 0 1rem;">'
-            f'<span style="background:#f1f5f9;padding:0.25rem 0.9rem;border-radius:99px;">Started Conversation · {filter_label}</span>'
-            f'</div>',
+            f'<div style="text-align:center;color:#94a3b8;font-size:0.78rem;margin:0.5rem 0 1.25rem;">'
+            f'<span style="background:#f1f5f9;padding:0.25rem 0.9rem;border-radius:99px;border:1px solid #e2e8f0;">'
+            f'Started Conversation · {filter_label}</span></div>',
             unsafe_allow_html=True
         )
+
         for msg in st.session_state.ai_messages:
             if msg["role"] == "user":
-                with st.chat_message("user"):
-                    st.markdown(msg["content"])
+                # ── Right-aligned user bubble ──────────────────────────────
+                st.markdown(
+                    f'<div style="display:flex;justify-content:flex-end;align-items:flex-start;'
+                    f'margin-bottom:1rem;gap:0.5rem;">'
+                    f'<div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;'
+                    f'border-radius:18px 18px 4px 18px;padding:0.7rem 1.1rem;max-width:72%;'
+                    f'font-size:0.9rem;line-height:1.5;font-family:Inter,sans-serif;">'
+                    f'{msg["content"]}</div>'
+                    f'<div style="width:34px;height:34px;border-radius:50%;background:#4F46E5;'
+                    f'display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+                    f'font-size:0.85rem;color:white;font-weight:700;">👤</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
             else:
-                with st.chat_message("assistant", avatar="🤖"):
+                # ── Left-aligned AI card with icon column ──────────────────
+                icon_col, content_col = st.columns([0.06, 0.94])
+                with icon_col:
+                    st.markdown(
+                        '<div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;'
+                        'border:1px solid #e2e8f0;display:flex;align-items:center;'
+                        'justify-content:center;font-size:1rem;margin-top:4px;">🤖</div>',
+                        unsafe_allow_html=True
+                    )
+                with content_col:
+                    st.markdown(
+                        '<div style="background:#f8fafc;border:1px solid #e2e8f0;'
+                        'border-radius:4px 16px 16px 16px;padding:0.9rem 1.1rem;'
+                        'margin-bottom:0.25rem;">',
+                        unsafe_allow_html=True
+                    )
                     st.markdown(msg["content"])
+                    st.markdown('</div>', unsafe_allow_html=True)
                     if msg.get("code"):
                         with st.expander("🔍 View executed code & raw output"):
                             st.code(msg["code"], language="python")
                             if msg.get("raw_output"):
                                 st.caption(f"Raw output: {msg['raw_output']}")
+                st.markdown("<div style='margin-bottom:0.75rem'></div>", unsafe_allow_html=True)
 
 # ── INPUT BAR ─────────────────────────────────────────────────────────────────
 st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
