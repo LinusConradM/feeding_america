@@ -1,4 +1,7 @@
-<footer>
+<!-- IMPORTANT: Use a <div> wrapper, NOT <footer>.
+     Streamlit's own built-in CSS rule "footer { display:none }" hides
+     all native footer elements before our CSS even loads. -->
+<div class="page-footer">
     <div class="footer">
         <div class="footer-inner">
 
@@ -14,12 +17,12 @@
             <div class="footer-col">
                 <h4>Platform</h4>
                 <ul>
-                    <li><a href="#gallery">Executive Overview</a></li>
-                    <li><a href="#gallery">Geographic Intelligence</a></li>
-                    <li><a href="#gallery">Regression Models</a></li>
-                    <li><a href="#gallery">Time Series Explorer</a></li>
-                    <li><a href="#bento">AI Data Analyst</a></li>
-                    <li><a href="#bento">Policy Scenarios</a></li>
+                    <li><a href="/1_Executive_Overview">Executive Overview</a></li>
+                    <li><a href="/2_Geographic_Intelligence">Geographic Intelligence</a></li>
+                    <li><a href="/4_Regression_Models">Regression Models</a></li>
+                    <li><a href="/7_Time_Series_Explorer">Time Series Explorer</a></li>
+                    <li><a href="/10_AI_Data_Analyst">AI Data Analyst</a></li>
+                    <li><a href="/8_Policy_Scenarios">Policy Scenarios</a></li>
                 </ul>
             </div>
 
@@ -55,9 +58,9 @@
             </div>
         </div>
     </div>
-</footer>
+</div>
 
-<!-- Nav scroll shadow + mobile menu JS (exact from index.html) -->
+<!-- Nav scroll shadow + mobile menu JS -->
 <script>
     window.addEventListener('scroll', function () {
         var nav = document.getElementById('main-nav');
