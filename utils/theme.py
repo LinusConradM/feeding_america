@@ -104,7 +104,7 @@ def inject_tailwind():
         /* ================================================================== */
         /*  STREAMLIT CHROME                                                  */
         /* ================================================================== */
-        #MainMenu, header, footer, .stDeployButton { display:none !important; }
+        #MainMenu, footer, .stDeployButton { display:none !important; }
 
         html, body, .stApp {
             font-family: 'Inter', Arial, sans-serif !important;
