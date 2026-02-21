@@ -40,10 +40,10 @@ st.html(Path("views/templates/hero.html").read_text())
 # This seamlessly flows within the Streamlit DOM, fixing the overlay mismatch.
 col1, col2, _ = st.columns([1.5, 1.5, 7])
 with col1:
-    if st.button("Explore Dashboards", use_container_width=True):
+    if st.button("Explore Dashboards", width='stretch'):
         st.switch_page("views/1_Executive_Overview.py")
 with col2:
-    if st.button("Launch AI Agent", use_container_width=True):
+    if st.button("Launch AI Agent", width='stretch'):
         st.switch_page("views/10_AI_Data_Analyst.py")
 
 

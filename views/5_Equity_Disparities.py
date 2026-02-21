@@ -470,9 +470,9 @@ if "no_vehicle" in year_data.columns:
             **PLOTLY_LAYOUT,
             title="No Vehicle Rate vs Food Insecurity Over Time",
             height=380,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
         fig_nv_dual.update_layout(
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             yaxis=dict(title="Food Insecurity Rate", tickformat=".0%", side="left"),
             yaxis2=dict(title="No Vehicle Rate", tickformat=".0%", side="right",
                         overlaying="y", showgrid=False),

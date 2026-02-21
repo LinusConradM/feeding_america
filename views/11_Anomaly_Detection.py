@@ -141,7 +141,7 @@ with st.spinner("Training Isolation Forest... Scanning for outliers..."):
             "anomaly_score": "Isolation Score"
         }, inplace=True)
         
-        st.dataframe(display_df, hide_index=True, use_container_width=True)
+        st.dataframe(display_df, hide_index=True, width='stretch')
 
     # --- MAP RENDER ---
     section_header("Geographic Distribution of Anomalies", "Where are the systemic breakdowns located?", "map")

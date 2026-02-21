@@ -2,7 +2,7 @@
 '$schema' = 'https://cdn.posit.co/publisher/schemas/posit-publishing-record-schema-v3.json'
 server_type = 'connect_cloud'
 server_url = 'https://connect.posit.cloud'
-client_version = '1.31.8'
+client_version = '1.30.0'
 created_at = ''
 dismissed_at = ''
 type = 'python-streamlit'
@@ -11,8 +11,8 @@ id = '019c78bc-f972-4318-8e1f-d9a2281838ea'
 dashboard_url = 'https://connect.posit.cloud/conradlinusmuhirwe/content/019c78bc-f972-4318-8e1f-d9a2281838ea'
 direct_url = 'https://019c78bc-f972-4318-8e1f-d9a2281838ea.share.connect.posit.cloud'
 logs_url = 'https://connect.posit.cloud/conradlinusmuhirwe/content/019c78bc-f972-4318-8e1f-d9a2281838ea/history'
-deployed_at = '2026-02-20T17:46:41-05:00'
-bundle_id = '019c7d3b-c1d3-f07f-9e5c-88af10780a87'
+deployed_at = '2026-02-21T01:02:44-05:00'
+bundle_id = '019c7ecb-0db0-d12f-f0bb-394e20c5500b'
 files = [
   '.env',
   '.posit/publish/deployments/deployment-QJG0.toml',
@@ -82,4 +82,4 @@ files = [
 title = 'gp-food-basket'
 
 [configuration.python]
-version = '3.13'
+version = '3.12'

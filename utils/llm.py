@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 # Load environment variables, overriding existing ones if necessary
@@ -17,9 +17,8 @@ def generate_insights(page_name: str, context_data: dict) -> str:
         return "⚠️ Error: Valid GEMINI_API_KEY not found in .env file or environment variables."
         
     try:
-        # Fallback to the stable generativeai module
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # Use the new genai SDK
+        client = genai.Client(api_key=api_key)
         
         # Build prompt
         prompt = f"""
@@ -34,7 +33,10 @@ Focus on what the numbers *mean*, identify any alarming or interesting trends, a
 Keep the response concise and directly addressing the provided data parameters. Do not include markdown headers like "## Insights", just start directly with the bullet points.
 """
 
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
         return response.text
         
     except Exception as e:

@@ -54,8 +54,9 @@ def kpi_card(
 
 
 def kpi_row(cards: list[dict]):
-    """Render a row of KPI cards using a CSS Grid layout for perfect responsiveness."""
-    cards_html = f'<div style="display:grid;grid-template-columns:repeat({len(cards)},1fr);gap:1.5rem;margin-bottom:1.5rem">'
+    """Render a row of KPI cards using responsive micro-tailwind classes."""
+    cols = min(4, len(cards)) # Cap at 4 since micro-tailwind only goes up to grid-cols-4
+    cards_html = f'<div class="grid grid-cols-{cols} gap-6 mb-6">'
     
     for card in cards:
         title = card.get("title", "")

@@ -5,8 +5,8 @@ html,
 body,
 [data-testid="stAppViewContainer"],
 .stApp {
-    background-color: #050505 !important;
-    background-image: linear-gradient(180deg, rgba(17, 20, 42, 0.85) 0%, rgba(5, 5, 5, 1) 100%), ___BG_URL___ !important;
+    background-color: #0D1452 !important;
+    background-image: linear-gradient(180deg, rgba(26, 35, 126, 0.85) 0%, rgba(13, 20, 82, 1) 100%), ___BG_URL___ !important;
     background-position: center top, center 20% !important;
     background-repeat: no-repeat !important;
     background-size: cover, 110% auto !important;
@@ -25,7 +25,7 @@ body,
     transform: translateX(-50%);
     width: 80vw;
     height: 80vh;
-    background: radial-gradient(ellipse at center, rgba(38, 208, 206, 0.15) 0%, rgba(11, 14, 38, 0) 70%);
+    background: radial-gradient(ellipse at center, rgba(121, 134, 203, 0.25) 0%, rgba(13, 20, 82, 0) 70%);
     pointer-events: none;
     z-index: 0;
 }
@@ -69,7 +69,7 @@ li {
 }
 
 .title-gradient {
-    background: linear-gradient(90deg, #26d0ce 0%, #38bdf8 100%);
+    background: linear-gradient(90deg, #7986CB 0%, #C5CAE9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -85,10 +85,10 @@ li {
 }
 
 .kpi-glass {
-    background: rgba(11, 14, 38, 0.6);
+    background: rgba(26, 35, 126, 0.4);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 2rem 1.5rem;
     display: flex;
@@ -101,8 +101,8 @@ li {
 
 .kpi-glass:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 30px -10px rgba(38, 208, 206, 0.25);
-    border-color: rgba(38, 208, 206, 0.4);
+    box-shadow: 0 10px 30px -10px rgba(121, 134, 203, 0.3);
+    border-color: rgba(121, 134, 203, 0.5);
 }
 
 .kpi-label {
@@ -129,7 +129,7 @@ li {
 }
 
 .kpi-trend.positive {
-    color: #26d0ce;
+    color: #7986CB;
 }
 
 .kpi-trend.negative {
@@ -140,7 +140,7 @@ li {
 .marquee-container {
     width: 100%;
     overflow: hidden;
-    background: rgba(11, 14, 38, 0.4);
+    background: rgba(26, 35, 126, 0.3);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1.25rem 0;
@@ -169,7 +169,7 @@ li {
     font-weight: 600;
 
     /* Illuminated Ribbon Card Effect */
-    background: rgba(11, 14, 38, 0.8);
+    background: rgba(26, 35, 126, 0.6);
     /* Deep glass bg */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -177,20 +177,20 @@ li {
     /* Padding to create the card shape */
     border-radius: 50px;
     /* Pill shape for ribbon look */
-    border: 1px solid rgba(38, 208, 206, 0.5);
+    border: 1px solid rgba(121, 134, 203, 0.5);
     /* Cyan border */
-    box-shadow: 0 0 15px rgba(38, 208, 206, 0.3),
+    box-shadow: 0 0 15px rgba(121, 134, 203, 0.3),
         /* Aqua glow */
-        inset 0 0 10px rgba(56, 189, 248, 0.2);
+        inset 0 0 10px rgba(197, 202, 233, 0.2);
     /* Inner blue glow */
     transition: all 0.3s ease;
 }
 
 .marquee-item:hover {
-    border-color: rgba(38, 208, 206, 1);
-    box-shadow: 0 0 25px rgba(38, 208, 206, 0.6),
-        inset 0 0 15px rgba(56, 189, 248, 0.5);
-    color: #2AD5FF;
+    border-color: rgba(121, 134, 203, 1);
+    box-shadow: 0 0 25px rgba(121, 134, 203, 0.6),
+        inset 0 0 15px rgba(197, 202, 233, 0.5);
+    color: #C5CAE9;
 }
 
 @keyframes marquee {
@@ -213,7 +213,7 @@ li {
 }
 
 .aurora-card {
-    background: rgba(11, 14, 38, 0.6);
+    background: rgba(26, 35, 126, 0.4);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -303,6 +303,31 @@ li {
     background: #8b5cf6;
 }
 
+/* Bento card specific layouts (moved from inline HTML for responsiveness) */
+.bento-ai {
+    grid-column: span 8;
+    grid-row: span 2;
+    border-top: 2px solid rgba(168, 85, 247, 0.4);
+}
+
+.bento-causal {
+    grid-column: span 4;
+    grid-row: span 2;
+    border-top: 2px solid rgba(56, 189, 248, 0.4);
+}
+
+.bento-geo {
+    grid-column: span 6;
+    grid-row: span 1;
+    border-top: 2px solid rgba(52, 211, 153, 0.4);
+}
+
+.bento-anomaly {
+    grid-column: span 6;
+    grid-row: span 1;
+    border-top: 2px solid rgba(251, 113, 133, 0.4);
+}
+
 .bento-card h3 {
     font-family: 'Geist', sans-serif;
     font-size: 1.4rem;
@@ -361,10 +386,10 @@ div[data-testid="stButton"] button {
 }
 
 div[data-testid="stButton"] button:hover {
-    background: rgba(38, 208, 206, 0.1) !important;
-    border-color: #26d0ce !important;
-    color: #26d0ce !important;
-    box-shadow: 0 0 15px rgba(38, 208, 206, 0.2) !important;
+    background: rgba(121, 134, 203, 0.2) !important;
+    border-color: #C5CAE9 !important;
+    color: #C5CAE9 !important;
+    box-shadow: 0 0 15px rgba(121, 134, 203, 0.4) !important;
 }
 
 @media (max-width: 1024px) {
@@ -376,9 +401,12 @@ div[data-testid="stButton"] button:hover {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .bento-large,
-    .bento-wide {
+    .bento-ai,
+    .bento-causal,
+    .bento-geo,
+    .bento-anomaly {
         grid-column: span 2;
+        grid-row: auto;
     }
 }
 
@@ -391,9 +419,10 @@ div[data-testid="stButton"] button:hover {
         grid-template-columns: 1fr;
     }
 
-    .bento-large,
-    .bento-wide,
-    .bento-tall {
+    .bento-ai,
+    .bento-causal,
+    .bento-geo,
+    .bento-anomaly {
         grid-column: span 1;
         grid-row: auto;
     }

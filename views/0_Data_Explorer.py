@@ -50,7 +50,7 @@ desc["Count"] = desc["Count"].apply(lambda x: f"{int(x):,}")
 
 st.dataframe(
     desc,
-    use_container_width=True,
+    width='stretch',
     hide_index=True,
 )
 
@@ -87,7 +87,7 @@ fig_miss = go.Figure(data=go.Heatmap(
     hovertemplate="<b>%{y}</b> in %{x}<br>Missing: %{z:.1f}%<extra></extra>",
 ))
 fig_miss.update_layout(**PLOTLY_LAYOUT, title="", height=380)
-st.plotly_chart(fig_miss, use_container_width=True)
+st.plotly_chart(fig_miss, width='stretch')
 
 st.markdown(
     """
@@ -140,7 +140,7 @@ with col1:
         barmode="overlay",
         xaxis_tickformat=".0%" if is_rate else "",
     )
-    st.plotly_chart(fig_hist, use_container_width=True)
+    st.plotly_chart(fig_hist, width='stretch')
 
 with col2:
     skew = hist_data.skew()
@@ -193,7 +193,7 @@ fig_box.add_annotation(
     text="Top 8 (highest median) ← — → Bottom 7 (lowest median)",
     font=dict(size=11, color=COLORS["slate"]), bgcolor="rgba(255,255,255,0.85)",
 )
-st.plotly_chart(fig_box, use_container_width=True)
+st.plotly_chart(fig_box, width='stretch')
 
 # ── 5. PAIR PLOT (SCATTER MATRIX) ─────────────────────────────────────────────
 section_header("Pair Plot", "All-vs-all scatter matrix for key numeric variables", "th")
@@ -212,7 +212,7 @@ fig_pair = px.scatter_matrix(
 )
 fig_pair.update_traces(diagonal_visible=True, showupperhalf=False, marker=dict(size=3))
 fig_pair.update_layout(**PLOTLY_LAYOUT, title="", height=650)
-st.plotly_chart(fig_pair, use_container_width=True)
+st.plotly_chart(fig_pair, width='stretch')
 
 # ── 6. PERCENTILE RANKINGS TABLE ──────────────────────────────────────────────
 section_header("Percentile Rankings", "Top & bottom 10 counties by selected variable", "sort-amount-down")
@@ -228,13 +228,13 @@ with col_a:
     st.markdown("#### 🔴 Top 10 (Worst)")
     top10 = rank_df.nlargest(10, get_variable_label(hist_var)).reset_index(drop=True)
     top10.index += 1
-    st.dataframe(top10, use_container_width=True)
+    st.dataframe(top10, width='stretch')
 
 with col_b:
     st.markdown("#### 🟢 Bottom 10 (Best)")
     bot10 = rank_df.nsmallest(10, get_variable_label(hist_var)).reset_index(drop=True)
     bot10.index += 1
-    st.dataframe(bot10, use_container_width=True)
+    st.dataframe(bot10, width='stretch')
 
 # ── LLM Insight Engine ────────────────────────────────────────────────────────
 context_dict = {

@@ -117,7 +117,7 @@ def inject_tailwind():
 
         /* ── Sidebar ────────────────────────────────────────────────────── */
         [data-testid="stSidebar"] {
-            background: #051C2C !important;
+            background: linear-gradient(160deg, #1A237E 0%, #0D1452 100%) !important;
         }
         [data-testid="stSidebar"], [data-testid="stSidebar"] div, [data-testid="stSidebar"] span, [data-testid="stSidebar"] p {
             color: rgba(255,255,255,.85) !important;
@@ -463,8 +463,12 @@ def inject_tailwind():
         /* ================================================================== */
         /*  RESPONSIVE                                                        */
         /* ================================================================== */
+        @media(max-width:1024px) {
+            .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+        }
         @media(max-width:768px){
-            .grid-cols-2,.grid-cols-3,.grid-cols-4{grid-template-columns:1fr}
+            .grid-cols-2,.grid-cols-3,.grid-cols-4{grid-template-columns:1fr !important;}
             .px-10,.px-12{padding-left:1.25rem;padding-right:1.25rem}
             .text-5xl{font-size:2rem} .text-4xl{font-size:1.75rem}
             .kpi-value{font-size:1.35rem}
@@ -496,7 +500,7 @@ def page_header(title: str, subtitle: str = "", icon: str = ""):
             position: relative;
             padding: 1.2rem 1.2rem;
             margin-bottom: 1.5rem;
-            background: #0B0E26; /* Deep space bg */
+            background: #0D1452; /* Portfolio deep blue bg */
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
