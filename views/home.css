@@ -1,9 +1,13 @@
 /* ═══════════════════════════════════════════════════════
    STREAMLIT CHROME ERASURE — highest priority
 ═══════════════════════════════════════════════════════ */
-header[data-testid="stHeader"],
-footer,
-footer * {
+/* Hide Streamlit's header and status widget ONLY.
+   Do NOT use bare `footer` selector — that would hide our custom footer too. */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+[data-testid="stStatusWidget"] {
     display: none !important;
 }
 
