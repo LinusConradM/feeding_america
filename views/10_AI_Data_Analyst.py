@@ -332,7 +332,8 @@ for i, q in enumerate(QUESTIONS):
             st.session_state.pending_prompt = q["desc"]
             st.rerun()
 
-# ── STATUS BAR ────────────────────────────────────────────────────────────────
+# ── CHAT WINDOW ───────────────────────────────────────────────────────────────
+# Status bar
 model_tag = "Gemini 2.5 Flash" if gemini_key else "Groq Llama-3.3-70b"
 st.markdown(f"""
 <div class="ai-status-bar">
@@ -342,12 +343,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── CHAT WINDOW ───────────────────────────────────────────────────────────────
-chat_container = st.container()
+chat_container = st.container(border=False)
 
 with chat_container:
-    st.markdown('<div class="chat-window">', unsafe_allow_html=True)
-
     if not st.session_state.ai_messages:
         st.markdown("""
         <div class="empty-state">
@@ -357,20 +355,26 @@ with chat_container:
         </div>
         """, unsafe_allow_html=True)
     else:
+        # Show context separator on first message
+        filter_label = f"Year: {selected_year}" + (f" · {selected_state}" if selected_state != "All States" else "")
+        st.markdown(
+            f'<div style="text-align:center;color:#94a3b8;font-size:0.78rem;margin:0.5rem 0 1rem;">'
+            f'<span style="background:#f1f5f9;padding:0.25rem 0.9rem;border-radius:99px;">Started Conversation · {filter_label}</span>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
         for msg in st.session_state.ai_messages:
             if msg["role"] == "user":
-                st.markdown(f'<div class="msg-user">{msg["content"]}</div>', unsafe_allow_html=True)
+                with st.chat_message("user"):
+                    st.markdown(msg["content"])
             else:
-                st.markdown(f'<div class="msg-bot">', unsafe_allow_html=True)
-                st.markdown(msg["content"])
-                if msg.get("code"):
-                    with st.expander("🔍 View executed code & raw output"):
-                        st.code(msg["code"], language="python")
-                        if msg.get("raw_output"):
-                            st.caption(f"Raw output: {msg['raw_output']}")
-                st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+                with st.chat_message("assistant", avatar="🤖"):
+                    st.markdown(msg["content"])
+                    if msg.get("code"):
+                        with st.expander("🔍 View executed code & raw output"):
+                            st.code(msg["code"], language="python")
+                            if msg.get("raw_output"):
+                                st.caption(f"Raw output: {msg['raw_output']}")
 
 # ── INPUT BAR ─────────────────────────────────────────────────────────────────
 st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
