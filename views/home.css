@@ -1321,9 +1321,9 @@ header[data-testid="stHeader"] {
    FOOTER  (exact from index.html)
 ═══════════════════════════════════════════════════════ */
 /* .page-footer is the div wrapper in footer.html.
-   We use a div (not <footer>) because Streamlit's built-in CSS hides <footer>. */
+   We use a div (not <footer>) because Streamlit's built-in CSS hides <footer>.
+   index.html footer has NO background — it's transparent so the page gradient shows through. */
 .page-footer {
-    background: var(--navy-dark);
     border-top: 1px solid var(--border);
     margin-top: 4rem;
 }
