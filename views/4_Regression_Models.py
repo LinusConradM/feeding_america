@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import cross_val_score
 import statsmodels.api as sm
-from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, get_numeric_columns
 
@@ -65,7 +65,6 @@ with st.sidebar:
 
     scale_data = st.checkbox("Standardize Variables", value=False)
 
-enforce_landscape_on_mobile()
 page_header("Regression Models",
             f"Build and evaluate {MODEL_TYPES.get(model_type, 'regression')} models", "chart-line")
 

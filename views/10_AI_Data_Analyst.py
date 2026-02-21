@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import io
 import time
-from utils.theme import enforce_landscape_on_mobile, inject_tailwind, page_header, COLORS
+from utils.theme import inject_tailwind, page_header, COLORS
 from utils.components import section_header, info_banner
 from utils.data_loader import load_data
 from utils.llm import _get_api_key
@@ -17,7 +17,6 @@ from google.genai import types
 st.set_page_config(page_title="AI Data Analyst", page_icon="🤖", layout="wide")
 inject_tailwind()
 
-enforce_landscape_on_mobile()
 page_header("AI Data Analyst", "Ask complex questions in plain english. The AI will write and execute data analysis code to find the answer.", "robot")
 
 # App State

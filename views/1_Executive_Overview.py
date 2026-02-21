@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, STATE_NAMES
 
@@ -25,7 +25,6 @@ with st.sidebar:
 year_data = data[data["year"] == selected_year]
 prev_data = data[data["year"] == selected_year - 1] if selected_year > data["year"].min() else None
 
-enforce_landscape_on_mobile()
 page_header("Executive Overview", f"National food insecurity snapshot for {selected_year}", "chart-bar")
 
 

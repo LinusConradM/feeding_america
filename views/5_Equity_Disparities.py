@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
@@ -20,7 +20,6 @@ with st.sidebar:
     eq_year = st.slider("Year", int(data["year"].min()), int(data["year"].max()),
                         int(data["year"].max()))
 
-enforce_landscape_on_mobile()
 page_header("Equity & Disparities",
             "Analyzing food insecurity gaps across demographics and geography", "balance-scale")
 

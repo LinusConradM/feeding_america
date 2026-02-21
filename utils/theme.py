@@ -487,45 +487,6 @@ def inject_tailwind():
         st.markdown(css, unsafe_allow_html=True)
 
 
-def enforce_landscape_on_mobile():
-    """Call this on specific dashboard pages to force the user to rotate their device."""
-    css = """
-        <style>
-        /* ── Force Landscape on Mobile ──────────────────────────────────── */
-        @media screen and (max-width: 768px) and (orientation: portrait) {
-            body::before {
-                content: "📱 Please rotate your device to landscape for the best dashboard experience.";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background-color: #0D1452; /* Match the portfolio blue theme */
-                background-image: linear-gradient(160deg, #1A237E 0%, #0D1452 100%);
-                color: #FFFFFF;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                font-family: 'Inter', sans-serif;
-                font-size: 1.25rem;
-                font-weight: 600;
-                padding: 2rem;
-                z-index: 999999;
-                box-sizing: border-box;
-            }
-            .stApp {
-                display: none !important; /* Hide the app entirely until rotated */
-            }
-        }
-        </style>
-    """
-    if hasattr(st, "html"):
-        st.html(css)
-    else:
-        st.markdown(css, unsafe_allow_html=True)
-
-
 # ── Reusable header ─────────────────────────────────────────────────────────
 def page_header(title: str, subtitle: str = "", icon: str = ""):
     """McKinsey-style page header — serif title, thin rule below."""
