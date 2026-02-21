@@ -36,6 +36,11 @@ from pathlib import Path
 st.html(Path("views/templates/hero.html").read_text())
 
 
+# ── KPI GLASS ROW ────────────────────────────────────────────────────────────
+st.html(Path("views/templates/kpi.html").read_text())
+
+st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+
 # ── NATIVE STREAMLIT CTA BUTTONS ─────────────────────────────────────────────
 # This seamlessly flows within the Streamlit DOM, fixing the overlay mismatch.
 col1, col2, _ = st.columns([1.5, 1.5, 7])
@@ -45,10 +50,6 @@ with col1:
 with col2:
     if st.button("Launch AI Agent", width='stretch'):
         st.switch_page("views/10_AI_Data_Analyst.py")
-
-
-# ── KPI GLASS ROW ────────────────────────────────────────────────────────────
-st.html(Path("views/templates/kpi.html").read_text())
 
 # ── V2 TECH STACK MARQUEE ────────────────────────────────────────────────────
 marquee_items = [
