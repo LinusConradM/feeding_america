@@ -473,6 +473,34 @@ def inject_tailwind():
             .text-5xl{font-size:2rem} .text-4xl{font-size:1.75rem}
             .kpi-value{font-size:1.35rem}
         }
+
+        /* ── Force Landscape on Mobile ──────────────────────────────────── */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            body::before {
+                content: "📱 Please rotate your device to landscape for the best dashboard experience.";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: #0D1452; /* Match the portfolio blue theme */
+                background-image: linear-gradient(160deg, #1A237E 0%, #0D1452 100%);
+                color: #FFFFFF;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                font-family: 'Inter', sans-serif;
+                font-size: 1.25rem;
+                font-weight: 600;
+                padding: 2rem;
+                z-index: 999999;
+                box-sizing: border-box;
+            }
+            .stApp {
+                display: none !important; /* Hide the app entirely until rotated */
+            }
+        }
         </style>
     """
     if hasattr(st, "html"):
