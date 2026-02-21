@@ -39,17 +39,21 @@ IMGS = {
 }
 
 
-# ── 1. Inject CSS (home.css = exact index.html styles) ───────────────────────
+# ── 1. Inject CSS via st.markdown so it reaches the real document head ────────
+# CRITICAL: st.html() sandboxes content in an iframe; CSS inside it cannot
+# affect the Streamlit chrome (body, fixed nav, etc.).
+# st.markdown(unsafe_allow_html=True) injects directly into the page head.
 css_raw = (_VIEWS_DIR / "home.css").read_text()
-st.html(css_raw)
+st.markdown(f"<style>{css_raw}</style>", unsafe_allow_html=True)
 
 
-# ── 2. Google Fonts + Font Awesome (same as index.html <head>) ───────────────
-st.html("""
+# ── 2. Google Fonts + Font Awesome (injected into real head via st.markdown) ──
+st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-""")
+""", unsafe_allow_html=True)
+
 
 
 # ── 3. Navigation ────────────────────────────────────────────────────────────

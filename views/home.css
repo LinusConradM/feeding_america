@@ -1,8 +1,46 @@
-<style>
+/* ═══════════════════════════════════════════════════════
+   STREAMLIT CHROME ERASURE — highest priority
+═══════════════════════════════════════════════════════ */
+header[data-testid="stHeader"],
+footer,
+footer * {
+    display: none !important;
+}
+
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Remove all padding / width constraints from Streamlit's main container */
+[data-testid="stMainBlockContainer"],
+[data-testid="stMain"],
+.block-container,
+section.main>div {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Force dark background on the Streamlit app shell */
+body,
+[data-testid="stAppViewContainer"],
+[data-testid="stApp"] {
+    background: #07093A !important;
+    color: #f8fafc !important;
+}
+
+/* Remove per-element wrapper padding on st.html() outputs */
+[data-testid="stHtml"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+}
 
 /* ═══════════════════════════════════════════════════════
    RESET & BASE  (exact from index.html)
 ═══════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
@@ -512,6 +550,7 @@ header[data-testid="stHeader"] {
     letter-spacing: -0.04em;
     background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 1.4rem;
 }
@@ -519,6 +558,7 @@ header[data-testid="stHeader"] {
 .hero-title .gradient-word {
     background: linear-gradient(90deg, var(--indigo) 0%, var(--indigo-lt) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -1514,5 +1554,3 @@ header[data-testid="stHeader"] {
 .text-indigo {
     color: var(--indigo-lt);
 }
-
-</style>
