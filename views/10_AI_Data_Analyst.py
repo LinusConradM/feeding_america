@@ -2,6 +2,7 @@
 Agentic AI Data Analyst - Natural language dataframe querying
 """
 
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -11,7 +12,6 @@ from utils.theme import inject_tailwind, page_header, COLORS
 from utils.components import section_header, info_banner
 from utils.data_loader import load_data
 from utils.llm import _get_api_key
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
 
 st.set_page_config(page_title="AI Data Analyst", page_icon="🤖", layout="wide")
@@ -33,15 +33,48 @@ if not api_key:
 
 df = load_data()
 
-# Initialize Langchain Pandas Agent
+# Initialize Langchain Pandas Agent (Gemini → Groq fallback)
 try:
     if st.session_state.agent is None:
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            google_api_key=api_key,
-            temperature=0.0
+        gemini_key = api_key
+        groq_key = os.environ.get("GROQ_API_KEY") or (
+            st.secrets.get("GROQ_API_KEY") if hasattr(st, "secrets") else None
         )
-        
+
+        llm = None
+        active_model = ""
+
+        # Attempt 1: Gemini
+        if gemini_key:
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                test_llm = ChatGoogleGenerativeAI(
+                    model="gemini-2.5-flash",
+                    google_api_key=gemini_key,
+                    temperature=0.0
+                )
+                # Quick validation ping
+                test_llm.invoke("ping")
+                llm = test_llm
+                active_model = "gemini-2.5-flash"
+            except Exception:
+                llm = None  # Fall through to Groq
+
+        # Attempt 2: Groq fallback
+        if llm is None and groq_key:
+            from langchain_groq import ChatGroq
+            llm = ChatGroq(
+                model="llama-3.3-70b-versatile",
+                api_key=groq_key,
+                temperature=0.0
+            )
+            active_model = "llama-3.3-70b-versatile (Groq)"
+
+        if llm is None:
+            st.error("⚠️ No valid AI API key found. Please set GEMINI_API_KEY or GROQ_API_KEY.")
+            st.stop()
+
+        st.session_state.active_model = active_model
         st.session_state.agent = create_pandas_dataframe_agent(
             llm,
             df,
