@@ -57,19 +57,10 @@ prev_unemp = prev_data["unemployment_rate"].mean() if prev_data is not None else
 prev_shortfall = prev_data["weighted_annual_food_budget_shortfall"].mean() if prev_data is not None else None
 
 kpi_row([
-    {"title": "National FI Rate", "value": f"{fi_rate:.1%}" if pd.notna(fi_rate) else "N/A", "change": safe_pct_change(fi_rate, prev_fi),
-     "icon": "utensils", "gradient": "coral"},
-    {"title": "Food Insecure Persons", "value": f"{fi_persons/1e6:.1f}M" if pd.notna(fi_persons) else "N/A", "change": safe_pct_change(fi_persons, prev_persons),
-     "icon": "users", "gradient": "navy"},
-    {"title": "Child FI Rate", "value": f"{child_fi:.1%}" if pd.notna(child_fi) else "N/A", "change": safe_pct_change(child_fi, prev_child),
-     "icon": "child", "gradient": "plum"},
-    {"title": "Cost Per Meal", "value": f"${cost_meal:.2f}" if pd.notna(cost_meal) else "N/A", "change": safe_pct_change(cost_meal, prev_cost),
-     "icon": "dollar-sign", "gradient": "amber"},
-])
-
-st.markdown("<div class='h-4'></div>", unsafe_allow_html=True)
-
-kpi_row([
+    {"title": "National FI Rate", "value": f"{fi_rate:.1%}" if pd.notna(fi_rate) else "N/A", "change": safe_pct_change(fi_rate, prev_fi), "icon": "utensils", "gradient": "coral"},
+    {"title": "Food Insecure Persons", "value": f"{fi_persons/1e6:.1f}M" if pd.notna(fi_persons) else "N/A", "change": safe_pct_change(fi_persons, prev_persons), "icon": "users", "gradient": "navy"},
+    {"title": "Child FI Rate", "value": f"{child_fi:.1%}" if pd.notna(child_fi) else "N/A", "change": safe_pct_change(child_fi, prev_child), "icon": "child", "gradient": "plum"},
+    {"title": "Cost Per Meal", "value": f"${cost_meal:.2f}" if pd.notna(cost_meal) else "N/A", "change": safe_pct_change(cost_meal, prev_cost), "icon": "dollar-sign", "gradient": "amber"},
     {"title": "Poverty Rate", "value": f"{poverty:.1%}" if pd.notna(poverty) else "N/A", "change": safe_pct_change(poverty, prev_poverty), "icon": "hand-holding-usd", "gradient": "sapphire"},
     {"title": "Median Income", "value": f"${med_income:,.0f}" if pd.notna(med_income) else "N/A", "change": safe_pct_change(med_income, prev_med_income), "icon": "wallet", "gradient": "emerald"},
     {"title": "Unemployment", "value": f"{unemp:.1%}" if pd.notna(unemp) else "N/A", "change": safe_pct_change(unemp, prev_unemp), "icon": "briefcase", "gradient": "coral"},

@@ -468,10 +468,16 @@ def inject_tailwind():
             .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
         }
         @media(max-width:768px){
-            .grid-cols-2,.grid-cols-3,.grid-cols-4{grid-template-columns:1fr !important;}
-            .px-10,.px-12{padding-left:1.25rem;padding-right:1.25rem}
-            .text-5xl{font-size:2rem} .text-4xl{font-size:1.75rem}
-            .kpi-value{font-size:1.35rem}
+            .grid-cols-4 { grid-template-columns: repeat(3, 1fr) !important; gap: 0.5rem !important; }
+            .grid-cols-2, .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; }
+            .px-10,.px-12{padding-left:0.75rem;padding-right:0.75rem}
+            /* Scale down KPIs severely to fit 3 in a row on mobile */
+            .kpi-card { padding: 0.65rem !important; }
+            .kpi-value { font-size: 1.15rem !important; }
+            .kpi-label { font-size: 0.55rem !important; letter-spacing: 0 !important; margin-bottom: 0.3rem !important; }
+            .kpi-label i { margin-right: 0.15rem !important; }
+            .kpi-change { font-size: 0.55rem !important; padding: 0.1rem 0.3rem !important; }
+            .text-5xl{font-size:1.75rem} .text-4xl{font-size:1.5rem}
         }
         </style>
     """
