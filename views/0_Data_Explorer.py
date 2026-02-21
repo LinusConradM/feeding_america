@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
 from utils.components import kpi_row, section_header, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, get_numeric_columns
 
@@ -29,6 +29,7 @@ with st.sidebar:
     geo_filter = st.selectbox("State Filter", ["All Counties"] + sorted(data["state"].dropna().unique().tolist()))
     hist_var = st.selectbox("Variable for Distribution / Box Plot", available_vars, format_func=get_variable_label)
 
+enforce_landscape_on_mobile()
 page_header("Data Explorer", "Exploratory Data Analysis — quality, distributions, and rankings", "microscope")
 
 year_data = data[data["year"] == selected_year].copy()

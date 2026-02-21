@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from scipy import stats
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, get_numeric_columns
 
@@ -41,6 +41,7 @@ with st.sidebar:
     geo_filter = st.selectbox("Geography", ["All Counties"] +
                               sorted(data["state"].dropna().unique().tolist()))
 
+enforce_landscape_on_mobile()
 page_header("Correlation Analysis",
             "Explore relationships between food insecurity indicators", "project-diagram")
 

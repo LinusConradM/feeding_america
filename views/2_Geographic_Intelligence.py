@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import enforce_landscape_on_mobile, inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
@@ -57,6 +57,7 @@ with st.sidebar:
         
     selected_state = st.session_state.geo_selected_state
 
+enforce_landscape_on_mobile()
 page_header("Geographic Intelligence",
             "Spatial analysis of food insecurity across U.S. counties", "map-marked-alt")
 

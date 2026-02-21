@@ -473,7 +473,18 @@ def inject_tailwind():
             .text-5xl{font-size:2rem} .text-4xl{font-size:1.75rem}
             .kpi-value{font-size:1.35rem}
         }
+        </style>
+    """
+    if hasattr(st, "html"):
+        st.html(css)
+    else:
+        st.markdown(css, unsafe_allow_html=True)
 
+
+def enforce_landscape_on_mobile():
+    """Call this on specific dashboard pages to force the user to rotate their device."""
+    css = """
+        <style>
         /* ── Force Landscape on Mobile ──────────────────────────────────── */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             body::before {
