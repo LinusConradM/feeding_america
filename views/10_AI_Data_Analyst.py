@@ -253,39 +253,41 @@ def _exec(code: str):
     except Exception:
         return "", traceback.format_exc()
 
-# ── Question card definitions ────────────────────────────────────────────────
-QUESTIONS = [
-    {
-        "title": "National Overview",
-        "desc": "What was the national food insecurity rate and total affected population in 2023?",
-        "icon": "🏛️", "card_class": "card-blue", "icon_class": "icon-blue",
-    },
-    {
-        "title": "Worst Affected States",
-        "desc": "Which 5 states had the highest child food insecurity rate in 2023?",
-        "icon": "👧", "card_class": "card-green", "icon_class": "icon-green",
-    },
-    {
-        "title": "Cost Analysis",
-        "desc": "What is the median cost per meal for the top 5 counties with the highest poverty rate in 2023?",
-        "icon": "🍽️", "card_class": "card-orange", "icon_class": "icon-orange",
-    },
-    {
-        "title": "Budget Shortfall",
-        "desc": "Which 5 states had the largest annual food budget shortfall in 2023?",
-        "icon": "💸", "card_class": "card-violet", "icon_class": "icon-violet",
-    },
-    {
-        "title": "SNAP Participation",
-        "desc": "What is the correlation between SNAP participation rate and food insecurity rate across all counties in 2023?",
-        "icon": "📋", "card_class": "card-teal", "icon_class": "icon-teal",
-    },
-    {
-        "title": "Rural vs Urban",
-        "desc": "Compare average food insecurity rates between Rural, Non-metro, and Metro counties in 2023.",
-        "icon": "🗺️", "card_class": "card-rose", "icon_class": "icon-rose",
-    },
-]
+# ── Question card definitions (dynamic by selected year/state) ───────────────
+def get_questions(year: int, state: str) -> list:
+    scope = f"in {year}" + (f" for {state}" if state != "All States" else "")
+    return [
+        {
+            "title": "National Overview",
+            "desc": f"What was the food insecurity rate and total affected population {scope}?",
+            "icon": "🏛️", "card_class": "card-blue", "icon_class": "icon-blue",
+        },
+        {
+            "title": "Worst Affected States",
+            "desc": f"Which 5 states had the highest child food insecurity rate {scope}?",
+            "icon": "👧", "card_class": "card-green", "icon_class": "icon-green",
+        },
+        {
+            "title": "Cost Analysis",
+            "desc": f"What is the median cost per meal for the top 5 counties by poverty rate {scope}?",
+            "icon": "🍽️", "card_class": "card-orange", "icon_class": "icon-orange",
+        },
+        {
+            "title": "Budget Shortfall",
+            "desc": f"Which 5 states had the largest annual food budget shortfall {scope}?",
+            "icon": "💸", "card_class": "card-violet", "icon_class": "icon-violet",
+        },
+        {
+            "title": "SNAP Participation",
+            "desc": f"What is the correlation between SNAP participation rate and food insecurity {scope}?",
+            "icon": "📋", "card_class": "card-teal", "icon_class": "icon-teal",
+        },
+        {
+            "title": "Rural vs Urban",
+            "desc": f"Compare average food insecurity rates between Rural, Non-metro, and Metro counties {scope}.",
+            "icon": "🗺️", "card_class": "card-rose", "icon_class": "icon-rose",
+        },
+    ]
 
 # ── PAGE HEADER ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -319,7 +321,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 card_cols = st.columns(3)
-for i, q in enumerate(QUESTIONS):
+for i, q in enumerate(get_questions(selected_year, selected_state)):
     with card_cols[i % 3]:
         st.markdown(f"""
         <div class="q-card {q['card_class']}">
