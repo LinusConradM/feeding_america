@@ -26,13 +26,32 @@ section.main>div {
     width: 100% !important;
 }
 
-/* Force dark background on the Streamlit app shell */
+/* Force the EXACT same background as index.html on the Streamlit app shell.
+   index.html uses body { background: #07093A } + body::before gradient.
+   Streamlit's body::before is suppressed by the React shell, so we apply
+   the gradient directly to [data-testid="stApp"]. */
 body,
 [data-testid="stAppViewContainer"],
 [data-testid="stApp"] {
-    background: #07093A !important;
+    background: linear-gradient(180deg, rgba(26, 35, 126, 0.9) 0%, rgba(7, 9, 58, 1) 100%) !important;
     color: #f8fafc !important;
+    min-height: 100vh;
 }
+
+/* Radial indigo glow at top-center (matches index.html body::after) */
+[data-testid="stApp"]::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    height: 80vh;
+    background: radial-gradient(ellipse at center, rgba(121, 134, 203, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
 
 /* Remove per-element wrapper padding on st.html() outputs */
 [data-testid="stHtml"] {
