@@ -6,6 +6,15 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 def _get_api_key():
+    # 1. Try Streamlit Secrets (for cloud deployments)
+    try:
+        import streamlit as st
+        if "GEMINI_API_KEY" in st.secrets:
+            return st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+        
+    # 2. Fall back to local environment variables
     return os.environ.get("GEMINI_API_KEY")
 
 def generate_insights(page_name: str, context_data: dict) -> str:

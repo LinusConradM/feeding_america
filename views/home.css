@@ -412,7 +412,20 @@ div[data-testid="stButton"] button:hover {
 
 @media (max-width: 768px) {
     .kpi-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .kpi-glass {
+        padding: 1rem 0.5rem;
+    }
+
+    .kpi-val {
+        font-size: 1.5rem;
+    }
+
+    .kpi-label {
+        font-size: 0.75rem;
     }
 
     .bento-grid {
