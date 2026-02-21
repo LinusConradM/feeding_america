@@ -1,176 +1,251 @@
 """
-Agentic AI Data Analyst - Natural language dataframe querying
+AI Data Analyst - Custom code generation + local exec() loop.
+Guarantees code is always executed against the real dataframe.
 """
 
 import os
+import io
+import contextlib
+import traceback
 import streamlit as st
 import pandas as pd
 import numpy as np
-import io
-import time
-from utils.theme import inject_tailwind, page_header, COLORS
-from utils.components import section_header, info_banner
+from utils.theme import inject_tailwind, page_header
+from utils.components import info_banner
 from utils.data_loader import load_data
-from utils.llm import _get_api_key
-from langchain_experimental.agents import create_pandas_dataframe_agent
+from utils.llm import _get_api_key, _get_groq_key
 
 st.set_page_config(page_title="AI Data Analyst", page_icon="🤖", layout="wide")
 inject_tailwind()
 
-page_header("AI Data Analyst", "Ask complex questions in plain english. The AI will write and execute data analysis code to find the answer.", "robot")
+page_header("AI Data Analyst", "Ask complex questions in plain English. The AI writes Python code, runs it live against the dataset, then explains the results.", "robot")
 
-# App State
+# ── Session State ────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "agent" not in st.session_state:
-    st.session_state.agent = None
 
-api_key = _get_api_key()
-
-if not api_key:
-    info_banner("⚠️ A valid GEMINI_API_KEY is required to use the Agentic LLM features.", "warning")
-    st.stop()
-
+# ── Load data ────────────────────────────────────────────────────────────────
 df = load_data()
 
-# Initialize Langchain Pandas Agent (Gemini → Groq fallback)
-try:
-    if st.session_state.agent is None:
-        gemini_key = api_key
-        groq_key = os.environ.get("GROQ_API_KEY") or (
-            st.secrets.get("GROQ_API_KEY") if hasattr(st, "secrets") else None
-        )
+# ── API key helpers ──────────────────────────────────────────────────────────
+gemini_key = _get_api_key()
+groq_key = _get_groq_key()
 
-        llm = None
-        active_model = ""
-
-        # Attempt 1: Gemini
-        if gemini_key:
-            try:
-                from langchain_google_genai import ChatGoogleGenerativeAI
-                test_llm = ChatGoogleGenerativeAI(
-                    model="gemini-2.5-flash",
-                    google_api_key=gemini_key,
-                    temperature=0.0
-                )
-                # Quick validation ping
-                test_llm.invoke("ping")
-                llm = test_llm
-                active_model = "gemini-2.5-flash"
-            except Exception:
-                llm = None  # Fall through to Groq
-
-        # Attempt 2: Groq fallback
-        if llm is None and groq_key:
-            from langchain_groq import ChatGroq
-            llm = ChatGroq(
-                model="llama-3.3-70b-versatile",
-                api_key=groq_key,
-                temperature=0.0
-            )
-            active_model = "llama-3.3-70b-versatile (Groq)"
-
-        if llm is None:
-            st.error("⚠️ No valid AI API key found. Please set GEMINI_API_KEY or GROQ_API_KEY.")
-            st.stop()
-
-        st.session_state.active_model = active_model
-        st.session_state.agent = create_pandas_dataframe_agent(
-            llm,
-            df,
-            verbose=False,
-            allow_dangerous_code=True,
-            agent_type="tool-calling",
-            return_intermediate_steps=True,
-            prefix=(
-                "You are a Senior Data Scientist analyzing the Feeding America U.S. Food Insecurity dataset. "
-                "The dataset is loaded as a pandas DataFrame named `df` with 40,000+ rows.\n\n"
-                "STRICT RULES:\n"
-                "1. You MUST ALWAYS use the python_repl_ast tool to write and execute pandas code BEFORE providing any answer.\n"
-                "2. NEVER assume data does not exist without running `df['year'].unique()` or equivalent to verify.\n"
-                "3. NEVER return a final answer without first verifying via code execution.\n"
-                "4. The `year` column is of dtype `Int64` (nullable integer). Filter it like: `df[df['year'] == 2023]`.\n\n"
-                "VERIFIED SCHEMA:\n"
-                "- `year` (Int64): 2009–2023. ALL 15 years have data. 2023 has 3,142 rows.\n"
-                "- `state` (str): 2-letter abbreviation (e.g. 'TX')\n"
-                "- `state_name` (str): Full state name\n"
-                "- `county` (str): County name\n"
-                "- `overall_food_insecurity_rate` (float): % of total pop food insecure\n"
-                "- `child_food_insecurity_rate` (float): % of children food insecure\n"
-                "- `poverty_rate` (float): % in poverty\n"
-                "- `unemployment_rate` (float): % unemployed\n"
-                "- `median_income` (float): Median household income in USD\n"
-                "- `cost_per_meal` (float): Local cost per meal in USD\n"
-                "- `snap_rate` (float): SNAP participation rate\n"
-                "- `population` (Int64): County population\n"
-                "- `no_of_food_insecure_persons_overall` (Int64): Raw count\n"
-                "- `no_of_food_insecure_children` (Int64): Raw count\n"
-                "- `weighted_annual_food_budget_shortfall` (float): Annual budget shortfall in USD\n"
-                "- `fi_category` (category): 'Low', 'Moderate', 'High', 'Very High'\n"
-                "- `urban_rural` (category): 'Rural', 'Non-metro', 'Metro'\n\n"
-                "When formatting your final answer use markdown with bold headers and bullet points."
-            )
-        )
-except Exception as e:
-    st.error(f"Failed to initialize AI Agent: {e}")
+if not gemini_key and not groq_key:
+    info_banner("⚠️ A valid GEMINI_API_KEY or GROQ_API_KEY is required.", "warning")
     st.stop()
 
+# ── Schema description injected into every prompt ────────────────────────────
+SCHEMA = """
+The DataFrame `df` contains U.S. Food Insecurity data (Feeding America, 2009–2023).
+Shape: ~40,000 rows × 20+ columns.
+VERIFIED FACTS:
+- `year` (Int64): Values 2009–2023. 2023 has exactly 3,142 rows. Filter: df[df['year'] == 2023]
+- `state` (str): 2-letter abbreviation e.g. 'TX'
+- `state_name` (str): Full state name
+- `county` (str): County name
+- `overall_food_insecurity_rate` (float): fraction (e.g. 0.15 = 15%)
+- `child_food_insecurity_rate` (float): fraction
+- `poverty_rate` (float): fraction
+- `unemployment_rate` (float): fraction
+- `median_income` (float): USD
+- `cost_per_meal` (float): USD per meal
+- `snap_rate` (float): SNAP participation rate (fraction)
+- `population` (Int64)
+- `no_of_food_insecure_persons_overall` (Int64)
+- `no_of_food_insecure_children` (Int64)
+- `weighted_annual_food_budget_shortfall` (float): USD
+- `fi_category` (category): 'Low','Moderate','High','Very High'
+- `urban_rural` (category): 'Rural','Non-metro','Metro'
+"""
+
+# ── LLM caller: returns code string ─────────────────────────────────────────
+def _call_llm_for_code(question: str) -> str:
+    """Ask the LLM to return ONLY executable pandas code, nothing else."""
+    system = (
+        "You are a Python data scientist. "
+        "Given a question about a DataFrame `df`, return ONLY executable Python code. "
+        "NO explanation, NO markdown fences, NO comments. Just raw Python. "
+        "The last line must assign the answer to a variable called `result`. "
+        "Import nothing — pandas (pd), numpy (np) are already imported. "
+        f"\n\nDataFrame schema:\n{SCHEMA}"
+    )
+    user_msg = f"Question: {question}"
+
+    # Try Gemini
+    if gemini_key:
+        try:
+            from google import genai
+            from google.genai import types
+            client = genai.Client(api_key=gemini_key)
+            resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_msg,
+                config=types.GenerateContentConfig(
+                    system_instruction=system,
+                    temperature=0.0,
+                )
+            )
+            return resp.text.strip()
+        except Exception:
+            pass
+
+    # Groq fallback
+    if groq_key:
+        import groq as groq_sdk
+        client = groq_sdk.Groq(api_key=groq_key)
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.0,
+        )
+        return resp.choices[0].message.content.strip()
+
+    raise RuntimeError("No valid API key available.")
+
+
+def _call_llm_for_explanation(question: str, code: str, output: str) -> str:
+    """Ask the LLM to explain the code result in natural language."""
+    system = (
+        "You are a senior policy analyst. "
+        "Given a user question, the Python code that was executed, and its output, "
+        "write a concise, professional markdown summary of the findings. "
+        "Start directly with key findings. Use bullet points. Be precise with numbers."
+    )
+    user_msg = (
+        f"Question: {question}\n\n"
+        f"Code executed:\n```python\n{code}\n```\n\n"
+        f"Output:\n{output}"
+    )
+
+    if gemini_key:
+        try:
+            from google import genai
+            from google.genai import types
+            client = genai.Client(api_key=gemini_key)
+            resp = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_msg,
+                config=types.GenerateContentConfig(system_instruction=system, temperature=0.3)
+            )
+            return resp.text.strip()
+        except Exception:
+            pass
+
+    if groq_key:
+        import groq as groq_sdk
+        client = groq_sdk.Groq(api_key=groq_key)
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.3,
+        )
+        return resp.choices[0].message.content.strip()
+
+    return output  # worst case, return raw output
+
+
+def _strip_fences(code: str) -> str:
+    """Strip markdown code fences if LLM includes them anyway."""
+    lines = code.splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
+def _exec_code(code: str) -> tuple[str, str | None]:
+    """
+    Execute code in a local namespace with df, pd, np available.
+    Returns (stdout_output, error_string_or_None).
+    """
+    code = _strip_fences(code)
+    local_ns = {"df": df, "pd": pd, "np": np}
+    stdout_capture = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(stdout_capture):
+            exec(code, local_ns)  # noqa: S102
+        # Prefer `result` variable, else captured stdout
+        result = local_ns.get("result", None)
+        captured = stdout_capture.getvalue().strip()
+        output = str(result) if result is not None else captured
+        return output, None
+    except Exception:
+        return "", traceback.format_exc()
+
+
+# ── UI ───────────────────────────────────────────────────────────────────────
 col1, col2 = st.columns([3, 1])
 
 with col1:
     st.markdown('<div class="bg-gray-50 border border-gray-200 rounded-xl p-6 min-h-[500px]">', unsafe_allow_html=True)
-    
+
     # Render chat history
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"], avatar="🤖" if msg["role"] == "assistant" else "👤"):
             st.markdown(msg["content"])
-            if "code" in msg:
-                with st.expander("Show AI-Generated Code"):
+            if msg.get("code"):
+                with st.expander("🔍 Show AI-Generated Code & Raw Output"):
                     st.code(msg["code"], language="python")
+                    if msg.get("raw_output"):
+                        st.text(f"Output: {msg['raw_output']}")
 
     # Chat input
     if prompt := st.chat_input("E.g., Which 5 counties in Texas saw the highest spike in child food insecurity between 2019 and 2021?"):
-        # Append user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
 
-        # Generate response
         with st.chat_message("assistant", avatar="🤖"):
             placeholder = st.empty()
-            placeholder.markdown(f'<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> Analyzing {len(df):,} rows of data...', unsafe_allow_html=True)
-            
-            try:
-                # Send message to model
-                response = st.session_state.agent.invoke({"input": prompt})
-                
-                # Extract code snippets if tool was used
-                executed_code = ""
-                intermediate_steps = response.get("intermediate_steps", [])
-                for action, observation in intermediate_steps:
-                    # action.tool_input handles the python code string generated by the agent
-                    code_val = action.tool_input
-                    if isinstance(code_val, dict) and 'query' in code_val:
-                        code_val = code_val['query']
-                    executed_code += f"# Code Executed by AI:\n{code_val}\n\n"
-                    executed_code += f"# Result:\n{observation}\n\n"
+            placeholder.markdown(f'<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> Generating pandas code against {len(df):,} rows...', unsafe_allow_html=True)
 
-                final_answer = response.get("output", "")
+            try:
+                # Step 1: LLM generates code
+                placeholder.markdown('<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> Step 1/3 — Generating code...', unsafe_allow_html=True)
+                code = _call_llm_for_code(prompt)
+                code = _strip_fences(code)
+
+                # Step 2: Execute code locally
+                placeholder.markdown('<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> Step 2/3 — Executing code locally...', unsafe_allow_html=True)
+                raw_output, error = _exec_code(code)
+
+                if error:
+                    # Try once more with the error context
+                    retry_prompt = f"{prompt}\n\nPrevious code failed with:\n{error}\nPlease fix the code."
+                    code = _call_llm_for_code(retry_prompt)
+                    code = _strip_fences(code)
+                    raw_output, error = _exec_code(code)
+
+                if error:
+                    final_answer = f"⚠️ Code execution failed:\n```\n{error}\n```"
+                else:
+                    # Step 3: LLM explains result
+                    placeholder.markdown('<i class="fas fa-circle-notch fa-spin text-blue-500 mr-2"></i> Step 3/3 — Interpreting results...', unsafe_allow_html=True)
+                    final_answer = _call_llm_for_explanation(prompt, code, raw_output)
+
                 placeholder.markdown(final_answer)
-                
-                if executed_code:
-                    with st.expander("Show AI-Generated Code"):
-                        st.code(executed_code, language="python")
-                
-                # Save assistant response
+
+                with st.expander("🔍 Show AI-Generated Code & Raw Output"):
+                    st.code(code, language="python")
+                    st.text(f"Raw output: {raw_output}")
+
                 st.session_state.messages.append({
-                    "role": "assistant", 
+                    "role": "assistant",
                     "content": final_answer,
-                    "code": executed_code if executed_code else None
+                    "code": code,
+                    "raw_output": raw_output,
                 })
-                
+
             except Exception as e:
-                placeholder.error(f"Agent Execution Error: {e}")
+                placeholder.error(f"Agent Error: {e}")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -182,16 +257,18 @@ with col2:
                 <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>How this works
             </h3>
             <p class="text-sm text-blue-900 leading-relaxed mb-4">
-                This isn't a standard chatbot. It is an <b>Agentic Code Execution Engine</b> powered by Gemini 2.5 Flash.
+                This is a <b>verified code execution engine</b>. Unlike LLM chatbots, it never guesses.
             </p>
-            <p class="text-sm text-blue-900 leading-relaxed mb-4">
-                When you ask a question, the AI won't guess the answer or regurgitate its training data. Instead, it will <b>write custom Python Pandas code</b>, securely execute that code against the live <code>Dataframe</code> backing this dashboard, and synthesize the mathematical outputs into a precise answer.
-            </p>
+            <ol class="text-sm text-blue-900 space-y-2 list-decimal list-inside">
+                <li class="bg-white p-2 rounded border border-blue-200">AI writes Python pandas code</li>
+                <li class="bg-white p-2 rounded border border-blue-200">Code runs <b>locally</b> against the real dataset</li>
+                <li class="bg-white p-2 rounded border border-blue-200">AI explains the actual output</li>
+            </ol>
             <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 mt-4">Example Questions</h4>
             <ul class="text-sm text-blue-900 space-y-3">
                 <li class="bg-white p-2 rounded border border-blue-200 shadow-sm font-medium">Which state had the largest <b>decrease</b> in child food insecurity between 2012 and 2022?</li>
-                <li class="bg-white p-2 rounded border border-blue-200 shadow-sm font-medium">What is the average poverty rate and cost per meal for the 10 counties with the highest overall food insecurity in 2023?</li>
-                <li class="bg-white p-2 rounded border border-blue-200 shadow-sm font-medium">List the top 5 'Rural' counties with the lowest unemployment rate but highest SNAP participation.</li>
+                <li class="bg-white p-2 rounded border border-blue-200 shadow-sm font-medium">What is the median cost per meal for the 5 counties with highest poverty in 2023?</li>
+                <li class="bg-white p-2 rounded border border-blue-200 shadow-sm font-medium">List top 5 Rural counties with lowest unemployment but highest SNAP participation.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True
