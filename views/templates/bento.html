@@ -1,70 +1,85 @@
-<div class="bento-grid">
+<div class="section-wrap" id="bento">
+    <h2 class="section-title">Platform Architecture</h2>
+    <p class="section-sub">From raw data to causal inference — a fully integrated analytics engine</p>
 
-    <!-- Massive Primary Card (Agentic AI) -->
-    <div class="aurora-card bento-ai card-agent">
-        <div class="card-title">
-            <i class="fas fa-robot" style="color:#c084fc; margin-right:0.5rem;"></i>
-            Autonomous Agentic Reasoning
-        </div>
-        <p class="card-desc" style="font-size: 1.15rem; max-width: 90%;">
-            The platform is augmented by <strong style="color:white">Gemini 2.5 Flash</strong> utilizing a secure Python
-            Code Execution sandbox. It doesnt guess answers from training data-it writes, tests, and executes Pandas
-            queries directly against the live longitudinal dataframe to mathematically solve plain-English inquiries.
-        </p>
-        <!-- Decorative Terminal Mockup -->
-        <div style="margin-top:auto; padding-top:2rem;">
-            <div
-                style="background:rgba(13, 20, 82, 0.8); border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; padding:1.25rem; font-family:monospace; font-size:0.9rem; color:#A1A1AA;">
-                <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
-                    <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>
-                    <span style="width:10px;height:10px;border-radius:50%;background:#eab308;"></span>
-                    <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;"></span>
+    <div class="bento-grid">
+
+        <!-- AI Agent (large) -->
+        <div class="aurora-card bento-ai">
+            <div class="card-glow"></div>
+            <div class="card-icon-lg text-purple"><i class="fas fa-robot"></i></div>
+            <div class="card-title">Autonomous Agentic Reasoning</div>
+            <p class="card-desc" style="font-size:1rem;max-width:90%;">
+                The platform is augmented by <strong>Gemini 2.5 Flash</strong> with a secure Python code execution
+                sandbox.
+                It doesn't guess — it writes, tests, and executes Pandas queries directly against the live longitudinal
+                dataframe to mathematically solve plain-English inquiries.
+            </p>
+            <div class="terminal" style="margin-top:auto;">
+                <div class="term-dots">
+                    <span style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:block"></span>
+                    <span style="width:9px;height:9px;border-radius:50%;background:#eab308;display:block"></span>
+                    <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:block"></span>
                 </div>
-                <span style="color:#c084fc;">user></span> What is the standard error of the DiD policy effect in
-                Texas?<br>
-                <span style="color:#60a5fa; margin-top:0.5rem; display:inline-block;">agent></span> Extracting
-                coefficients...<br>
-                <span style="color:#34d399; margin-top:0.5rem; display:inline-block;">agent></span> The standard error
-                is +/-0.042%.
+                <div class="term-line"><span class="term-user">user&gt;</span> What is the DiD policy effect SE in
+                    Texas?</div>
+                <div class="term-line"><span class="term-agent">agent&gt;</span> Extracting regression coefficients...
+                </div>
+                <div class="term-line"><span class="term-ok">agent&gt;</span> Standard error: ±0.042 percentage points
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Vertical High-Contrast Card (Causal Inference) -->
-    <div class="aurora-card bento-causal card-ml">
-        <div class="card-title" style="color:#7dd3fc;">
-            <i class="fas fa-chart-line" style="margin-right:0.5rem;"></i>
-            Causal Inference
+        <!-- Causal Inference -->
+        <div class="aurora-card bento-causal">
+            <div class="card-icon-lg text-teal"><i class="fas fa-chart-line"></i></div>
+            <div class="card-title" style="color:#7dd3fc;">Causal Inference Engine</div>
+            <p class="card-desc" style="font-size:1rem;line-height:1.7;">
+                Pivots from descriptive to prescriptive analytics. Uses
+                <strong>Difference-in-Differences</strong> modeling to isolate the true causal effect of
+                hypothetical policy shocks against controlled baseline groups — proving impact rather than correlation.
+            </p>
+            <div style="margin-top:auto;padding-top:1.5rem;">
+                <div
+                    style="background:rgba(42,213,255,0.08);border:1px solid rgba(42,213,255,0.2);border-radius:10px;padding:1rem 1.25rem;">
+                    <div
+                        style="font-family:'Geist Mono',monospace;font-size:0.8rem;color:#94a3b8;margin-bottom:0.4rem;">
+                        DiD Estimator</div>
+                    <div style="font-family:'Geist Mono',monospace;font-size:1.1rem;color:#2AD5FF;font-weight:700;">β̂ =
+                        (Ȳ₁ᵀ − Ȳ₁ᶜ) − (Ȳ₀ᵀ − Ȳ₀ᶜ)</div>
+                </div>
+            </div>
         </div>
-        <p class="card-desc" style="font-size:1.1rem; line-height:1.7;">
-            Pivots from descriptive analytics to prescriptive causality. Uses <strong
-                style="color:white;">Difference-in-Differences</strong> modeling to isolate the true effect of
-            hypothetical policy shocks against controlled baseline groups, proving impact rather than just correlation.
-        </p>
-    </div>
 
-    <!-- Horizontal Secondary Card (Geospatial) -->
-    <div class="aurora-card bento-geo card-geo">
-        <div class="card-title">
-            <i class="fas fa-map-marked-alt" style="color:#6ee7b7; margin-right:0.5rem;"></i>
-            Spatially-Weighted Clustering
+        <!-- Geospatial -->
+        <div class="aurora-card bento-geo">
+            <div class="card-icon-lg text-teal"><i class="fas fa-map-marked-alt"></i></div>
+            <div class="card-title">Spatially-Weighted Clustering</div>
+            <p class="card-desc">
+                K-Means augmented with GPS coordinates to force geographic contiguity.
+                Tracks regional flow shifts using <strong>Sankey matrices</strong>.
+            </p>
         </div>
-        <p class="card-desc">
-            K-Means clustering engines augmented with lateral GPS coordinates to force geographic contiguity. Tracks
-            regional flow shifts dynamically using structural <strong style="color:white">Sankey matrices</strong>.
-        </p>
-    </div>
 
-    <!-- Horizontal Secondary Card (Anomaly) -->
-    <div class="aurora-card bento-anomaly">
-        <div class="card-title">
-            <i class="fas fa-bullseye" style="color:#fda4af; margin-right:0.5rem;"></i>
-            Unsupervised Outlier Detection
+        <!-- Time Series -->
+        <div class="aurora-card bento-time">
+            <div class="card-icon-lg text-amber"><i class="fas fa-stream"></i></div>
+            <div class="card-title">Time Series Forecasting</div>
+            <p class="card-desc">
+                SARIMAX modeling for temporal trend analysis, pre/post COVID impact assessment,
+                and county-level food insecurity forecasts.
+            </p>
         </div>
-        <p class="card-desc">
-            Machine learning <strong style="color:white">Isolation Forests</strong> autonomously scan all 3,142 counties
-            to flag severe multivariate anomalies hidden within the economic matrix.
-        </p>
-    </div>
 
+        <!-- Anomaly -->
+        <div class="aurora-card bento-anom">
+            <div class="card-icon-lg text-pink"><i class="fas fa-bullseye"></i></div>
+            <div class="card-title">Unsupervised Outlier Detection</div>
+            <p class="card-desc">
+                <strong>Isolation Forests</strong> autonomously scan all 3,142 counties to flag
+                severe multivariate anomalies hidden within the economic matrix.
+            </p>
+        </div>
+
+    </div>
 </div>

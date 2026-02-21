@@ -1,8 +1,88 @@
-<div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:2.5rem;margin-top:2rem;text-align:center;padding-bottom:3rem;">
-    <p style="color:#F4F4F5;font-family:'Geist',sans-serif;font-size:1.1rem;font-weight:700;margin:0;">
-        Architected by Conrad Linus Muhirwe
-    </p>
-    <p style="color:#94a3b8;font-family:'Geist Mono',monospace;font-size:0.85rem;margin:0.5rem 0 0;letter-spacing:0.1em;text-transform:uppercase;">
-        MS Analytics & AI &bull; American University &bull; 2026
-    </p>
-</div>
+<footer>
+    <div class="footer">
+        <div class="footer-inner">
+
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon">🌾</div>
+                    <span class="logo-name">FoodInsight.us</span>
+                </div>
+                <p>A professional analytics platform investigating food insecurity patterns across 3,100+ U.S. counties.
+                    Built at American University for DATA-613: Data Science Practicum.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="#gallery">Executive Overview</a></li>
+                    <li><a href="#gallery">Geographic Intelligence</a></li>
+                    <li><a href="#gallery">Regression Models</a></li>
+                    <li><a href="#gallery">Time Series Explorer</a></li>
+                    <li><a href="#bento">AI Data Analyst</a></li>
+                    <li><a href="#bento">Policy Scenarios</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Research</h4>
+                <ul>
+                    <li><a href="#methods">Statistical Methods</a></li>
+                    <li><a href="#sources">Data Sources</a></li>
+                    <li><a href="https://github.com/LinusConradM/gp-food-basket" target="_blank">Source Code</a></li>
+                    <li><a href="https://www.feedingamerica.org/research/map-the-meal-gap" target="_blank">Feeding
+                            America</a></li>
+                    <li><a href="https://www.census.gov/programs-surveys/acs" target="_blank">U.S. Census Bureau</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <div>
+                <p style="font-weight:600;color:#f8fafc;margin-bottom:0.3rem;">Conrad Linus Muhirwe</p>
+                <p>MS Analytics &amp; AI &nbsp;·&nbsp; American University &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; CC BY 4.0
+                </p>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/LinusConradM/gp-food-basket" target="_blank" class="footer-social-btn"
+                    title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="mailto:linusconradm@gmail.com" class="footer-social-btn" title="Email">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Nav scroll shadow + mobile menu JS (exact from index.html) -->
+<script>
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('main-nav');
+        if (!nav) return;
+        if (window.scrollY > 40) {
+            nav.style.background = 'rgba(7,9,58,0.97)';
+            nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.4)';
+        } else {
+            nav.style.background = 'rgba(7,9,58,0.85)';
+            nav.style.boxShadow = 'none';
+        }
+    });
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 1024) closeMobileMenu();
+    });
+    function toggleMobileMenu() {
+        var menu = document.getElementById('mobile-menu');
+        var ham = document.getElementById('hamburger');
+        if (menu) menu.classList.toggle('open');
+        if (ham) ham.classList.toggle('open');
+    }
+    function closeMobileMenu() {
+        var menu = document.getElementById('mobile-menu');
+        var ham = document.getElementById('hamburger');
+        if (menu) menu.classList.remove('open');
+        if (ham) ham.classList.remove('open');
+    }
+</script>

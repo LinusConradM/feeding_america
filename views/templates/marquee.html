@@ -1,6 +1,29 @@
-<div class="marquee-container-dark">
-    <div class="marquee-content">
-        {marquee_text}
+<div class="marquee-section">
+    <div class="marquee-track" id="marquee-track">
+        <!-- Pills injected by JS below -->
     </div>
 </div>
-"
+
+<script>
+    (function () {
+        var PILLS = [
+            { icon: 'fa-microchip', color: '#a78bfa', label: 'Gemini 2.5 Flash' },
+            { icon: 'fa-project-diagram', color: '#38bdf8', label: 'Difference-in-Differences' },
+            { icon: 'fa-chart-line', color: '#f472b6', label: 'SARIMAX Forecasting' },
+            { icon: 'fa-search-location', color: '#34d399', label: 'Spatial K-Means' },
+            { icon: 'fa-bullseye', color: '#fbbf24', label: 'Isolation Forests' },
+            { icon: 'fa-map', color: '#60a5fa', label: 'Bivariate Mapping' },
+            { icon: 'fa-chart-area', color: '#c084fc', label: 'Density Joyplots' },
+            { icon: 'fa-wave-square', color: '#2AD5FF', label: 'Temporal Analysis' },
+            { icon: 'fa-balance-scale', color: '#fda4af', label: 'Equity Disparities' },
+            { icon: 'fa-sitemap', color: '#86efac', label: 'PCA Projection' },
+        ];
+        var track = document.getElementById('marquee-track');
+        if (track) {
+            var pills = PILLS.concat(PILLS).concat(PILLS);
+            track.innerHTML = pills.map(function (p) {
+                return '<span class="marquee-pill"><i class="fas ' + p.icon + '" style="color:' + p.color + '"></i>' + p.label + '</span>';
+            }).join('');
+        }
+    })();
+</script>

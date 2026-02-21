@@ -1,0 +1,260 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     TOP NAVIGATION BAR  —  ThoughtSpot-style with hover mega-menus
+     Pure-CSS mobile toggle (no JS required, works inside st.html())
+     Links point to actual Streamlit page paths.
+═══════════════════════════════════════════════════════════════════ -->
+<div class="app-nav-wrapper">
+
+  <!-- Hidden checkbox — pure-CSS mobile toggle engine -->
+  <input type="checkbox" id="app-nav-toggle" class="app-nav-toggle-check">
+
+  <nav class="app-nav" id="main-nav" aria-label="Main navigation">
+    <div class="nav-inner-bar">
+
+      <!-- ── Logo ────────────────────────────────────────────────── -->
+      <a href="/" class="app-nav-logo">
+        <div class="app-nav-logo-icon">🌾</div>
+        <span>FoodInsight&nbsp;<span style="color:#C5CAE9;">Analytics</span></span>
+      </a>
+
+      <!-- ── Desktop nav links ────────────────────────────────────── -->
+      <ul class="app-nav-links">
+
+        <!-- Overview (plain link) -->
+        <li class="app-nav-item">
+          <a href="/" class="app-nav-link">Overview</a>
+        </li>
+
+        <!-- Dashboard ▸ mega-menu (4 items, 2-col grid) -->
+        <li class="app-nav-item">
+          <span class="app-nav-link">
+            Dashboard&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
+          </span>
+          <div class="app-mega-menu app-mega-wide">
+            <a class="app-menu-item" href="/1_Executive_Overview" data-img="___IMG_OVERVIEW___"
+              data-label="Executive Overview — KPIs &amp; Trends">
+              <span class="app-mi-icon" style="color:#C5CAE9;">
+                <i class="fas fa-chart-bar"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Executive Overview</strong>
+                <span>National KPIs &amp; trend analysis</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/2_Geographic_Intelligence" data-img="___IMG_MAP___"
+              data-label="Geographic Intelligence — Choropleth Maps">
+              <span class="app-mi-icon" style="color:#2AD5FF;">
+                <i class="fas fa-map-marked-alt"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Geographic Intelligence</strong>
+                <span>Interactive choropleth maps</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/0_Data_Explorer">
+              <span class="app-mi-icon" style="color:#34d399;">
+                <i class="fas fa-microscope"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Data Explorer</strong>
+                <span>Browse 47,000+ observations</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/9_Data_Downloads">
+              <span class="app-mi-icon" style="color:#fbbf24;">
+                <i class="fas fa-download"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Data Downloads</strong>
+                <span>Export CSV / Excel / JSON</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- Analytics ▸ mega-menu (6 items, 2-col grid) -->
+        <li class="app-nav-item">
+          <span class="app-nav-link">
+            Analytics&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
+          </span>
+          <div class="app-mega-menu app-mega-wide">
+            <a class="app-menu-item" href="/4_Regression_Models" data-img="___IMG_REGRESSION___"
+              data-label="Regression Models — OLS, Ridge, LASSO, Random Forest">
+              <span class="app-mi-icon" style="color:#f472b6;">
+                <i class="fas fa-chart-line"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Regression Models</strong>
+                <span>OLS, Ridge, LASSO, Random Forest</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/3_Correlation_Analysis">
+              <span class="app-mi-icon" style="color:#C5CAE9;">
+                <i class="fas fa-project-diagram"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Correlation Analysis</strong>
+                <span>Bivariate testing &amp; matrices</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/5_Equity_Disparities">
+              <span class="app-mi-icon" style="color:#fbbf24;">
+                <i class="fas fa-balance-scale"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Equity Disparities</strong>
+                <span>Racial, urban-rural, income gaps</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/6_County_Clustering">
+              <span class="app-mi-icon" style="color:#2AD5FF;">
+                <i class="fas fa-sitemap"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>County Clustering</strong>
+                <span>K-Means + PCA projection</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/7_Time_Series_Explorer" data-img="___IMG_TIMELINE___"
+              data-label="Time Series Explorer — SARIMAX Forecasting">
+              <span class="app-mi-icon" style="color:#34d399;">
+                <i class="fas fa-stream"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Time Series Explorer</strong>
+                <span>SARIMAX &amp; trend forecasting</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/11_Anomaly_Detection">
+              <span class="app-mi-icon" style="color:#f472b6;">
+                <i class="fas fa-bullseye"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Anomaly Detection</strong>
+                <span>Isolation Forest, 3,142 counties</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- AI Agent ▸ mega-menu (2 items, single col) -->
+        <li class="app-nav-item">
+          <span class="app-nav-link">
+            AI Agent&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
+          </span>
+          <div class="app-mega-menu">
+            <a class="app-menu-item" href="/10_AI_Data_Analyst">
+              <span class="app-mi-icon" style="color:#a78bfa;">
+                <i class="fas fa-robot"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>AI Data Analyst</strong>
+                <span>Gemini 2.5 Flash + code execution</span>
+              </span>
+            </a>
+            <a class="app-menu-item" href="/8_Policy_Scenarios">
+              <span class="app-mi-icon" style="color:#2AD5FF;">
+                <i class="fas fa-flask"></i>
+              </span>
+              <span class="app-mi-text">
+                <strong>Policy Scenarios</strong>
+                <span>DiD causal inference simulation</span>
+              </span>
+            </a>
+          </div>
+        </li>
+
+        <!-- Methods (plain link) -->
+        <li class="app-nav-item">
+          <a href="#bento" class="app-nav-link">Methods</a>
+        </li>
+
+      </ul>
+
+      <!-- ── Desktop CTA buttons ──────────────────────────────────── -->
+      <div class="app-nav-cta">
+        <a href="/9_Data_Downloads" class="app-btn-ghost">
+          <i class="fas fa-database"></i>&nbsp;Data
+        </a>
+        <a href="https://github.com/LinusConradM/feeding_america" target="_blank" rel="noopener"
+          class="app-btn-primary">
+          <i class="fab fa-github"></i>&nbsp;GitHub
+        </a>
+      </div>
+
+      <!-- ── Hamburger (label triggers the hidden checkbox) ──────── -->
+      <label for="app-nav-toggle" class="app-hamburger" aria-label="Toggle mobile menu">
+        <span></span><span></span><span></span>
+      </label>
+
+    </div><!-- /nav-inner-bar -->
+
+    <!-- ── Mobile slide-down menu ──────────────────────────────── -->
+    <div class="app-mobile-menu">
+
+      <div class="app-mob-section">
+        <div class="app-mob-section-title">Dashboard</div>
+        <a class="app-mob-item" href="/1_Executive_Overview">
+          <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-chart-bar"></i></span>
+          Executive Overview
+        </a>
+        <a class="app-mob-item" href="/2_Geographic_Intelligence">
+          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-map-marked-alt"></i></span>
+          Geographic Intelligence
+        </a>
+        <a class="app-mob-item" href="/0_Data_Explorer">
+          <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-microscope"></i></span>
+          Data Explorer
+        </a>
+      </div>
+
+      <div class="app-mob-section">
+        <div class="app-mob-section-title">Analytics</div>
+        <a class="app-mob-item" href="/4_Regression_Models">
+          <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-chart-line"></i></span>
+          Regression Models
+        </a>
+        <a class="app-mob-item" href="/3_Correlation_Analysis">
+          <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-project-diagram"></i></span>
+          Correlation Analysis
+        </a>
+        <a class="app-mob-item" href="/5_Equity_Disparities">
+          <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-balance-scale"></i></span>
+          Equity Disparities
+        </a>
+        <a class="app-mob-item" href="/6_County_Clustering">
+          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-sitemap"></i></span>
+          County Clustering
+        </a>
+        <a class="app-mob-item" href="/7_Time_Series_Explorer">
+          <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-stream"></i></span>
+          Time Series Explorer
+        </a>
+        <a class="app-mob-item" href="/11_Anomaly_Detection">
+          <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-bullseye"></i></span>
+          Anomaly Detection
+        </a>
+      </div>
+
+      <div class="app-mob-section">
+        <div class="app-mob-section-title">AI &amp; Policy</div>
+        <a class="app-mob-item" href="/10_AI_Data_Analyst">
+          <span class="app-mi-icon" style="color:#a78bfa;"><i class="fas fa-robot"></i></span>
+          AI Data Analyst
+        </a>
+        <a class="app-mob-item" href="/8_Policy_Scenarios">
+          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-flask"></i></span>
+          Policy Scenarios
+        </a>
+      </div>
+
+      <div class="app-mob-cta">
+        <a href="https://github.com/LinusConradM/feeding_america" target="_blank" rel="noopener" class="app-m-primary">
+          <i class="fab fa-github"></i>&nbsp;GitHub
+        </a>
+      </div>
+
+    </div><!-- /app-mobile-menu -->
+  </nav>
+
+</div><!-- /app-nav-wrapper -->

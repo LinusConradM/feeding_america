@@ -1,83 +1,187 @@
 """
 U.S. Food Insecurity Analytics Platform
 Conrad Linus Muhirwe - American University
+
+home.py — Renders the landing page using the exact index.html design.
+Every section maps to a template in views/templates/.
 """
 import streamlit as st
 import warnings
 import base64
-import os
+from pathlib import Path
 
-from utils.theme import inject_tailwind
-
-# Suppress expected numpy warnings when calculating aggregations on all-NaN slices
 warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
 
-def get_base64_of_bin_file(bin_file):
+_VIEWS_DIR = Path(__file__).parent          # …/views/
+_ROOT_DIR  = _VIEWS_DIR.parent              # project root
+_TMPL_DIR  = _VIEWS_DIR / "templates"       # …/views/templates/
+_IMG_DIR   = _ROOT_DIR / "images"
+
+
+# ── Helper: embed image as base64 data-URI ────────────────────────────────────
+def b64_img(path: Path) -> str:
+    """Return a data:image/png;base64,… URI for the image at `path`."""
     try:
-        with open(bin_file, 'rb') as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
+        return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
     except Exception:
         return ""
 
-bg_img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "hero_bg.png")
-bg_url = f"url('data:image/png;base64,{get_base64_of_bin_file(bg_img_path)}')"
+
+# Pre-encode all gallery images so Streamlit can render them inside st.html()
+IMGS = {
+    "overview":   b64_img(_IMG_DIR / "OverviewPage.png"),
+    "map":        b64_img(_IMG_DIR / "ExplorationMap.png"),
+    "data":       b64_img(_IMG_DIR / "ExplorationDataView.png"),
+    "regression": b64_img(_IMG_DIR / "AnalysisRegression.png"),
+    "timeline":   b64_img(_IMG_DIR / "Timeline.png"),
+    "critical":   b64_img(_IMG_DIR / "Critical Path.png"),
+}
 
 
-with open("views/home.css", "r") as f:
-    custom_css = f.read()
-
-custom_css = custom_css.replace('___BG_URL___', bg_url)
-
-st.html(custom_css)
-# ── HERO TEXT ────────────────────────────────────────────────────────────────
-from pathlib import Path
-st.html(Path("views/templates/hero.html").read_text())
+# ── 1. Inject CSS (home.css = exact index.html styles) ───────────────────────
+css_raw = (_VIEWS_DIR / "home.css").read_text()
+st.html(css_raw)
 
 
-# ── KPI GLASS ROW ────────────────────────────────────────────────────────────
-st.html(Path("views/templates/kpi.html").read_text())
-
-st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
-
-# ── NATIVE STREAMLIT CTA BUTTONS ─────────────────────────────────────────────
-# This seamlessly flows within the Streamlit DOM, fixing the overlay mismatch.
-_, col1, col2, _ = st.columns([1, 1, 1, 1])
-with col1:
-    if st.button("Explore Dashboards", width='stretch'):
-        st.switch_page("views/1_Executive_Overview.py")
-with col2:
-    if st.button("Launch AI Agent", width='stretch'):
-        st.switch_page("views/10_AI_Data_Analyst.py")
-
-# ── V2 TECH STACK MARQUEE ────────────────────────────────────────────────────
-marquee_items = [
-    ('<i class="fas fa-microchip" style="color:#a78bfa"></i> Gemini 2.5 Flash', 'AI_Data_Analyst'),
-    ('<i class="fas fa-project-diagram" style="color:#38bdf8"></i> Difference-in-Differences', 'Policy_Scenarios'),
-    ('<i class="fas fa-chart-line" style="color:#f472b6"></i> SARIMAX Forecasting', 'Time_Series_Explorer'),
-    ('<i class="fas fa-search-location" style="color:#34d399"></i> Spatial K-Means', 'County_Clustering'),
-    ('<i class="fas fa-bullseye" style="color:#fbbf24"></i> Isolation Forests', 'Anomaly_Detection'),
-    ('<i class="fas fa-map" style="color:#60a5fa"></i> Bivariate Mapping', 'Geographic_Intelligence'),
-    ('<i class="fas fa-chart-area" style="color:#a78bfa"></i> Density Joyplots', 'Data_Explorer'),
-]
-marquee_text = "".join([f'<a href="{url}" target="_self" class="marquee-item" style="text-decoration: none; cursor: pointer;">{item}</a>' for item, url in marquee_items])
-marquee_text = marquee_text + marquee_text + marquee_text # Triple for smooth infinite loop
-
-marquee_template = Path("views/templates/marquee.html").read_text()
-st.html(marquee_template.format(marquee_text=marquee_text))
+# ── 2. Google Fonts + Font Awesome (same as index.html <head>) ───────────────
+st.html("""
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+""")
 
 
-
-# ── V2 VIBRANT BENTO GRID ─────────────────────────────────────────────────────
-st.markdown('<h2 style="font-family:\'SF Pro Display\',\'Inter\',sans-serif;font-size:2.2rem;font-weight:700;color:#FFFFFF;margin-bottom:2rem;letter-spacing:-0.02em;">Platform Architecture</h2>', unsafe_allow_html=True)
-
-st.html(Path("views/templates/bento.html").read_text())
-
-
-
-
-# ── FOOTER ───────────────────────────────────────────────────────────────────
-st.html(Path("views/templates/footer.html").read_text())
+# ── 3. Navigation ────────────────────────────────────────────────────────────
+nav_tmpl = (_TMPL_DIR / "nav.html").read_text()
+nav_html = (nav_tmpl
+    .replace("___IMG_OVERVIEW___",   IMGS["overview"])
+    .replace("___IMG_MAP___",        IMGS["map"])
+    .replace("___IMG_REGRESSION___", IMGS["regression"])
+    .replace("___IMG_TIMELINE___",   IMGS["timeline"])
+)
+st.html(nav_html)
 
 
+# ── 4. Hero section ───────────────────────────────────────────────────────────
+# The hero uses a split layout: text left, reactive screenshot right.
+# Images are base64 so Streamlit serves them correctly without a static file server.
+hero_tmpl = (_TMPL_DIR / "hero.html").read_text()
+
+# Build the right-side screenshot pane inline (needs JS for reactive switching)
+hero_html = f"""
+<div class="home-page-wrap">
+  <section id="hero">
+    <div class="hero">
+      <div class="hero-layout">
+
+        <!-- LEFT: text -->
+        <div class="hero-text">
+          {hero_tmpl}
+        </div>
+
+        <!-- RIGHT: reactive screenshot -->
+        <div class="hero-visual">
+          <div class="hero-screen-wrap">
+            <div class="hero-screen-frame">
+              <div class="hero-screen-bar">
+                <span class="dot-r"></span>
+                <span class="dot-y"></span>
+                <span class="dot-g"></span>
+                <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:#94a3b8;margin-left:0.5rem;">
+                  food-insecurity-analytics &middot; streamlit
+                </span>
+              </div>
+              <img
+                id="hero-img"
+                src="{IMGS['overview']}"
+                alt="Dashboard preview"
+                class="hero-screen-img"
+              />
+            </div>
+            <div class="hero-screen-label" id="hero-label">Executive Overview — National KPIs</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+"""
+st.html(hero_html)
+
+
+# ── 5. KPI strip ─────────────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "kpi.html").read_text())
+
+
+# ── 6. Marquee ───────────────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "marquee.html").read_text())
+
+
+# ── 7. Bento grid (Platform Architecture) ────────────────────────────────────
+st.html((_TMPL_DIR / "bento.html").read_text())
+
+
+# ── 8. Dashboard Gallery ─────────────────────────────────────────────────────
+gallery_tmpl = (_TMPL_DIR / "gallery.html").read_text()
+gallery_html = (gallery_tmpl
+    .replace("___IMG_OVERVIEW___",   IMGS["overview"])
+    .replace("___IMG_MAP___",        IMGS["map"])
+    .replace("___IMG_DATA___",       IMGS["data"])
+    .replace("___IMG_REGRESSION___", IMGS["regression"])
+    .replace("___IMG_TIMELINE___",   IMGS["timeline"])
+    .replace("___IMG_CRITICAL___",   IMGS["critical"])
+)
+st.html(gallery_html)
+
+
+# ── 9. Statistical Methods ────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "methods.html").read_text())
+
+
+# ── 10. Data Sources ─────────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "sources.html").read_text())
+
+
+# ── 11. Footer + nav JS ───────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "footer.html").read_text())
+
+# Close the home-page-wrap div opened in step 4
+st.html("</div>")
+
+
+# ── 12. Hero reactive image JS (nav hover changes screenshot) ─────────────────
+hero_js = f"""
+<script>
+(function() {{
+  var heroImg   = document.getElementById('hero-img');
+  var heroLabel = document.getElementById('hero-label');
+  var DEFAULT_SRC   = '{IMGS["overview"]}';
+  var DEFAULT_LABEL = 'Executive Overview — National KPIs';
+
+  function setHeroImg(src, label) {{
+    heroImg.style.opacity = '0';
+    setTimeout(function() {{
+      heroImg.src = src;
+      heroImg.onload = function() {{ heroImg.style.opacity = '1'; }};
+      heroLabel.textContent = label;
+    }}, 150);
+  }}
+
+  // Attach to every menu-item that has data-img
+  document.querySelectorAll('.menu-item[data-img]').forEach(function(el) {{
+    el.addEventListener('mouseenter', function() {{
+      setHeroImg(el.dataset.img, el.dataset.label);
+    }});
+  }});
+
+  // Restore default when leaving any nav-item
+  document.querySelectorAll('.nav-item').forEach(function(item) {{
+    item.addEventListener('mouseleave', function() {{
+      setHeroImg(DEFAULT_SRC, DEFAULT_LABEL);
+    }});
+  }});
+}})();
+</script>
+"""
+st.html(hero_js)
