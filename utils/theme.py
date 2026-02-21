@@ -468,8 +468,8 @@ def inject_tailwind():
             .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
         }
         @media(max-width:768px){
-            .grid-cols-4 { grid-template-columns: repeat(3, 1fr) !important; gap: 0.5rem !important; }
-            .grid-cols-2, .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; }
+            .grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; justify-content: center !important; }
+            .grid-cols-2, .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; justify-content: center !important; }
             .px-10,.px-12{padding-left:0.75rem;padding-right:0.75rem}
             /* Scale down KPIs severely to fit 3 in a row on mobile */
             .kpi-card { padding: 0.65rem !important; }
