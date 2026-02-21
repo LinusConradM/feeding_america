@@ -119,7 +119,26 @@ st.html((_TMPL_DIR / "kpi.html").read_text())
 
 
 # ── 6. Marquee ───────────────────────────────────────────────────────────────
-st.html((_TMPL_DIR / "marquee.html").read_text())
+# Generate pills in Python so no JS is needed inside the st.html() iframe
+MARQUEE_PILLS = [
+    ("fa-microchip",       "#a78bfa", "Gemini 2.5 Flash"),
+    ("fa-project-diagram", "#38bdf8", "Difference-in-Differences"),
+    ("fa-chart-line",      "#f472b6", "SARIMAX Forecasting"),
+    ("fa-search-location", "#34d399", "Spatial K-Means"),
+    ("fa-bullseye",        "#fbbf24", "Isolation Forests"),
+    ("fa-map",             "#60a5fa", "Bivariate Mapping"),
+    ("fa-chart-area",      "#c084fc", "Density Joyplots"),
+    ("fa-wave-square",     "#2AD5FF", "Temporal Analysis"),
+    ("fa-balance-scale",   "#fda4af", "Equity Disparities"),
+    ("fa-sitemap",         "#86efac", "PCA Projection"),
+]
+pill_html = "".join(
+    f'<span class="marquee-pill"><i class="fas {icon}" style="color:{color}"></i> {label}</span>'
+    for icon, color, label in MARQUEE_PILLS
+)
+# Triple the pills for the seamless infinite loop animation
+pills_3x = pill_html * 3
+st.html(f'<div class="marquee-section"><div class="marquee-track">{pills_3x}</div></div>')
 
 
 # ── 7. Bento grid (Platform Architecture) ────────────────────────────────────
