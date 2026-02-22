@@ -103,7 +103,7 @@ hero_html = f"""
                 class="hero-screen-img"
               />
             </div>
-            <div class="hero-screen-label" id="hero-label">Executive Overview — National KPIs</div>
+            <div class="hero-screen-label" id="hero-label">Dashboard Gallery</div>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ hero_js = f"""
   var heroImg   = document.getElementById('hero-img');
   var heroLabel = document.getElementById('hero-label');
   var DEFAULT_SRC   = '{IMGS["overview"]}';
-  var DEFAULT_LABEL = 'Executive Overview — National KPIs';
+  var DEFAULT_LABEL = 'Dashboard Gallery';
 
   function setHeroImg(src, label) {{
     heroImg.style.opacity = '0';
