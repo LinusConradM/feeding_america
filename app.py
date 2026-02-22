@@ -40,25 +40,35 @@ with st.sidebar:
 
 # ── Navigation Configuration ──────────────────────────────────────────────────
 # Main group
-home_page = st.Page("views/home.py", title="Home", icon="🏠", default=True)
-exec_page = st.Page("views/1_Executive_Overview.py", title="Executive Overview", icon="📊")
-geo_page = st.Page("views/2_Geographic_Intelligence.py", title="Geographic Intelligence", icon="🗺️")
+home_page = st.Page("views/home.py", title="Home", icon="🏠", default=True, url_path="")
+exec_page = st.Page(
+    "views/1_Executive_Overview.py",
+    title="Executive Overview",
+    icon="📊",
+    url_path="1_Executive_Overview",
+)
+geo_page = st.Page(
+    "views/2_Geographic_Intelligence.py",
+    title="Geographic Intelligence",
+    icon="🗺️",
+    url_path="2_Geographic_Intelligence",
+)
 
 # Analytics group bundle
-explorer_page = st.Page("views/0_Data_Explorer.py", title="Data Explorer", icon="🔬")
-corr_page = st.Page("views/3_Correlation_Analysis.py", title="Correlation Analysis", icon="📈")
-reg_page = st.Page("views/4_Regression_Models.py", title="Regression Models", icon="📉")
-equity_page = st.Page("views/5_Equity_Disparities.py", title="Equity Disparities", icon="⚖️")
-cluster_page = st.Page("views/6_County_Clustering.py", title="County Clustering", icon="🧩")
-time_page = st.Page("views/7_Time_Series_Explorer.py", title="Time Series Explorer", icon="⏳")
-anomaly_page = st.Page("views/11_Anomaly_Detection.py", title="Anomaly Detection", icon="📡")
+explorer_page = st.Page("views/0_Data_Explorer.py", title="Data Explorer", icon="🔬", url_path="0_Data_Explorer")
+corr_page = st.Page("views/3_Correlation_Analysis.py", title="Correlation Analysis", icon="📈", url_path="3_Correlation_Analysis")
+reg_page = st.Page("views/4_Regression_Models.py", title="Regression Models", icon="📉", url_path="4_Regression_Models")
+equity_page = st.Page("views/5_Equity_Disparities.py", title="Equity Disparities", icon="⚖️", url_path="5_Equity_Disparities")
+cluster_page = st.Page("views/6_County_Clustering.py", title="County Clustering", icon="🧩", url_path="6_County_Clustering")
+time_page = st.Page("views/7_Time_Series_Explorer.py", title="Time Series Explorer", icon="⏳", url_path="7_Time_Series_Explorer")
+anomaly_page = st.Page("views/11_Anomaly_Detection.py", title="Anomaly Detection", icon="📡", url_path="11_Anomaly_Detection")
 
 # Advanced AI
-ai_page = st.Page("views/10_AI_Data_Analyst.py", title="AI Data Analyst", icon="🤖")
+ai_page = st.Page("views/10_AI_Data_Analyst.py", title="AI Data Analyst", icon="🤖", url_path="10_AI_Data_Analyst")
 
 # Planning & Data group
-policy_page = st.Page("views/8_Policy_Scenarios.py", title="Policy Scenarios", icon="🔮")
-data_page = st.Page("views/9_Data_Downloads.py", title="Data Downloads", icon="💾")
+policy_page = st.Page("views/8_Policy_Scenarios.py", title="Policy Scenarios", icon="🔮", url_path="8_Policy_Scenarios")
+data_page = st.Page("views/9_Data_Downloads.py", title="Data Downloads", icon="💾", url_path="9_Data_Downloads")
 
 # Define the router without Streamlit's default flat visuals
 pg = st.navigation([
