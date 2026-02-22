@@ -780,6 +780,48 @@ header[data-testid="stHeader"] {
     z-index: -1;
 }
 
+/* Remove hero screenshot preview and expand hero text across the row */
+.hero {
+    align-items: flex-start;
+    padding-top: 80px;
+    padding-bottom: 3rem;
+    min-height: auto;
+}
+
+.hero-visual {
+    display: none;
+}
+
+.hero-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+}
+
+.hero-text {
+    width: 100%;
+    max-width: 980px;
+}
+
+.hero-badge {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-title {
+    margin-top: 2rem;
+}
+
+.hero-sub {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-actions {
+    justify-content: center;
+}
+
 /* ═══════════════════════════════════════════════════════
    KPI STRIP  (exact from index.html)
 ═══════════════════════════════════════════════════════ */

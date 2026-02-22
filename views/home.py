@@ -145,35 +145,22 @@ st.html(f'<div class="marquee-section"><div class="marquee-track">{pills_3x}</di
 st.html((_TMPL_DIR / "bento.html").read_text())
 
 
-# ── 8. Dashboard Gallery ─────────────────────────────────────────────────────
-gallery_tmpl = (_TMPL_DIR / "gallery.html").read_text()
-gallery_html = (gallery_tmpl
-    .replace("___IMG_OVERVIEW___",   IMGS["overview"])
-    .replace("___IMG_MAP___",        IMGS["map"])
-    .replace("___IMG_DATA___",       IMGS["data"])
-    .replace("___IMG_REGRESSION___", IMGS["regression"])
-    .replace("___IMG_TIMELINE___",   IMGS["timeline"])
-    .replace("___IMG_CRITICAL___",   IMGS["critical"])
-)
-st.html(gallery_html)
-
-
-# ── 9. Statistical Methods ────────────────────────────────────────────────────
+# ── 8. Statistical Methods ────────────────────────────────────────────────────
 st.html((_TMPL_DIR / "methods.html").read_text())
 
 
-# ── 10. Data Sources ─────────────────────────────────────────────────────────
+# ── 9. Data Sources ─────────────────────────────────────────────────────────
 st.html((_TMPL_DIR / "sources.html").read_text())
 
 
-# ── 11. Footer + nav JS ───────────────────────────────────────────────────────
+# ── 10. Footer + nav JS ───────────────────────────────────────────────────────
 st.html((_TMPL_DIR / "footer.html").read_text())
 
 # Close the home-page-wrap div opened in step 4
 st.html("</div>")
 
 
-# ── 12. Hero reactive image JS (nav hover changes screenshot) ─────────────────
+# ── 11. Hero reactive image JS (nav hover changes screenshot) ─────────────────
 hero_js = f"""
 <script>
 (function() {{
