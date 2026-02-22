@@ -3,30 +3,30 @@
     <p class="section-sub">Hover the navigation tabs or click below to preview each module</p>
 
     <div class="gallery-tabs">
-        <button class="gtab active"
-            onclick="switchGallery(this,'___IMG_OVERVIEW___','Executive Overview — National KPIs &amp; trend analysis')">
+        <a class="gtab active" href="/1_Executive_Overview" onmouseenter="switchGallery(this,'___IMG_OVERVIEW___','Executive Overview — National KPIs &amp; trend analysis')" onfocus="switchGallery(this,'___IMG_OVERVIEW___','Executive Overview — National KPIs &amp; trend analysis')">
             <i class="fas fa-chart-bar"></i> Overview
-        </button>
-        <button class="gtab"
-            onclick="switchGallery(this,'___IMG_MAP___','Geographic Intelligence — County-level choropleth maps')">
+        </a>
+        <a class="gtab" href="/2_Geographic_Intelligence"
+            onmouseenter="switchGallery(this,'___IMG_MAP___','Geographic Intelligence — County-level choropleth maps')"
+            onfocus="switchGallery(this,'___IMG_MAP___','Geographic Intelligence — County-level choropleth maps')">
             <i class="fas fa-map"></i> Geography
-        </button>
+        </a>
         <button class="gtab"
             onclick="switchGallery(this,'___IMG_DATA___','Data Explorer — 47,000+ county-year observations')">
             <i class="fas fa-microscope"></i> Data Explorer
-        </button>
+        </a>
         <button class="gtab"
             onclick="switchGallery(this,'___IMG_REGRESSION___','Regression Models — OLS, Ridge, LASSO, Random Forest')">
             <i class="fas fa-chart-line"></i> Regression
-        </button>
+        </a>
         <button class="gtab"
             onclick="switchGallery(this,'___IMG_TIMELINE___','Time Series Explorer — SARIMAX &amp; trend forecasting')">
             <i class="fas fa-stream"></i> Time Series
-        </button>
+        </a>
         <button class="gtab"
             onclick="switchGallery(this,'___IMG_CRITICAL___','Critical Path — Project workflow &amp; architecture')">
             <i class="fas fa-project-diagram"></i> Architecture
-        </button>
+        </a>
     </div>
 
     <div class="gallery-frame">
