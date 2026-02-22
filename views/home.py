@@ -121,20 +121,20 @@ st.html((_TMPL_DIR / "kpi.html").read_text())
 # ── 6. Marquee ───────────────────────────────────────────────────────────────
 # Generate pills in Python so no JS is needed inside the st.html() iframe
 MARQUEE_PILLS = [
-    ("fa-microchip",       "#a78bfa", "Gemini 2.5 Flash"),
-    ("fa-project-diagram", "#38bdf8", "Difference-in-Differences"),
-    ("fa-chart-line",      "#f472b6", "SARIMAX Forecasting"),
-    ("fa-search-location", "#34d399", "Spatial K-Means"),
-    ("fa-bullseye",        "#fbbf24", "Isolation Forests"),
-    ("fa-map",             "#60a5fa", "Bivariate Mapping"),
-    ("fa-chart-area",      "#c084fc", "Density Joyplots"),
-    ("fa-wave-square",     "#2AD5FF", "Temporal Analysis"),
-    ("fa-balance-scale",   "#fda4af", "Equity Disparities"),
-    ("fa-sitemap",         "#86efac", "PCA Projection"),
+    ("fa-microchip",       "#a78bfa", "Gemini 2.5 Flash", "/10_AI_Data_Analyst"),
+    ("fa-project-diagram", "#38bdf8", "Difference-in-Differences", "/8_Policy_Scenarios"),
+    ("fa-chart-line",      "#f472b6", "SARIMAX Forecasting", "/7_Time_Series_Explorer"),
+    ("fa-search-location", "#34d399", "Spatial K-Means", "/6_County_Clustering"),
+    ("fa-bullseye",        "#fbbf24", "Isolation Forests", "/11_Anomaly_Detection"),
+    ("fa-map",             "#60a5fa", "Bivariate Mapping", "/2_Geographic_Intelligence"),
+    ("fa-chart-area",      "#c084fc", "Density Joyplots", "/5_Equity_Disparities"),
+    ("fa-wave-square",     "#2AD5FF", "Temporal Analysis", "/7_Time_Series_Explorer"),
+    ("fa-balance-scale",   "#fda4af", "Equity Disparities", "/5_Equity_Disparities"),
+    ("fa-sitemap",         "#86efac", "PCA Projection", "/6_County_Clustering"),
 ]
 pill_html = "".join(
-    f'<span class="marquee-pill"><i class="fas {icon}" style="color:{color}"></i> {label}</span>'
-    for icon, color, label in MARQUEE_PILLS
+    f'<a class="marquee-pill" href="{href}"><i class="fas {icon}" style="color:{color}"></i> {label}</a>'
+    for icon, color, label, href in MARQUEE_PILLS
 )
 # Triple the pills for the seamless infinite loop animation
 pills_3x = pill_html * 3

@@ -1016,8 +1016,9 @@ header[data-testid="stHeader"] {
     padding: 0.6rem 1.35rem;
     box-shadow: 0 0 12px rgba(121, 134, 203, 0.2), inset 0 0 8px rgba(197, 202, 233, 0.15);
     transition: all 0.25s;
-    cursor: default;
+    cursor: pointer;
     flex-shrink: 0;
+    text-decoration: none;
 }
 
 .marquee-pill:hover {
