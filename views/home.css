@@ -860,24 +860,59 @@ header[data-testid="stHeader"] {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 3px;
     border-radius: 12px 12px 0 0;
+    clip-path: inset(0 47% 0 47% round 999px);
+    animation: kpiTopSweep 2.8s ease-in-out infinite;
+    will-change: clip-path, opacity;
+    box-shadow: 0 0 10px rgba(255,255,255,0.12);
+}
+
+@keyframes kpiTopSweep {
+    0% {
+        clip-path: inset(0 49% 0 49% round 999px);
+        opacity: 0.35;
+    }
+    18% {
+        clip-path: inset(0 38% 0 38% round 999px);
+        opacity: 0.95;
+    }
+    42% {
+        clip-path: inset(0 0 0 0 round 999px);
+        opacity: 1;
+    }
+    100% {
+        clip-path: inset(0 0 0 0 round 999px);
+        opacity: 0.9;
+    }
 }
 
 .kpi-glass.k1::before {
     background: linear-gradient(90deg, var(--blue), var(--indigo));
+    animation-delay: 0s;
 }
 
 .kpi-glass.k2::before {
     background: linear-gradient(90deg, var(--teal), var(--green));
+    animation-delay: 0.2s;
 }
 
 .kpi-glass.k3::before {
     background: linear-gradient(90deg, var(--purple), var(--pink));
+    animation-delay: 0.4s;
 }
 
 .kpi-glass.k4::before {
     background: linear-gradient(90deg, var(--amber), #f97316);
+    animation-delay: 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kpi-glass::before {
+        animation: none;
+        clip-path: inset(0 0 0 0 round 999px);
+        opacity: 1;
+    }
 }
 
 .kpi-glass:hover {
