@@ -118,18 +118,21 @@ height = 240 if IS_PORTRAIT else (280 if IS_MOBILE else 400)
 dtick = 2 if IS_MOBILE else None
 margin = dict(l=48, r=12, t=36, b=48) if IS_MOBILE else None
 
+layout_kwargs = dict(PLOTLY_LAYOUT)
+if margin:
+    layout_kwargs["margin"] = margin
+
 fig_trend.update_layout(
-    **PLOTLY_LAYOUT,
+    **layout_kwargs,
     title="",
     yaxis_title="Food Insecurity Rate",
     xaxis_title="Year",
     yaxis_tickformat=".0%",
     height=height,
     showlegend=False,
-    margin=margin,
 )
 fig_trend.update_xaxes(dtick=dtick)
-st.plotly_chart(fig_trend, use_container_width=True, config={"responsive": True})
+st.plotly_chart(fig_trend, width="stretch", config={"responsive": True})
 
 # --- TWO-COLUMN: REGIONAL COMPARISON + KEY STATS ---
 col1, col2 = st.columns([3, 2])
