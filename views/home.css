@@ -237,6 +237,16 @@ header[data-testid="stHeader"] {
     position: relative;
 }
 
+.nav-item::after,
+.app-nav-item::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px;
+}
+
 .nav-link,
 .app-nav-link {
     display: flex;
@@ -277,7 +287,7 @@ header[data-testid="stHeader"] {
 .mega-menu,
 .app-mega-menu {
     position: absolute;
-    top: calc(100% + 10px);
+    top: 100%;
     left: 50%;
     min-width: 220px;
     background: rgba(10, 15, 70, 0.97);
