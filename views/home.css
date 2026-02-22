@@ -312,48 +312,6 @@ header[data-testid="stHeader"] {
     gap: 0.1rem;
 }
 
-.app-mega-methods {
-    min-width: 520px;
-    width: 520px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-    padding: 0.75rem;
-    max-height: min(72vh, 640px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.app-method-card {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    padding: 1rem 1rem 0.95rem;
-}
-
-.app-method-card .method-name,
-.app-method-card .method-desc,
-.app-method-card .method-badge {
-    pointer-events: none;
-}
-
-.app-mega-methods::-webkit-scrollbar {
-    width: 8px;
-}
-
-.app-mega-methods::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.app-mega-methods::-webkit-scrollbar-thumb {
-    background: rgba(121, 134, 203, 0.25);
-    border-radius: 999px;
-}
-
-.app-mega-methods::-webkit-scrollbar-thumb:hover {
-    background: rgba(121, 134, 203, 0.45);
-}
-
 .nav-item:hover>.mega-menu,
 .app-nav-item:hover>.app-mega-menu {
     opacity: 1;

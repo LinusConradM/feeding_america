@@ -158,18 +158,22 @@ gallery_html = (gallery_tmpl
 st.html(gallery_html)
 
 
-# ── 9. Data Sources ─────────────────────────────────────────────────────────
+# ── 9. Statistical Methods ────────────────────────────────────────────────────
+st.html((_TMPL_DIR / "methods.html").read_text())
+
+
+# ── 10. Data Sources ─────────────────────────────────────────────────────────
 st.html((_TMPL_DIR / "sources.html").read_text())
 
 
-# ── 10. Footer + nav JS ───────────────────────────────────────────────────────
+# ── 11. Footer + nav JS ───────────────────────────────────────────────────────
 st.html((_TMPL_DIR / "footer.html").read_text())
 
 # Close the home-page-wrap div opened in step 4
 st.html("</div>")
 
 
-# ── 11. Hero reactive image JS (nav hover changes screenshot) ─────────────────
+# ── 12. Hero reactive image JS (nav hover changes screenshot) ─────────────────
 hero_js = f"""
 <script>
 (function() {{
