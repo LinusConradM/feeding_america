@@ -10,11 +10,15 @@ import numpy as np
 from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, STATE_NAMES
+from utils.responsive import get_viewport_profile
 
 
 
 
 data = load_data()
+viewport = get_viewport_profile()
+IS_MOBILE = viewport["is_mobile"]
+IS_PORTRAIT = viewport["is_portrait"]
 
 # Sidebar controls
 with st.sidebar:
@@ -89,13 +93,17 @@ trend = data.groupby("year", observed=True)["overall_food_insecurity_rate"].mean
 trend.columns = ["Year", "FI Rate"]
 
 fig_trend = go.Figure()
+line_width = 2 if IS_MOBILE else 3
+marker_size = 5 if IS_MOBILE else 8
+fill_color = "rgba(34, 81, 255, 0.05)" if IS_MOBILE else "rgba(34, 81, 255, 0.08)"
+
 fig_trend.add_trace(go.Scatter(
     x=trend["Year"], y=trend["FI Rate"],
     mode="lines+markers",
-    line=dict(color=COLORS["blue"], width=3),
-    marker=dict(size=8, color=COLORS["blue"]),
+    line=dict(color=COLORS["blue"], width=line_width),
+    marker=dict(size=marker_size, color=COLORS["blue"]),
     fill="tozeroy",
-    fillcolor="rgba(34, 81, 255, 0.08)",
+    fillcolor=fill_color,
     name="Food Insecurity Rate",
     hovertemplate="<b>%{x}</b><br>FI Rate: %{y:.1%}<extra></extra>",
 ))
@@ -106,16 +114,22 @@ fig_trend.add_vrect(x0=2009, x1=2010, fillcolor="rgba(192,57,43,0.08)",
 fig_trend.add_vrect(x0=2020, x1=2021, fillcolor="rgba(192,57,43,0.08)",
                     line_width=0, annotation_text="COVID-19", annotation_position="top left")
 
+height = 240 if IS_PORTRAIT else (280 if IS_MOBILE else 400)
+dtick = 2 if IS_MOBILE else None
+margin = dict(l=48, r=12, t=36, b=48) if IS_MOBILE else None
+
 fig_trend.update_layout(
     **PLOTLY_LAYOUT,
     title="",
     yaxis_title="Food Insecurity Rate",
     xaxis_title="Year",
     yaxis_tickformat=".0%",
-    height=400,
+    height=height,
     showlegend=False,
+    margin=margin,
 )
-st.plotly_chart(fig_trend, width='stretch')
+fig_trend.update_xaxes(dtick=dtick)
+st.plotly_chart(fig_trend, use_container_width=True, config={"responsive": True})
 
 # --- TWO-COLUMN: REGIONAL COMPARISON + KEY STATS ---
 col1, col2 = st.columns([3, 2])
