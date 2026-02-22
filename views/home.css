@@ -783,8 +783,8 @@ header[data-testid="stHeader"] {
 /* Remove hero screenshot preview and expand hero text across the row */
 .hero {
     align-items: flex-start;
-    padding-top: 80px;
-    padding-bottom: 3rem;
+    padding-top: 62px;
+    padding-bottom: 2rem;
     min-height: auto;
 }
 
@@ -809,7 +809,7 @@ header[data-testid="stHeader"] {
 }
 
 .hero-title {
-    margin-top: 2rem;
+    margin-top: 0;
 }
 
 .hero-sub {
@@ -828,7 +828,7 @@ header[data-testid="stHeader"] {
 .kpi-section {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0 1.75rem 6rem;
+    padding: 0 1.75rem 2rem;
 }
 
 .kpi-row {
@@ -919,7 +919,7 @@ header[data-testid="stHeader"] {
     border-bottom: 1px solid var(--border);
     padding: 1.25rem 0;
     overflow: hidden;
-    margin-bottom: 7rem;
+    margin-bottom: 2rem;
 }
 
 .marquee-track {
@@ -988,7 +988,7 @@ header[data-testid="stHeader"] {
 .section-sub {
     color: var(--muted);
     font-size: 0.95rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -999,7 +999,7 @@ header[data-testid="stHeader"] {
     grid-template-columns: repeat(12, 1fr);
     grid-auto-rows: minmax(220px, auto);
     gap: 1.25rem;
-    margin-bottom: 6rem;
+    margin-bottom: 2rem;
 }
 
 .aurora-card {
@@ -1154,7 +1154,7 @@ header[data-testid="stHeader"] {
    DASHBOARD GALLERY  (exact from index.html)
 ═══════════════════════════════════════════════════════ */
 .gallery-section {
-    margin-bottom: 7rem;
+    margin-bottom: 2rem;
 }
 
 .gallery-tabs {
@@ -1232,7 +1232,7 @@ header[data-testid="stHeader"] {
    STATISTICAL METHODS  (exact from index.html)
 ═══════════════════════════════════════════════════════ */
 .methods-section {
-    margin-bottom: 7rem;
+    margin-bottom: 2rem;
 }
 
 .methods-grid {
@@ -1295,7 +1295,7 @@ header[data-testid="stHeader"] {
    DATA SOURCES  (exact from index.html)
 ═══════════════════════════════════════════════════════ */
 .sources-section {
-    margin-bottom: 7rem;
+    margin-bottom: 2rem;
 }
 
 .sources-grid {
