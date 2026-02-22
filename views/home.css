@@ -1156,6 +1156,7 @@ header[data-testid="stHeader"] {
     padding: 1rem 1rem 0;
     box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
     overflow: hidden;
+    display: none;
 }
 
 .gallery-bar {
