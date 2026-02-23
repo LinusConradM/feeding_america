@@ -181,6 +181,13 @@ header[data-testid="stHeader"] {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar,
+.nav-inner-bar::-webkit-scrollbar {
+    display: none;
 }
 
 /* Logo */
