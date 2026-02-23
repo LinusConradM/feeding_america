@@ -9,6 +9,7 @@ import streamlit as st
 import warnings
 import base64
 from pathlib import Path
+import pandas as pd
 
 warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
@@ -38,6 +39,31 @@ IMGS = {
     "critical":   b64_img(_IMG_DIR / "Critical Path.png"),
 }
 
+# ── FI Rate ticker data for nav ─────────────────────────────────────────────
+try:
+    from utils.data_loader import load_data
+
+    _df = load_data()
+    _fi_years = (
+        _df.groupby("year", observed=True)["overall_food_insecurity_rate"]
+        .mean()
+        .dropna()
+        .round(4)
+        .sort_index()
+    )
+    _ticker_items = "".join(
+        f'<span class=\"fi-ticker-item\">{int(y)} FI Rate = {v:.1%}</span>'
+        for y, v in _fi_years.items()
+    )
+    _ticker_items = _ticker_items or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
+    _ticker_html = (
+        '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
+        f'{_ticker_items*3}'
+        '</div></div>'
+    )
+except Exception:
+    _ticker_html = '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
+
 
 # ── 1. Inject CSS via st.markdown so it reaches the real document head ────────
 # CRITICAL: st.html() sandboxes content in an iframe; CSS inside it cannot
@@ -63,6 +89,7 @@ nav_html = (nav_tmpl
     .replace("___IMG_MAP___",        IMGS["map"])
     .replace("___IMG_REGRESSION___", IMGS["regression"])
     .replace("___IMG_TIMELINE___",   IMGS["timeline"])
+    .replace("__FI_TICKER__", _ticker_html)
 )
 st.html(nav_html)
 

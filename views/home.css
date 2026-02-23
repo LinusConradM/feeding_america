@@ -217,6 +217,33 @@ header[data-testid="stHeader"] {
     display: inline;
 }
 
+/* FI ticker next to logo */
+.fi-ticker {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 0.75rem;
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.82rem;
+    color: #c5cae9;
+    max-width: 260px;
+    vertical-align: middle;
+}
+.fi-ticker-track {
+    display: inline-block;
+    animation: fi-scroll 70s linear infinite;
+}
+.fi-ticker-item {
+    margin-right: 1.5rem;
+}
+@keyframes fi-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+@media (max-width: 768px) {
+    .fi-ticker { display: none; }
+}
+
 @media (min-width: 480px) {
     .nav-logo span {
         display: inline;
