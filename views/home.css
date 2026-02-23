@@ -179,6 +179,7 @@ header[data-testid="stHeader"] {
     padding: 0 1.75rem;
     height: 62px;
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
     overflow-x: auto;
@@ -290,6 +291,7 @@ header[data-testid="stHeader"] {
 .nav-links,
 .app-nav-links {
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.15rem;
     list-style: none;
