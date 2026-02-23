@@ -293,10 +293,13 @@ if run_clustering or "cluster_results" in st.session_state:
               color = link_colors
           ))])
           
-        fig_sankey.update_layout(
-            **PLOTLY_LAYOUT, title="", height=500,
+        sankey_layout = dict(PLOTLY_LAYOUT)
+        sankey_layout.update(
+            title="",
+            height=500,
             font=dict(size=12, family="Inter, sans-serif")
         )
+        fig_sankey.update_layout(**sankey_layout)
         st.plotly_chart(fig_sankey, width='stretch')
         
     # Geographic distribution
@@ -306,18 +309,21 @@ if run_clustering or "cluster_results" in st.session_state:
     cluster_data_map = cluster_data.copy()
     cluster_data_map["Cluster"] = cluster_data_map["Cluster"].astype(str)
     
-    fig_geo = px.scatter_mapbox(
+    fig_geo = px.scatter_map(
         cluster_data_map, 
         lat="lat", lon="lon", 
         color="Cluster",
         hover_name="county", hover_data=["state"] + selected_vars,
         color_discrete_sequence=SEQUENTIAL_COLORS,
-        zoom=3.5, center={"lat": 39.8283, "lon": -98.5795}
+        zoom=3.5, center={"lat": 39.8283, "lon": -98.5795},
+        map_style="carto-positron"
     )
     
-    fig_geo.update_layout(
-        **PLOTLY_LAYOUT, title="County Clusters Mapping", height=600,
-        mapbox_style="carto-positron",
-        margin={"r":0,"t":40,"l":0,"b":0}
+    geo_layout = dict(PLOTLY_LAYOUT)
+    geo_layout.update(
+        title="County Clusters Mapping",
+        height=600,
+        margin={"r":0,"t":40,"l":0,"b":0},
     )
+    fig_geo.update_layout(**geo_layout)
     st.plotly_chart(fig_geo, width='stretch')

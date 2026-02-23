@@ -354,6 +354,8 @@ def inject_tailwind():
         .gap-section { height: var(--space-4); }
         .mt-section { margin-top: var(--space-4); }
         .mb-section { margin-bottom: var(--space-4); }
+        .section-spacer { height: var(--space-4); }
+        .section-spacer-sm { height: var(--space-3); }
         .stack-3 > * + * { margin-top: var(--space-3); }
         @media (max-width: 768px) {
             :root {
@@ -361,6 +363,16 @@ def inject_tailwind():
                 --space-2: 0.9rem;
                 --space-3: 1.2rem;
                 --space-4: 1.6rem;
+            }
+        }
+
+        /* Uniform bottom rhythm for charts */
+        div[data-testid="stPlotlyChart"] {
+            margin-bottom: var(--space-4) !important;
+        }
+        @media (max-width: 768px) {
+            div[data-testid="stPlotlyChart"] {
+                margin-bottom: var(--space-3) !important;
             }
         }
 

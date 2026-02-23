@@ -166,6 +166,7 @@ overlay_css = """
     position: relative;
     width: 100%;
     height: auto;
+    margin-bottom: var(--space-4);
 }
 .trend-wrap .plotly-graph-div {
     width: 100% !important;
@@ -240,6 +241,9 @@ overlay_css = """
         bottom: auto;
         max-width: unset;
     }
+    .trend-wrap {
+        margin-bottom: var(--space-3);
+    }
 }
 </style>
 """
@@ -255,7 +259,7 @@ trend_html = f"""
 </div>
 """
 
-st.components.v1.html(trend_html, height=height + 140)
+st.components.v1.html(trend_html, height=height + 40)
 
 # --- TWO-COLUMN: REGIONAL COMPARISON + KEY STATS ---
 col1, col2 = st.columns([3, 2])
