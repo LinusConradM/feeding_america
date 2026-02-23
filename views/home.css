@@ -1804,3 +1804,21 @@ header[data-testid="stHeader"] {
 .text-indigo {
     color: var(--indigo-lt);
 }
+
+
+@media (max-width: 768px) {
+    .app-nav-links {
+        flex-direction: row;
+        gap: 0.65rem;
+        align-items: center;
+        margin-top: 0.75rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    .app-nav-item {
+        width: auto;
+        flex-shrink: 0;
+    }
+}
