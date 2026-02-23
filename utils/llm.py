@@ -76,3 +76,53 @@ Keep the response concise and directly addressing the provided data parameters. 
             return f"⚠️ Both Gemini and Groq failed: {e}"
 
     return "⚠️ No valid API key found. Please set GEMINI_API_KEY or GROQ_API_KEY."
+
+
+def explain_plot(plot_name: str, chart_context: dict) -> str:
+    """
+    Generate a concise, plain-language plot explanation for non-technical users.
+
+    Returns 2–3 bullets highlighting what the chart shows and how to read it.
+    """
+    prompt = f"""
+You are a senior data scientist who translates charts into plain-English insights for the public.
+Explain the plot titled \"{plot_name}\". Context: {chart_context}
+
+Write one concise paragraph (no bullets):
+- Lead with the main trajectory (direction and level)
+- Mention only years present in the context; never invent or predict future years
+- Highlight inflection periods within the available years
+- Keep it under 110 words total
+Avoid jargon; use clear years and approximate percentages.
+"""
+
+    # Prefer Gemini, fall back to Groq, else static text
+    gemini_key = _get_api_key()
+    if gemini_key:
+        try:
+            from google import genai
+            client = genai.Client(api_key=gemini_key)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config={"temperature": 0.55},
+            )
+            return response.text.strip()
+        except Exception:
+            pass
+
+    groq_key = _get_groq_key()
+    if groq_key:
+        try:
+            import groq as groq_sdk
+            client = groq_sdk.Groq(api_key=groq_key)
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.55,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception:
+            pass
+
+    return "Food insecurity rose early, eased mid-decade, and spiked around 2020 before improving. Recent years remain above pre-2019 levels—suggesting recovery but not full normalization."

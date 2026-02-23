@@ -343,6 +343,28 @@ def inject_tailwind():
         .hover-lift { transition: transform .25s, box-shadow .25s; }
 
         /* ================================================================== */
+        /*  SPACING SCALE (global rhythm)                                     */
+        /* ================================================================== */
+        :root {
+            --space-1: 0.5rem;
+            --space-2: 1rem;
+            --space-3: 1.5rem;
+            --space-4: 2rem;
+        }
+        .gap-section { height: var(--space-4); }
+        .mt-section { margin-top: var(--space-4); }
+        .mb-section { margin-bottom: var(--space-4); }
+        .stack-3 > * + * { margin-top: var(--space-3); }
+        @media (max-width: 768px) {
+            :root {
+                --space-1: 0.45rem;
+                --space-2: 0.9rem;
+                --space-3: 1.2rem;
+                --space-4: 1.6rem;
+            }
+        }
+
+        /* ================================================================== */
         /*  McKINSEY KPI CARD (the signature element, upgraded)               */
         /* ================================================================== */
         .kpi-card {

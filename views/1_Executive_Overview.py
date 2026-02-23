@@ -5,12 +5,14 @@ Executive Overview - National KPIs, trends, regional comparisons.
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import pandas as pd
 import numpy as np
 from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, STATE_NAMES
 from utils.responsive import get_viewport_profile
+from utils.llm import explain_plot
 
 
 
@@ -80,7 +82,7 @@ kpi_row([
     {"title": "Budget Shortfall", "value": f"${shortfall:,.0f}" if pd.notna(shortfall) else "N/A", "change": safe_pct_change(shortfall, prev_shortfall), "icon": "exclamation-triangle", "gradient": "navy"},
 ])
 
-st.markdown("<div class='h-6'></div>", unsafe_allow_html=True)
+st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
 
 # LLM Insight Engine
 context_dict = {
@@ -142,7 +144,118 @@ fig_trend.update_layout(
     showlegend=False,
 )
 fig_trend.update_xaxes(dtick=dtick)
-st.plotly_chart(fig_trend, width="stretch", config={"responsive": True})
+trend_context = {
+    "Years covered": f"{int(trend['Year'].min())}-{int(trend['Year'].max())}",
+    "Latest rate": f"{trend['FI Rate'].iloc[-1]:.1%}",
+    "Change since start": f"{(trend['FI Rate'].iloc[-1] - trend['FI Rate'].iloc[0]):+.1%}",
+    "Max year": int(trend["Year"].max()),
+}
+trend_explainer = explain_plot("National Food Insecurity Trend (2009-2023)", trend_context)
+
+# Render plot + hover explainer as a custom HTML block so hover reveals card
+trend_div = pio.to_html(
+    fig_trend,
+    include_plotlyjs="cdn",
+    full_html=False,
+    config={"responsive": True, "displayModeBar": False},
+)
+
+overlay_css = """
+<style>
+.trend-wrap {
+    position: relative;
+    width: 100%;
+    height: auto;
+}
+.trend-wrap .plotly-graph-div {
+    width: 100% !important;
+}
+.trend-explainer {
+    position: absolute;
+    top: -20px;
+    right: 12px;
+    max-width: 440px;
+    background: rgba(26, 35, 126, 0.9);
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 5;
+}
+.trend-explainer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+    border-radius: 14px 14px 0 0;
+}
+.trend-wrap:hover .trend-explainer {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.trend-explainer h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #e5eaff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.trend-explainer ul {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #f2f4ff;
+}
+.trend-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d1024;
+    font-size: 1rem;
+    box-shadow: 0 10px 20px rgba(167,139,250,0.35);
+}
+@media (max-width: 768px) {
+    .trend-explainer {
+        left: 8px;
+        right: 8px;
+        top: -40px;
+        bottom: auto;
+        max-width: unset;
+    }
+}
+</style>
+"""
+trend_html = f"""
+{overlay_css}
+<div class="trend-wrap">
+  {trend_div}
+  <div class="trend-explainer">
+    <p style="margin:0;font-size:1.02rem;line-height:1.55;color:#f8fafc;">
+      {trend_explainer.replace(chr(10), ' ')}
+    </p>
+  </div>
+</div>
+"""
+
+st.components.v1.html(trend_html, height=height + 140)
 
 # --- TWO-COLUMN: REGIONAL COMPARISON + KEY STATS ---
 col1, col2 = st.columns([3, 2])
