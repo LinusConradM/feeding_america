@@ -20,6 +20,16 @@ viewport = get_viewport_profile()
 IS_MOBILE = viewport["is_mobile"]
 IS_PORTRAIT = viewport["is_portrait"]
 
+
+def layout_responsive(**kwargs):
+    """Merge base Plotly layout with responsive overrides safely."""
+    layout = dict(PLOTLY_LAYOUT)
+    margin = kwargs.pop("margin", None)
+    layout.update(kwargs)
+    if margin:
+        layout["margin"] = margin
+    return layout
+
 # Sidebar controls
 with st.sidebar:
     st.markdown('<p class="text-white font-semibold text-sm mb-2">Filters</p>', unsafe_allow_html=True)
@@ -146,20 +156,30 @@ with col1:
         regional.columns = ["Region", "FI Rate"]
         regional = regional.dropna(subset=["Region"])
 
+        reg_height = 240 if IS_PORTRAIT else (280 if IS_MOBILE else 300)
+        reg_margin = dict(l=64, r=12, t=32, b=40) if IS_MOBILE else None
+        reg_dtick = 0.02 if IS_MOBILE else None
+
         fig_reg = px.bar(
             regional, x="FI Rate", y="Region", orientation="h",
             color="FI Rate",
             color_continuous_scale=[COLORS["teal"], COLORS["amber"], COLORS["rose"]],
         )
         fig_reg.update_layout(
-            **PLOTLY_LAYOUT, title="", height=300, showlegend=False,
-            coloraxis_showscale=False,
-            xaxis_tickformat=".0%",
+            **layout_responsive(
+                title="",
+                height=reg_height,
+                showlegend=False,
+                coloraxis_showscale=False,
+                xaxis_tickformat=".0%",
+                margin=reg_margin,
+            ),
         )
+        fig_reg.update_xaxes(dtick=reg_dtick)
         fig_reg.update_traces(
             hovertemplate="<b>%{y}</b><br>FI Rate: %{x:.1%}<extra></extra>",
         )
-        st.plotly_chart(fig_reg, width='stretch')
+        st.plotly_chart(fig_reg, width="stretch")
 
 with col2:
     section_header("Key Statistics", icon="calculator")
@@ -227,13 +247,14 @@ fig_map = px.choropleth(
     labels={"FI Rate": "Food Insecurity Rate"},
 )
 fig_map.update_layout(
-    **PLOTLY_LAYOUT,
-    title="",
-    height=500,
-    geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="rgba(0,0,0,0)"),
-    coloraxis_colorbar=dict(tickformat=".0%", title="FI Rate"),
+    **layout_responsive(
+        title="",
+        height=360 if IS_PORTRAIT else (420 if IS_MOBILE else 500),
+        geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="rgba(0,0,0,0)"),
+        coloraxis_colorbar=dict(tickformat=".0%", title="FI Rate"),
+    ),
 )
-st.plotly_chart(fig_map, width='stretch')
+st.plotly_chart(fig_map, width="stretch")
 
 # --- URBAN VS RURAL ---
 section_header("Urban vs Rural Comparison", icon="city")
@@ -250,13 +271,19 @@ if "urban_rural" in year_data.columns:
         color_discrete_sequence=[COLORS["teal"], COLORS["amber"], COLORS["blue"]],
     )
     fig_urban.update_layout(
-        **PLOTLY_LAYOUT, title="", height=350, showlegend=False,
-        yaxis_tickformat=".0%", yaxis_title="Avg Food Insecurity Rate",
+        **layout_responsive(
+            title="",
+            height=260 if IS_PORTRAIT else (300 if IS_MOBILE else 350),
+            showlegend=False,
+            yaxis_tickformat=".0%",
+            yaxis_title="Avg Food Insecurity Rate",
+            margin=dict(l=40, r=10, t=32, b=40) if IS_MOBILE else None,
+        ),
     )
     fig_urban.update_traces(
         hovertemplate="<b>%{x}</b><br>FI Rate: %{y:.1%}<extra></extra>",
     )
-    st.plotly_chart(fig_urban, width='stretch')
+    st.plotly_chart(fig_urban, width="stretch")
 
 # Footer
 st.markdown(
