@@ -176,30 +176,32 @@ header[data-testid="stHeader"] {
 .nav-inner-bar {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0 1.75rem;
-    height: 62px;
+    padding: 0 1.25rem;
+    height: 60px;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: space-between;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-.nav-inner::-webkit-scrollbar,
-.nav-inner-bar::-webkit-scrollbar {
-    display: none;
+    justify-content: flex-start;
+    gap: 0.9rem;
 }
 
 @media (max-width: 768px) {
     .nav-inner,
     .nav-inner-bar {
         justify-content: flex-start;
-        gap: 0.75rem;
-        padding: 0 1rem;
+        gap: 0.45rem;
+        padding: 0 0.8rem;
         margin: 0;
         max-width: none;
         width: auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        height: 56px;
+    }
+    .nav-inner::-webkit-scrollbar,
+    .nav-inner-bar::-webkit-scrollbar {
+        display: none;
     }
 }
 
@@ -243,11 +245,11 @@ header[data-testid="stHeader"] {
     align-items: center;
     overflow-x: auto;
     white-space: nowrap;
-    margin-left: 0.75rem;
+    margin-left: 0.6rem;
     font-family: 'Geist Mono', monospace;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #c5cae9;
-    max-width: 280px;
+    max-width: 200px;
     vertical-align: middle;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -267,9 +269,9 @@ header[data-testid="stHeader"] {
 @media (max-width: 768px) {
     .fi-ticker {
         display: inline-block;
-        max-width: 180px;
-        font-size: 0.78rem;
-        margin-left: 0.4rem;
+        max-width: 160px;
+        font-size: 0.76rem;
+        margin-left: 0.3rem;
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
@@ -317,9 +319,9 @@ header[data-testid="stHeader"] {
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.45rem 0.85rem;
+    padding: 0.75rem 1.0rem;
     border-radius: 6px;
-    font-size: 0.88rem;
+    font-size: 0.98rem;
     font-weight: 500;
     color: var(--muted);
     cursor: pointer;
@@ -410,8 +412,8 @@ header[data-testid="stHeader"] {
 
 .menu-item .mi-icon,
 .app-mi-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -458,7 +460,7 @@ header[data-testid="stHeader"] {
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+        gap: 0.45rem;
     text-decoration: none;
 }
 
@@ -482,7 +484,7 @@ header[data-testid="stHeader"] {
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+        gap: 0.45rem;
     box-shadow: 0 0 20px rgba(34, 81, 255, 0.25);
     text-decoration: none;
 }
@@ -568,7 +570,7 @@ header[data-testid="stHeader"] {
 .app-mob-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.9rem;
     padding: 0.65rem 0.5rem;
     border-radius: 8px;
     color: var(--muted);
@@ -587,7 +589,7 @@ header[data-testid="stHeader"] {
 .mob-cta,
 .app-mob-cta {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.9rem;
     margin-top: 1.25rem;
 }
 
@@ -1482,7 +1484,7 @@ header[data-testid="stHeader"] {
 .source-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+        gap: 0.45rem;
 }
 
 .stag {
@@ -1594,7 +1596,7 @@ header[data-testid="stHeader"] {
 
 .footer-bottom .footer-socials {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.9rem;
 }
 
 .footer-social-btn {
@@ -1724,7 +1726,7 @@ header[data-testid="stHeader"] {
     }
 
     .gallery-tabs {
-        gap: 0.4rem;
+        gap: 0.45rem;
         flex-wrap: nowrap;
         overflow-x: auto;
         overflow-y: hidden;
