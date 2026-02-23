@@ -246,7 +246,12 @@ header[data-testid="stHeader"] {
         max-width: 180px;
         font-size: 0.78rem;
         margin-left: 0.4rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
+    .fi-ticker::-webkit-scrollbar { display: none; }
     .fi-ticker-track {
         animation-duration: 90s;
     }
