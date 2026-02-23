@@ -241,7 +241,15 @@ header[data-testid="stHeader"] {
     100% { transform: translateX(-50%); }
 }
 @media (max-width: 768px) {
-    .fi-ticker { display: none; }
+    .fi-ticker {
+        display: inline-block;
+        max-width: 180px;
+        font-size: 0.78rem;
+        margin-left: 0.4rem;
+    }
+    .fi-ticker-track {
+        animation-duration: 90s;
+    }
 }
 
 @media (min-width: 480px) {
