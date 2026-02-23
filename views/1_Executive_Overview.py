@@ -191,32 +191,32 @@ with col2:
         ("Above Average", f"{(fi_vals > fi_vals.mean()).sum():,} counties", "#B91C1C", "#fff1f1"),
     ]
     stat_cards_html = """
-    <style>
-    .stat-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; }
-    @media (max-width: 820px) { .stat-grid { gap:12px; } }
-    @media (max-width: 580px) { .stat-grid { gap:10px; } }
-    .stat-card-box {
-        border-radius:16px; padding:1.05rem 0.9rem;
-        text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.04);
-        border:1px solid rgba(0,0,0,0.04); height:100%;
-    }
-    .stat-card-title {
-        font-size:0.78rem; font-weight:700; letter-spacing:0.04em;
-        color:#6B7280; margin-bottom:0.35rem; text-transform:uppercase;
-    }
-    .stat-card-value {
-        font-size:1.35rem; font-weight:800; margin:0;
-    }
-    </style>
-    <div class="stat-grid">
-    """
+<style>
+.stat-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; }
+@media (max-width: 820px) { .stat-grid { gap:12px; } }
+@media (max-width: 580px) { .stat-grid { gap:10px; } }
+.stat-card-box {
+    border-radius:16px; padding:1.05rem 0.9rem;
+    text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.04);
+    border:1px solid rgba(0,0,0,0.04); height:100%;
+}
+.stat-card-title {
+    font-size:0.78rem; font-weight:700; letter-spacing:0.04em;
+    color:#6B7280; margin-bottom:0.35rem; text-transform:uppercase;
+}
+.stat-card-value {
+    font-size:1.35rem; font-weight:800; margin:0;
+}
+</style>
+<div class="stat-grid">
+"""
     for title, value, fg, bg in cards:
         stat_cards_html += f"""
-        <div class="stat-card-box" style="background:{bg};">
-            <div class="stat-card-title">{title}</div>
-            <div class="stat-card-value" style="color:{fg};">{value}</div>
-        </div>
-        """
+<div class="stat-card-box" style="background:{bg};">
+    <div class="stat-card-title">{title}</div>
+    <div class="stat-card-value" style="color:{fg};">{value}</div>
+</div>
+"""
     stat_cards_html += "</div>"
     st.markdown(stat_cards_html, unsafe_allow_html=True)
 
