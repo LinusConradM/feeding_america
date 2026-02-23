@@ -184,20 +184,54 @@ with col1:
 with col2:
     section_header("Key Statistics", icon="calculator")
     fi_vals = year_data["overall_food_insecurity_rate"].dropna()
-    c1, c2 = st.columns(2, gap="medium")
-    with c1:
-        stat_card("Median FI Rate", f"{fi_vals.median():.1%}", color="blue")
-    with c2:
-        stat_card("Std Deviation", f"{fi_vals.std():.1%}", color="purple")
+    if IS_MOBILE:
+        # Mobile-friendly 2x2 grid with centered text
+        cards = [
+            ("Median FI Rate", f"{fi_vals.median():.1%}", "#2251FF", "#eef4ff"),
+            ("Std Deviation", f"{fi_vals.std():.1%}", "#7C3AED", "#f8efff"),
+            ("Range", f"{fi_vals.min():.1%} - {fi_vals.max():.1%}", "#B45309", "#fff8e6"),
+            ("Above Average", f"{(fi_vals > fi_vals.mean()).sum():,} counties", "#B91C1C", "#fff1f1"),
+        ]
+        for i in range(0, len(cards), 2):
+            c_left, c_right = st.columns(2, gap="small")
+            for col, card in zip((c_left, c_right), cards[i : i + 2]):
+                title, value, fg, bg = card
+                col.markdown(
+                    f"""
+                    <div style="
+                        background:{bg};
+                        border:1px solid rgba(0,0,0,0.04);
+                        border-radius:16px;
+                        padding:1.1rem 1rem;
+                        text-align:center;
+                        box-shadow:0 1px 4px rgba(0,0,0,0.04);
+                        height:100%;
+                    ">
+                        <div style="font-size:0.78rem;font-weight:700;letter-spacing:0.04em;color:#6B7280;margin-bottom:0.35rem;text-transform:uppercase;">
+                            {title}
+                        </div>
+                        <div style="font-size:1.35rem;font-weight:800;color:{fg};margin:0;">
+                            {value}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+    else:
+        c1, c2 = st.columns(2, gap="medium")
+        with c1:
+            stat_card("Median FI Rate", f"{fi_vals.median():.1%}", color="blue")
+        with c2:
+            stat_card("Std Deviation", f"{fi_vals.std():.1%}", color="purple")
+            
+        st.markdown("<br>", unsafe_allow_html=True)
         
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    c3, c4 = st.columns(2, gap="medium")
-    with c3:
-        stat_card("Range", f"{fi_vals.min():.1%} - {fi_vals.max():.1%}", color="amber")
-    with c4:
-        above_avg = (fi_vals > fi_vals.mean()).sum()
-        stat_card("Above Average", f"{above_avg:,} counties", color="red")
+        c3, c4 = st.columns(2, gap="medium")
+        with c3:
+            stat_card("Range", f"{fi_vals.min():.1%} - {fi_vals.max():.1%}", color="amber")
+        with c4:
+            above_avg = (fi_vals > fi_vals.mean()).sum()
+            stat_card("Above Average", f"{above_avg:,} counties", color="red")
 
 # --- TOP/BOTTOM STATES ---
 section_header("State Rankings", "Top and bottom 10 states by food insecurity rate", "trophy")
