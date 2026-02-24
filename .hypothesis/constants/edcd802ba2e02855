@@ -1,0 +1,4 @@
+# file: /Users/linusmuhirwe/Library/CloudStorage/OneDrive-american.edu/Personal/portfolio_projects/gp-food-basket/utils/responsive.py
+# hypothesis_version: 6.151.9
+
+[240, 280, 350, 450, 600, 820, 1024, 'ViewportProfile', 'desktop', 'mobile', 'query_params', 'tablet', 'vw']

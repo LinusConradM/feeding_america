@@ -478,8 +478,8 @@ def inject_tailwind():
         .section-hdr {
             border-bottom: 2px solid #051C2C;
             padding-bottom: .5rem;
-            margin-bottom: 1.25rem;
-            margin-top: 2rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
         }
         .section-hdr h2 {
             font-family: Georgia, serif;
@@ -489,9 +489,23 @@ def inject_tailwind():
             margin: 0;
         }
         .section-hdr p {
-            font-size: .8rem;
+            font-size: 1.125rem;
             color: #6B7F95;
             margin: .2rem 0 0;
+        }
+        
+        /* Responsive adjustments for section headers */
+        @media (max-width: 768px) {
+            .section-hdr {
+                margin-top: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            .section-hdr h2 {
+                font-size: 1.125rem;
+            }
+            .section-hdr p {
+                font-size: 1.125rem;
+            }
         }
 
         /* ================================================================== */
@@ -502,16 +516,32 @@ def inject_tailwind():
             .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
         }
         @media(max-width:768px){
+            /* Mobile typography adjustments - ensure minimum 14px for body text */
+            html, body, .stApp {
+                font-size: 14px !important;
+            }
+            /* Ensure text utility classes meet 14px minimum */
+            .text-xs { font-size: 0.875rem; line-height: 1.25rem; } /* 14px minimum */
+            .text-sm { font-size: 0.875rem; line-height: 1.25rem; } /* 14px */
+            .text-base { font-size: 1rem; line-height: 1.5rem; } /* 14px base */
+            .text-lg { font-size: 1.125rem; line-height: 1.75rem; } /* 15.75px */
+            .text-xl { font-size: 1.25rem; line-height: 1.75rem; } /* 17.5px */
+            .text-2xl { font-size: 1.5rem; line-height: 2rem; } /* 21px */
+            .text-3xl { font-size: 1.75rem; line-height: 2.25rem; } /* 24.5px */
+            .text-4xl { font-size: 2rem; line-height: 2.5rem; } /* 28px */
+            .text-5xl { font-size: 2.25rem; line-height: 1.15; } /* 31.5px */
+            
+            /* Grid layout adjustments */
             .grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; justify-content: center !important; }
             .grid-cols-2, .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; justify-content: center !important; }
             .px-10,.px-12{padding-left:0.75rem;padding-right:0.75rem}
+            
             /* Scale down KPIs severely to fit 3 in a row on mobile */
             .kpi-card { padding: 0.65rem !important; }
             .kpi-value { font-size: 1.15rem !important; }
             .kpi-label { font-size: 0.55rem !important; letter-spacing: 0 !important; margin-bottom: 0.3rem !important; }
             .kpi-label i { margin-right: 0.15rem !important; }
             .kpi-change { font-size: 0.55rem !important; padding: 0.1rem 0.3rem !important; }
-            .text-5xl{font-size:1.75rem} .text-4xl{font-size:1.5rem}
         }
         </style>
     """
