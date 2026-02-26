@@ -276,3 +276,79 @@
   </nav>
 
 </div><!-- /app-nav-wrapper -->
+
+<!-- Mobile dropdown toggle script -->
+<script>
+(function() {
+    // Only run on mobile devices
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+    
+    // Close all open dropdowns
+    function closeAllDropdowns() {
+        document.querySelectorAll('.app-mega-menu').forEach(function(menu) {
+            menu.classList.remove('mobile-open');
+        });
+    }
+    
+    // Setup mobile dropdown functionality
+    function setupMobileDropdowns() {
+        if (!isMobile()) return;
+        
+        document.querySelectorAll('.app-nav-item').forEach(function(item) {
+            var link = item.querySelector('.app-nav-link');
+            var menu = item.querySelector('.app-mega-menu');
+            
+            if (link && menu) {
+                link.addEventListener('click', function(e) {
+                    if (isMobile()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        var isOpen = menu.classList.contains('mobile-open');
+                        closeAllDropdowns();
+                        
+                        if (!isOpen) {
+                            menu.classList.add('mobile-open');
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (isMobile() && !e.target.closest('.app-nav-item')) {
+                closeAllDropdowns();
+            }
+        });
+        
+        // Close dropdown when clicking a menu item
+        document.querySelectorAll('.app-menu-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                if (isMobile()) {
+                    closeAllDropdowns();
+                }
+            });
+        });
+    }
+    
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupMobileDropdowns);
+    } else {
+        setupMobileDropdowns();
+    }
+    
+    // Re-initialize on resize
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            closeAllDropdowns();
+            setupMobileDropdowns();
+        }, 250);
+    });
+})();
+</script>

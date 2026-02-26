@@ -183,6 +183,7 @@ header[data-testid="stHeader"] {
     align-items: center;
     justify-content: flex-start;
     gap: 0.9rem;
+    overflow: visible;
 }
 
 @media (max-width: 768px) {
@@ -193,11 +194,13 @@ header[data-testid="stHeader"] {
         padding: 0 0.8rem;
         margin: 0;
         max-width: none;
-        width: auto;
+        width: 100%;
         overflow-x: auto;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         height: 56px;
+        flex-wrap: nowrap;
     }
     .nav-inner::-webkit-scrollbar,
     .nav-inner-bar::-webkit-scrollbar {
@@ -1631,9 +1634,19 @@ header[data-testid="stHeader"] {
     /* Keep app-nav-links visible on mobile for dropdown functionality */
     .app-nav-links {
         display: flex !important;
+        overflow-x: auto;
+        overflow-y: visible;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .app-nav-links::-webkit-scrollbar {
+        display: none;
     }
 
-    .hamburger {
+    .hamburger,
+    .app-hamburger {
         display: flex;
     }
 
