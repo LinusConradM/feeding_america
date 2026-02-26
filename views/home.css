@@ -1627,6 +1627,11 @@ header[data-testid="stHeader"] {
     .nav-cta {
         display: none;
     }
+    
+    /* Keep app-nav-links visible on mobile for dropdown functionality */
+    .app-nav-links {
+        display: flex !important;
+    }
 
     .hamburger {
         display: flex;
@@ -1879,6 +1884,7 @@ header[data-testid="stHeader"] {
         padding-bottom: 0.25rem;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        display: flex !important;
     }
     .app-nav-links::-webkit-scrollbar {
         display: none;
@@ -1886,5 +1892,11 @@ header[data-testid="stHeader"] {
     .app-nav-item {
         width: auto;
         flex-shrink: 0;
+    }
+    
+    /* Make nav links more touch-friendly on mobile */
+    .app-nav-link {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.88rem;
     }
 }
