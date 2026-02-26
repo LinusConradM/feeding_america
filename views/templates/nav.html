@@ -30,7 +30,7 @@
           <span class="app-nav-link">
             Dashboard&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
           </span>
-          <div class="app-mega-menu app-mega-wide">
+          <div class="app-mega-menu" onclick="event.stopPropagation();">
             <a class="app-menu-item" href="/1_Executive_Overview" data-img="___IMG_OVERVIEW___"
               data-label="Executive Overview — KPIs &amp; Trends">
               <span class="app-mi-icon" style="color:#C5CAE9;">
@@ -68,7 +68,7 @@
           <span class="app-nav-link">
             Analytics&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
           </span>
-          <div class="app-mega-menu app-mega-wide">
+          <div class="app-mega-menu" onclick="event.stopPropagation();">
             <a class="app-menu-item" href="/4_Regression_Models" data-img="___IMG_REGRESSION___"
               data-label="Regression Models — OLS, Ridge, LASSO, Random Forest">
               <span class="app-mi-icon" style="color:#f472b6;">
@@ -133,7 +133,7 @@
           <span class="app-nav-link">
             Policy Scenarios&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
           </span>
-          <div class="app-mega-menu">
+          <div class="app-mega-menu" onclick="event.stopPropagation();">
             <a class="app-menu-item" href="/8_Policy_Scenarios">
               <span class="app-mi-icon" style="color:#2AD5FF;">
                 <i class="fas fa-flask"></i>
@@ -151,7 +151,7 @@
           <span class="app-nav-link">
             AI Agent&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
           </span>
-          <div class="app-mega-menu">
+          <div class="app-mega-menu" onclick="event.stopPropagation();">
             <a class="app-menu-item" href="/10_AI_Data_Analyst">
               <span class="app-mi-icon" style="color:#a78bfa;">
                 <i class="fas fa-robot"></i>
@@ -169,7 +169,7 @@
           <span class="app-nav-link">
             Reports&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
           </span>
-          <div class="app-mega-menu">
+          <div class="app-mega-menu" onclick="event.stopPropagation();">
             <a class="app-menu-item" href="/9_Data_Downloads">
               <span class="app-mi-icon" style="color:#fbbf24;">
                 <i class="fas fa-download"></i>
@@ -194,8 +194,8 @@
     <!-- ── Mobile slide-down menu ──────────────────────────────── -->
     <div class="app-mobile-menu">
 
-        <div class="app-mob-section">
-          <div class="app-mob-section-title">Dashboard</div>
+      <div class="app-mob-section">
+        <div class="app-mob-section-title">Dashboard</div>
         <a class="app-mob-item" href="/">
           <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-home"></i></span>
           Home
@@ -279,117 +279,122 @@
 
 <!-- Mobile dropdown toggle script with debugging -->
 <script>
-console.log('[NAV] Script starting...');
+  console.log('[NAV] Script starting...');
 
-(function() {
+  (function () {
     console.log('[NAV] IIFE executing');
-    
+
     // Only run on mobile devices
     function isMobile() {
-        var mobile = window.innerWidth <= 768;
-        console.log('[NAV] isMobile check:', mobile, 'width:', window.innerWidth);
-        return mobile;
+      var mobile = window.innerWidth <= 768;
+      console.log('[NAV] isMobile check:', mobile, 'width:', window.innerWidth);
+      return mobile;
     }
-    
+
     // Close all open dropdowns
     function closeAllDropdowns() {
-        console.log('[NAV] closeAllDropdowns called');
-        var menus = document.querySelectorAll('.app-mega-menu');
-        console.log('[NAV] Found menus:', menus.length);
-        menus.forEach(function(menu) {
-            menu.classList.remove('mobile-open');
-        });
+      console.log('[NAV] closeAllDropdowns called');
+      var menus = document.querySelectorAll('.app-mega-menu');
+      console.log('[NAV] Found menus:', menus.length);
+      menus.forEach(function (menu) {
+        menu.classList.remove('mobile-open');
+      });
     }
-    
+
     // Setup mobile dropdown functionality
     function setupMobileDropdowns() {
-        console.log('[NAV] setupMobileDropdowns called, isMobile:', isMobile());
-        
-        if (!isMobile()) {
-            console.log('[NAV] Not mobile, skipping setup');
-            return;
-        }
-        
-        var items = document.querySelectorAll('.app-nav-item');
-        console.log('[NAV] Found nav items:', items.length);
-        
-        items.forEach(function(item, index) {
-            var link = item.querySelector('.app-nav-link');
-            var menu = item.querySelector('.app-mega-menu');
-            
-            console.log('[NAV] Item', index, '- link:', !!link, 'menu:', !!menu);
-            
-            if (link && menu) {
-                link.addEventListener('click', function(e) {
-                    console.log('[NAV] Link clicked!', index);
-                    
-                    if (isMobile()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        var isOpen = menu.classList.contains('mobile-open');
-                        console.log('[NAV] Menu was open:', isOpen);
-                        
-                        closeAllDropdowns();
-                        
-                        if (!isOpen) {
-                            menu.classList.add('mobile-open');
-                            console.log('[NAV] Opened menu', index);
-                        }
-                    }
-                });
-                console.log('[NAV] Added click listener to item', index);
-            }
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (isMobile() && !e.target.closest('.app-nav-item')) {
-                console.log('[NAV] Clicked outside, closing all');
-                closeAllDropdowns();
-            }
-        });
-        
-        // Close dropdown when clicking a menu item
-        var menuItems = document.querySelectorAll('.app-menu-item');
-        console.log('[NAV] Found menu items:', menuItems.length);
-        menuItems.forEach(function(item) {
-            item.addEventListener('click', function() {
-                if (isMobile()) {
-                    console.log('[NAV] Menu item clicked, closing all');
-                    closeAllDropdowns();
+      console.log('[NAV] setupMobileDropdowns called, isMobile:', isMobile());
+
+      if (!isMobile()) {
+        console.log('[NAV] Not mobile, skipping setup');
+        return;
+      }
+
+      var items = document.querySelectorAll('.app-nav-item');
+      console.log('[NAV] Found nav items:', items.length);
+
+      items.forEach(function (item, index) {
+        var link = item.querySelector('.app-nav-link');
+        var menu = item.querySelector('.app-mega-menu');
+
+        console.log('[NAV] Item', index, '- link:', !!link, 'menu:', !!menu);
+
+        if (link && menu) {
+          link.addEventListener('click', function (e) {
+            console.log('[NAV] Link clicked!', index);
+
+            if (isMobile()) {
+              e.preventDefault();
+              e.stopPropagation();
+
+              var isOpen = menu.classList.contains('mobile-open');
+              console.log('[NAV] Menu was open:', isOpen);
+
+              // Close all *other* dropdowns first
+              var allMenus = document.querySelectorAll('.app-mega-menu');
+              allMenus.forEach(function (m) {
+                if (m !== menu) {
+                  m.classList.remove('mobile-open');
                 }
-            });
+              });
+
+              // Toggle the current one
+              menu.classList.toggle('mobile-open');
+              console.log('[NAV] Toggled menu', index, 'to:', menu.classList.contains('mobile-open'));
+            }
+          });
+          console.log('[NAV] Added click listener to item', index);
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function (e) {
+        if (isMobile() && !e.target.closest('.app-nav-item')) {
+          console.log('[NAV] Clicked outside, closing all');
+          closeAllDropdowns();
+        }
+      });
+
+      // Close dropdown when clicking a menu item
+      var menuItems = document.querySelectorAll('.app-menu-item');
+      console.log('[NAV] Found menu items:', menuItems.length);
+      menuItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+          if (isMobile()) {
+            console.log('[NAV] Menu item clicked, closing all');
+            closeAllDropdowns();
+          }
         });
-        
-        console.log('[NAV] Setup complete');
+      });
+
+      console.log('[NAV] Setup complete');
     }
-    
+
     // Initialize
     console.log('[NAV] Document ready state:', document.readyState);
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('[NAV] DOMContentLoaded fired');
-            setupMobileDropdowns();
-        });
-    } else {
-        console.log('[NAV] Document already loaded, running setup');
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('[NAV] DOMContentLoaded fired');
         setupMobileDropdowns();
+      });
+    } else {
+      console.log('[NAV] Document already loaded, running setup');
+      setupMobileDropdowns();
     }
-    
+
     // Re-initialize on resize
     var resizeTimer;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            console.log('[NAV] Resize detected');
-            closeAllDropdowns();
-            setupMobileDropdowns();
-        }, 250);
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        console.log('[NAV] Resize detected');
+        closeAllDropdowns();
+        setupMobileDropdowns();
+      }, 250);
     });
-    
-    console.log('[NAV] IIFE complete');
-})();
 
-console.log('[NAV] Script complete');
+    console.log('[NAV] IIFE complete');
+  })();
+
+  console.log('[NAV] Script complete');
 </script>
