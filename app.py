@@ -79,25 +79,27 @@ pg = st.navigation([
 ], position="hidden")
 
 # Build the custom expandable sidebar menu
-with st.sidebar:
-    st.page_link(home_page, label="Home", icon="🏠")
-    st.page_link(exec_page, label="Executive Overview", icon="📊")
-    st.page_link(geo_page, label="Geographic Intelligence", icon="🗺️")
-    
-    with st.expander("Analytics", expanded=False, icon="🧠"):
-        st.page_link(explorer_page, label="Data Explorer", icon="🔬")
-        st.page_link(corr_page, label="Correlation Analysis", icon="📈")
-        st.page_link(reg_page, label="Regression Models", icon="📉")
-        st.page_link(equity_page, label="Equity Disparities", icon="⚖️")
-        st.page_link(cluster_page, label="County Clustering", icon="🧩")
-        st.page_link(anomaly_page, label="Anomaly Detection", icon="📡")
-        st.page_link(time_page, label="Time Series Explorer", icon="⏳")
-
-    with st.expander("Agentic AI", expanded=False, icon="🤖"): # New expander for Agentic AI
-        st.page_link(ai_page, label="AI Data Analyst", icon="🤖")
+# Hide navigation on Executive Overview page (it has its own custom sidebar)
+if pg != exec_page:
+    with st.sidebar:
+        st.page_link(home_page, label="Home", icon="🏠")
+        st.page_link(exec_page, label="Executive Overview", icon="📊")
+        st.page_link(geo_page, label="Geographic Intelligence", icon="🗺️")
         
-    st.page_link(policy_page, label="Policy Scenarios", icon="🔮")
-    st.page_link(data_page, label="Data Downloads", icon="💾")
+        with st.expander("Analytics", expanded=False, icon="🧠"):
+            st.page_link(explorer_page, label="Data Explorer", icon="🔬")
+            st.page_link(corr_page, label="Correlation Analysis", icon="📈")
+            st.page_link(reg_page, label="Regression Models", icon="📉")
+            st.page_link(equity_page, label="Equity Disparities", icon="⚖️")
+            st.page_link(cluster_page, label="County Clustering", icon="🧩")
+            st.page_link(anomaly_page, label="Anomaly Detection", icon="📡")
+            st.page_link(time_page, label="Time Series Explorer", icon="⏳")
+
+        with st.expander("Agentic AI", expanded=False, icon="🤖"): # New expander for Agentic AI
+            st.page_link(ai_page, label="AI Data Analyst", icon="🤖")
+            
+        st.page_link(policy_page, label="Policy Scenarios", icon="🔮")
+        st.page_link(data_page, label="Data Downloads", icon="💾")
 
 # Run the selected page
 pg.run()

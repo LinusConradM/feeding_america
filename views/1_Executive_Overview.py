@@ -34,7 +34,13 @@ def layout_responsive(**kwargs):
 
 # Sidebar controls
 with st.sidebar:
-    st.markdown('<p class="text-white font-semibold text-sm mb-2">Filters</p>', unsafe_allow_html=True)
+    # Clean Home button
+    if st.button("🏠 Home", use_container_width=True, type="primary"):
+        st.switch_page("views/home.py")
+    
+    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+    
+    st.markdown('<p class="text-white font-semibold text-sm mb-2">Data Selectors</p>', unsafe_allow_html=True)
     selected_year = st.slider("Year", int(data["year"].min()), int(data["year"].max()),
                               int(data["year"].max()))
 
@@ -591,7 +597,7 @@ st.components.v1.html(trend_html, height=chart_config.height + 40)
 # ============================================================================
 # SECTION 3: GEOGRAPHIC SECTION
 # ============================================================================
-section_header("Geographic Analysis", "Spatial patterns of food insecurity", "map")
+section_header("Geographic Analysis", f"Spatial patterns for {selected_year}", "map")
 
 # Render consolidated geographic section with state map, regional comparison, and urban/rural comparison
 geographic_section(year_data, selected_year, viewport, selected_state=st.session_state.get('selected_state'))
@@ -603,15 +609,15 @@ st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
 # SECTION 4: STATE RANKINGS
 # ============================================================================
 
-# Prepare state rankings data
-state_avg = (year_data.groupby("state", observed=True)["overall_food_insecurity_rate"]
-             .mean().reset_index()
-             .sort_values("overall_food_insecurity_rate"))
-state_avg.columns = ["State", "FI Rate"]
-state_avg["State Name"] = state_avg["State"].map(STATE_NAMES)
-
 def render_state_rankings():
     """Render state rankings content with responsive layout."""
+    # Prepare state rankings data (inside function to ensure it updates with year changes)
+    state_avg = (year_data.groupby("state", observed=True)["overall_food_insecurity_rate"]
+                 .mean().reset_index()
+                 .sort_values("overall_food_insecurity_rate"))
+    state_avg.columns = ["State", "FI Rate"]
+    state_avg["State Name"] = state_avg["State"].map(STATE_NAMES)
+    
     # Responsive layout: 2 columns for desktop/tablet, 1 column for mobile
     if IS_MOBILE:
         # Mobile: 1-column layout (top 10 above bottom 10)
@@ -664,7 +670,7 @@ def render_state_rankings():
 
 # Wrap in collapsible section, default to expanded
 collapsible_section(
-    title="State Rankings",
+    title=f"State Rankings ({selected_year})",
     content_func=render_state_rankings,
     icon="trophy",
     default_expanded=True,
@@ -718,7 +724,7 @@ def render_statistical_details():
     st.markdown(stat_cards_html, unsafe_allow_html=True)
 
 collapsible_section(
-    title="Statistical Details",
+    title=f"Statistical Details ({selected_year})",
     content_func=render_statistical_details,
     icon="calculator",
     default_expanded=True,

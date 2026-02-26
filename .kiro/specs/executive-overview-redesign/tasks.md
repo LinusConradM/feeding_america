@@ -289,95 +289,95 @@ The plan prioritizes incremental validation through checkpoints and includes pro
   - **Property 34: Map pinch-zoom support**
   - **Validates: Requirements 10.4**
 
-- [~] 7.9 Implement lazy loading for below-fold content on mobile
+- [ ] 7.9 Implement lazy loading for below-fold content on mobile
   - Identify visualizations below the fold
   - Implement lazy loading using st.empty() placeholders
   - Render on scroll into view
   - _Requirements: 12.2_
 
-- [~] 7.10 Write property test for mobile lazy loading
+- [ ] 7.10 Write property test for mobile lazy loading
   - **Property 39: Mobile lazy loading**
   - **Validates: Requirements 12.2**
 
-- [~] 7.11 Optimize JavaScript loading for performance
+- [ ] 7.11 Optimize JavaScript loading for performance
   - Add defer/async attributes to non-critical JavaScript
   - Measure First Contentful Paint timing
   - _Requirements: 12.3, 12.4_
 
-- [~] 7.12 Write property test for performance metrics
+- [ ] 7.12 Write property test for performance metrics
   - **Property 40, 41: First Contentful Paint and deferred JavaScript**
   - **Validates: Requirements 12.3, 12.4**
 
-- [~] 7.13 Optimize images for mobile
+- [ ] 7.13 Optimize images for mobile
   - Compress images to reduce file size by 40%
   - Serve appropriately sized images based on viewport
   - _Requirements: 12.5_
 
-- [~] 7.14 Write property test for mobile image optimization
+- [ ] 7.14 Write property test for mobile image optimization
   - **Property 42: Mobile image optimization**
   - **Validates: Requirements 12.5**
 
 ### 8. Accessibility Implementation
 
-- [~] 8.1 Add alt text and ARIA labels to all icons and images
+- [ ] 8.1 Add alt text and ARIA labels to all icons and images
   - Audit all img elements for alt attributes
   - Add aria-label to icon-only buttons
   - _Requirements: 16.1_
 
-- [~] 8.2 Write property test for alt text and ARIA labels
+- [ ] 8.2 Write property test for alt text and ARIA labels
   - **Property 53, 56: Icon/image alt text and ARIA labels for unlabeled controls**
   - **Validates: Requirements 16.1, 16.4**
 
-- [~] 8.3 Implement keyboard navigation for all interactive elements
+- [ ] 8.3 Implement keyboard navigation for all interactive elements
   - Ensure all interactive elements are focusable via Tab
   - Add visible focus indicators
   - Test tab order follows logical flow
   - _Requirements: 16.2_
 
-- [~] 8.4 Write property test for keyboard navigation
+- [ ] 8.4 Write property test for keyboard navigation
   - **Property 54: Keyboard navigation support**
   - **Validates: Requirements 16.2**
 
-- [~] 8.5 Implement semantic HTML heading hierarchy
+- [ ] 8.5 Implement semantic HTML heading hierarchy
   - Use h1 for page title, h2 for major sections, h3 for subsections
   - Ensure no heading levels are skipped
   - _Requirements: 16.3_
 
-- [~] 8.6 Write property test for heading hierarchy
+- [ ] 8.6 Write property test for heading hierarchy
   - **Property 55: Semantic heading hierarchy**
   - **Validates: Requirements 16.3**
 
-- [~] 8.7 Add labels to all form controls
+- [ ] 8.7 Add labels to all form controls
   - Ensure all dropdowns, buttons, inputs have associated labels
   - Use aria-labelledby where visual labels are not present
   - _Requirements: 16.5_
 
-- [~] 8.8 Write property test for form control labels
+- [ ] 8.8 Write property test for form control labels
   - **Property 57: Form control label association**
   - **Validates: Requirements 16.5**
 
-- [~] 8.9 Add text alternatives for data visualizations
+- [ ] 8.9 Add text alternatives for data visualizations
   - Provide aria-describedby descriptions for charts
   - Offer data table alternatives in expanders
   - _Requirements: 16.6_
 
-- [~] 8.10 Write property test for visualization text alternatives
+- [ ] 8.10 Write property test for visualization text alternatives
   - **Property 58: Visualization text alternatives**
   - **Validates: Requirements 16.6**
 
-- [~] 8.11 Verify color contrast ratios meet WCAG AA standards
+- [ ] 8.11 Verify color contrast ratios meet WCAG AA standards
   - Test all text/background pairs for 4.5:1 contrast ratio
   - Use color-blind friendly palettes for multi-category visualizations
   - Add non-color visual cues (labels, patterns) for critical distinctions
   - _Requirements: 14.3, 14.4, 14.5_
 
-- [~] 8.12 Write property test for color accessibility
+- [ ] 8.12 Write property test for color accessibility
   - **Property 48, 49, 50: Color contrast, color-blind palettes, redundant encoding**
   - **Validates: Requirements 14.3, 14.4, 14.5**
 
 ### 9. Checkpoint - Verify Accessibility and Performance
 
-- [~] 9.1 Run accessibility audit with axe-core
+- [ ] 9.1 Run accessibility audit with axe-core
   - Fix any WCAG AA violations
   - Test with screen reader (NVDA or JAWS)
   - Verify keyboard navigation flow
@@ -385,114 +385,114 @@ The plan prioritizes incremental validation through checkpoints and includes pro
 
 ### 10. Error Handling and Data Validation
 
-- [~] 10.1 Implement data loading error handling
+- [ ] 10.1 Implement data loading error handling
   - Wrap data loading in try-except
   - Display user-friendly error banner
   - Provide retry button
   - Log detailed error to console
   - _Requirements: 18.1_
 
-- [~] 10.2 Write unit test for data loading errors
+- [ ] 10.2 Write unit test for data loading errors
   - Test error banner display
   - Test retry functionality
   - _Requirements: 18.1_
 
-- [~] 10.3 Implement missing data graceful degradation
+- [ ] 10.3 Implement missing data graceful degradation
   - Display "N/A" in KPI cards for missing metrics
   - Show warning for unavailable year data
   - Suggest alternative years
   - _Requirements: 18.2_
 
-- [~] 10.4 Write property test for missing data handling
+- [ ] 10.4 Write property test for missing data handling
   - **Property 64: Missing data graceful degradation**
   - **Validates: Requirements 18.2**
 
-- [~] 10.5 Implement visualization rendering error handling
+- [ ] 10.5 Implement visualization rendering error handling
   - Catch Plotly rendering exceptions
   - Display fallback message with retry option
   - Offer data table alternative
   - _Requirements: 18.3_
 
-- [~] 10.6 Write unit test for visualization errors
+- [ ] 10.6 Write unit test for visualization errors
   - Test fallback message display
   - Test data table alternative
   - _Requirements: 18.3_
 
-- [~] 10.7 Implement year validation before filtering
+- [ ] 10.7 Implement year validation before filtering
   - Validate selected year exists in dataset
   - Default to most recent year if invalid
   - _Requirements: 18.5_
 
-- [~] 10.8 Write property test for year validation
+- [ ] 10.8 Write property test for year validation
   - **Property 66: Year validation before filtering**
   - **Validates: Requirements 18.5**
 
-- [~] 10.9 Implement error console logging
+- [ ] 10.9 Implement error console logging
   - Log all errors with timestamp, type, message, stack trace
   - Include user context (year, viewport, browser)
   - _Requirements: 18.4_
 
-- [~] 10.10 Write property test for error logging
+- [ ] 10.10 Write property test for error logging
   - **Property 65: Error console logging**
   - **Validates: Requirements 18.4**
 
-- [~] 10.11 Implement LLM API error handling
+- [ ] 10.11 Implement LLM API error handling
   - Catch API exceptions gracefully
   - Display "AI insights temporarily unavailable" message
   - Do not block dashboard rendering
   - _Requirements: 20.2, 20.3_
 
-- [~] 10.12 Write unit test for LLM API errors
+- [ ] 10.12 Write unit test for LLM API errors
   - Test graceful degradation
   - Test dashboard continues rendering
   - _Requirements: 20.2, 20.3_
 
-- [~] 10.13 Implement state lookup selection error handling
+- [ ] 10.13 Implement state lookup selection error handling
   - Validate state code exists in dataset
   - Display warning if state has no data
   - Clear selection and reset to default view
   - _Requirements: 4.3, 4.4_
 
-- [~] 10.14 Write unit test for state lookup errors
+- [ ] 10.14 Write unit test for state lookup errors
   - Test invalid state code handling
   - Test missing state data warning
   - _Requirements: 4.3, 4.4_
 
-- [~] 10.15 Implement session storage error handling
+- [ ] 10.15 Implement session storage error handling
   - Wrap localStorage operations in try-except
   - Fall back to session_state for persistence
   - Log warning about storage unavailability
   - _Requirements: 17.1, 17.2_
 
-- [~] 10.16 Write unit test for session storage errors
+- [ ] 10.16 Write unit test for session storage errors
   - Test localStorage fallback
   - Test session_state persistence
   - _Requirements: 17.1, 17.2_
 
 ### 11. Year Selection and State Persistence
 
-- [~] 11.1 Implement year selection storage in sessionStorage
+- [ ] 11.1 Implement year selection storage in sessionStorage
   - Store selected year on change
   - Restore year from sessionStorage on load
   - Default to most recent year for new sessions
   - _Requirements: 17.1, 17.2, 17.3_
 
-- [~] 11.2 Write property test for year selection persistence
+- [ ] 11.2 Write property test for year selection persistence
   - **Property 59, 60, 61: Year selection storage, restoration, default**
   - **Validates: Requirements 17.1, 17.2, 17.3**
 
-- [~] 11.3 Implement year change update timing
+- [ ] 11.3 Implement year change update timing
   - Update all visualizations within 500ms of year change
   - Display loading indicator during update
   - _Requirements: 17.4, 17.5_
 
-- [~] 11.4 Write property test for year change timing
+- [ ] 11.4 Write property test for year change timing
   - **Property 62, 63: Year change update timing and loading indicator**
   - **Validates: Requirements 17.4, 17.5**
 
 ### 12. Print-Friendly Layout
 
-- [~] 12.1 Implement print-specific CSS styles
+- [ ] 12.1 Implement print-specific CSS styles
   - Create print media query styles
   - Expand all collapsible sections for print
   - Hide interactive elements (buttons, dropdowns)
@@ -500,66 +500,66 @@ The plan prioritizes incremental validation through checkpoints and includes pro
   - Add footer with year and timestamp
   - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5_
 
-- [~] 12.2 Write property test for print mode
+- [ ] 12.2 Write property test for print mode
   - **Property 67, 68, 69, 70, 71: Print CSS, section expansion, element removal, margins, footer**
   - **Validates: Requirements 19.1, 19.2, 19.3, 19.4, 19.5**
 
 ### 13. LLM Integration and Insights
 
-- [~] 13.1 Enhance LLM explainer with year-specific context
+- [ ] 13.1 Enhance LLM explainer with year-specific context
   - Pass selected year's national metrics to LLM
   - Generate contextual insights for Hero Section
   - _Requirements: 20.1, 20.2_
 
-- [~] 13.2 Write property test for LLM input context
+- [ ] 13.2 Write property test for LLM input context
   - **Property 72: LLM explainer input context**
   - **Validates: Requirements 20.2**
 
-- [~] 13.3 Implement hover insights for National Trend chart
+- [ ] 13.3 Implement hover insights for National Trend chart
   - Add hover event handler to chart
   - Display AI-generated insights about trend pattern
   - _Requirements: 20.3_
 
-- [~] 13.4 Write property test for chart hover insights
+- [ ] 13.4 Write property test for chart hover insights
   - **Property 73: National trend hover insights**
   - **Validates: Requirements 20.3**
 
-- [~] 13.5 Implement LLM output length constraint
+- [ ] 13.5 Implement LLM output length constraint
   - Truncate LLM output to 150 words maximum
   - Add "Read more" link if truncated
   - _Requirements: 20.4_
 
-- [~] 13.6 Write property test for LLM output length
+- [ ] 13.6 Write property test for LLM output length
   - **Property 74: LLM output length constraint**
   - **Validates: Requirements 20.4**
 
-- [~] 13.7 Add transparency indicator for LLM content
+- [ ] 13.7 Add transparency indicator for LLM content
   - Display "AI-generated" badge or label
   - Add icon to identify AI content
   - _Requirements: 20.5_
 
-- [~] 13.8 Write property test for LLM transparency
+- [ ] 13.8 Write property test for LLM transparency
   - **Property 75: LLM content transparency indicator**
   - **Validates: Requirements 20.5**
 
 ### 14. Color Scheme and Visual Consistency
 
-- [~] 14.1 Implement consistent color scales for geographic visualizations
+- [ ] 14.1 Implement consistent color scales for geographic visualizations
   - Define color scale: teal (low) → amber (medium) → rose (high)
   - Apply to state map, regional comparison, urban/rural comparison
   - _Requirements: 3.4, 14.1_
 
-- [~] 14.2 Write property test for color scale consistency
+- [ ] 14.2 Write property test for color scale consistency
   - **Property 8: Geographic color scale consistency**
   - **Validates: Requirements 3.4, 14.1**
 
-- [~] 14.3 Implement KPI card gradient consistency
+- [ ] 14.3 Implement KPI card gradient consistency
   - Define gradient colors for Core FI Metrics row
   - Define gradient colors for Economic Drivers row
   - Apply consistently within row groups
   - _Requirements: 14.2_
 
-- [~] 14.4 Write property test for KPI gradient consistency
+- [ ] 14.4 Write property test for KPI gradient consistency
   - **Property 47: KPI card gradient consistency**
   - **Validates: Requirements 14.2**
 
@@ -570,31 +570,31 @@ The plan prioritizes incremental validation through checkpoints and includes pro
   - Fix any failing properties
   - Document any edge cases discovered
 
-- [~] 15.2 Run complete unit test suite
+- [ ] 15.2 Run complete unit test suite
   - Execute all unit tests for components and integration
   - Achieve minimum 80% code coverage
   - Fix any failing tests
 
-- [~] 15.3 Perform manual testing across devices
+- [ ] 15.3 Perform manual testing across devices
   - Test on desktop (Chrome, Firefox, Safari)
   - Test on tablet (iPad, Android tablet)
   - Test on mobile (iPhone, Android phone)
   - Verify responsive breakpoints transition smoothly
   - Test touch interactions feel natural
 
-- [~] 15.4 Perform accessibility audit
+- [ ] 15.4 Perform accessibility audit
   - Run axe-core automated accessibility tests
   - Test with screen reader (NVDA or JAWS)
   - Verify keyboard navigation follows logical tab order
   - Test color contrast with accessibility tools
 
-- [~] 15.5 Performance testing and optimization
+- [ ] 15.5 Performance testing and optimization
   - Measure First Contentful Paint on 3G network
   - Verify lazy loading works on mobile
   - Test dashboard render time with full dataset
   - Optimize any performance bottlenecks
 
-- [~] 15.6 Final checkpoint - Ensure all tests pass
+- [ ] 15.6 Final checkpoint - Ensure all tests pass
   - Verify all property tests pass
   - Verify all unit tests pass
   - Verify accessibility audit passes
