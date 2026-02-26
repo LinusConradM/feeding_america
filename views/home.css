@@ -1631,7 +1631,7 @@ header[data-testid="stHeader"] {
         display: none;
     }
     
-    /* Keep app-nav-links visible on mobile for dropdown functionality */
+    /* Show app-nav-links on mobile instead of hamburger menu */
     .app-nav-links {
         display: flex !important;
         overflow-x: auto;
@@ -1639,15 +1639,24 @@ header[data-testid="stHeader"] {
         flex-wrap: nowrap;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        flex: 1;
+        min-width: 0;
     }
     
     .app-nav-links::-webkit-scrollbar {
         display: none;
     }
 
+    /* Hide hamburger menu when showing nav links */
     .hamburger,
     .app-hamburger {
-        display: flex;
+        display: none !important;
+    }
+    
+    /* Hide the mobile slide-down menu */
+    .mobile-menu,
+    .app-mobile-menu {
+        display: none !important;
     }
 
     .hero-layout {
@@ -1790,22 +1799,30 @@ header[data-testid="stHeader"] {
     /* Mobile dropdown behavior - allow dropdowns to show on click */
     .mega-menu,
     .app-mega-menu {
-        /* Remove display: none to allow JavaScript toggle */
+        /* Position dropdown below the nav bar */
         position: fixed;
-        top: 60px;
+        top: 56px;
         left: 0;
         right: 0;
         transform: none;
         min-width: 100%;
-        max-height: calc(100vh - 60px);
+        max-height: calc(100vh - 56px);
         overflow-y: auto;
         border-radius: 0;
         z-index: 9999;
+        background: rgba(7, 9, 58, 0.98);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
     
     .mega-menu.wide,
     .app-mega-wide {
         grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
     
     /* Mobile dropdown is hidden by default, shown with .mobile-open class */
@@ -1813,12 +1830,26 @@ header[data-testid="stHeader"] {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+        display: block;
     }
     
     .app-mega-menu.mobile-open {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
+        display: block;
+    }
+    
+    /* Make menu items more touch-friendly on mobile */
+    .app-menu-item {
+        padding: 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .app-mi-icon {
+        width: 40px;
+        height: 40px;
     }
 }
 
