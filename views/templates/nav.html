@@ -277,67 +277,103 @@
 
 </div><!-- /app-nav-wrapper -->
 
-<!-- Mobile dropdown toggle script -->
+<!-- Mobile dropdown toggle script with debugging -->
 <script>
+console.log('[NAV] Script starting...');
+
 (function() {
+    console.log('[NAV] IIFE executing');
+    
     // Only run on mobile devices
     function isMobile() {
-        return window.innerWidth <= 768;
+        var mobile = window.innerWidth <= 768;
+        console.log('[NAV] isMobile check:', mobile, 'width:', window.innerWidth);
+        return mobile;
     }
     
     // Close all open dropdowns
     function closeAllDropdowns() {
-        document.querySelectorAll('.app-mega-menu').forEach(function(menu) {
+        console.log('[NAV] closeAllDropdowns called');
+        var menus = document.querySelectorAll('.app-mega-menu');
+        console.log('[NAV] Found menus:', menus.length);
+        menus.forEach(function(menu) {
             menu.classList.remove('mobile-open');
         });
     }
     
     // Setup mobile dropdown functionality
     function setupMobileDropdowns() {
-        if (!isMobile()) return;
+        console.log('[NAV] setupMobileDropdowns called, isMobile:', isMobile());
         
-        document.querySelectorAll('.app-nav-item').forEach(function(item) {
+        if (!isMobile()) {
+            console.log('[NAV] Not mobile, skipping setup');
+            return;
+        }
+        
+        var items = document.querySelectorAll('.app-nav-item');
+        console.log('[NAV] Found nav items:', items.length);
+        
+        items.forEach(function(item, index) {
             var link = item.querySelector('.app-nav-link');
             var menu = item.querySelector('.app-mega-menu');
             
+            console.log('[NAV] Item', index, '- link:', !!link, 'menu:', !!menu);
+            
             if (link && menu) {
                 link.addEventListener('click', function(e) {
+                    console.log('[NAV] Link clicked!', index);
+                    
                     if (isMobile()) {
                         e.preventDefault();
                         e.stopPropagation();
                         
                         var isOpen = menu.classList.contains('mobile-open');
+                        console.log('[NAV] Menu was open:', isOpen);
+                        
                         closeAllDropdowns();
                         
                         if (!isOpen) {
                             menu.classList.add('mobile-open');
+                            console.log('[NAV] Opened menu', index);
                         }
                     }
                 });
+                console.log('[NAV] Added click listener to item', index);
             }
         });
         
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             if (isMobile() && !e.target.closest('.app-nav-item')) {
+                console.log('[NAV] Clicked outside, closing all');
                 closeAllDropdowns();
             }
         });
         
         // Close dropdown when clicking a menu item
-        document.querySelectorAll('.app-menu-item').forEach(function(item) {
+        var menuItems = document.querySelectorAll('.app-menu-item');
+        console.log('[NAV] Found menu items:', menuItems.length);
+        menuItems.forEach(function(item) {
             item.addEventListener('click', function() {
                 if (isMobile()) {
+                    console.log('[NAV] Menu item clicked, closing all');
                     closeAllDropdowns();
                 }
             });
         });
+        
+        console.log('[NAV] Setup complete');
     }
     
     // Initialize
+    console.log('[NAV] Document ready state:', document.readyState);
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupMobileDropdowns);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[NAV] DOMContentLoaded fired');
+            setupMobileDropdowns();
+        });
     } else {
+        console.log('[NAV] Document already loaded, running setup');
         setupMobileDropdowns();
     }
     
@@ -346,9 +382,14 @@
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
+            console.log('[NAV] Resize detected');
             closeAllDropdowns();
             setupMobileDropdowns();
         }, 250);
     });
+    
+    console.log('[NAV] IIFE complete');
 })();
+
+console.log('[NAV] Script complete');
 </script>

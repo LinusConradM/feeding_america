@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a237e;
+            color: white;
+        }
+        
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(7, 9, 58, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+        
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            height: 56px;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .nav-item {
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .nav-link {
+            padding: 0.6rem 0.9rem;
+            color: #94a3b8;
+            cursor: pointer;
+            white-space: nowrap;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .mega-menu {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background: rgba(7, 9, 58, 0.98);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem;
+            z-index: 9999;
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
+            
+            /* Hidden by default */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+        }
+        
+        .mega-menu.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 1rem;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .content {
+            margin-top: 80px;
+            padding: 2rem;
+        }
+        
+        .debug {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: lime;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleDropdown('dropdown1')">Dashboard ▼</div>
+                <div class="mega-menu" id="dropdown1">
+                    <a href="#" class="menu-item">Executive Overview</a>
+                    <a href="#" class="menu-item">Geographic Intelligence</a>
+                    <a href="#" class="menu-item">Data Explorer</a>
+                </div>
+            </div>
+            
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleDropdown('dropdown2')">Analytics ▼</div>
+                <div class="mega-menu" id="dropdown2">
+                    <a href="#" class="menu-item">Regression Models</a>
+                    <a href="#" class="menu-item">Correlation Analysis</a>
+                    <a href="#" class="menu-item">Time Series</a>
+                </div>
+            </div>
+            
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleDropdown('dropdown3')">Reports ▼</div>
+                <div class="mega-menu" id="dropdown3">
+                    <a href="#" class="menu-item">Data Downloads</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <h1>Mobile Dropdown Test</h1>
+        <p>Tap on Dashboard, Analytics, or Reports to test the dropdown.</p>
+        <p>Screen width: <span id="width"></span>px</p>
+    </div>
+    
+    <div class="debug" id="debug">Debug log:</div>
+    
+    <script>
+        function log(msg) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + msg;
+            debug.scrollTop = debug.scrollHeight;
+        }
+        
+        function toggleDropdown(id) {
+            log('toggleDropdown called for: ' + id);
+            
+            // Close all dropdowns
+            document.querySelectorAll('.mega-menu').forEach(menu => {
+                if (menu.id !== id) {
+                    menu.classList.remove('open');
+                    log('Closed: ' + menu.id);
+                }
+            });
+            
+            // Toggle the clicked dropdown
+            const dropdown = document.getElementById(id);
+            if (dropdown) {
+                dropdown.classList.toggle('open');
+                log('Toggled: ' + id + ' - isOpen: ' + dropdown.classList.contains('open'));
+            } else {
+                log('ERROR: Dropdown not found: ' + id);
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-item')) {
+                document.querySelectorAll('.mega-menu').forEach(menu => {
+                    menu.classList.remove('open');
+                });
+                log('Closed all dropdowns (clicked outside)');
+            }
+        });
+        
+        // Update screen width
+        function updateWidth() {
+            document.getElementById('width').textContent = window.innerWidth;
+        }
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+        
+        log('Script loaded successfully');
+        log('Screen width: ' + window.innerWidth + 'px');
+    </script>
+</body>
+</html>
