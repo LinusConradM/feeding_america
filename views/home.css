@@ -1769,8 +1769,38 @@ header[data-testid="stHeader"] {
         align-items: flex-start;
     }
 
-    .mega-menu {
-        display: none !important;
+    /* Mobile dropdown behavior - allow dropdowns to show on click */
+    .mega-menu,
+    .app-mega-menu {
+        /* Remove display: none to allow JavaScript toggle */
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        transform: none;
+        min-width: 100%;
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+        border-radius: 0;
+        z-index: 9999;
+    }
+    
+    .mega-menu.wide,
+    .app-mega-wide {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Mobile dropdown is hidden by default, shown with .mobile-open class */
+    .app-mega-menu {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+    
+    .app-mega-menu.mobile-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
 }
 
