@@ -39,7 +39,6 @@ def _load_and_encode_image(img_path: str) -> str:
         return ""
 
 
-@st.cache_data(show_spinner=False)
 def _load_template(template_name: str) -> str:
     """
     Load HTML template file. Cached to avoid re-reading on every page load.
@@ -56,7 +55,6 @@ def _load_template(template_name: str) -> str:
         return ""
 
 
-@st.cache_data(show_spinner=False)
 def _load_css() -> str:
     """
     Load CSS file. Cached to avoid re-reading on every page load.
