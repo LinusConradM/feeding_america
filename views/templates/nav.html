@@ -311,16 +311,23 @@
       }
 
       var items = document.querySelectorAll('.app-nav-item');
+      var wrapper = document.querySelector('.app-nav-wrapper');
       console.log('[NAV] Found nav items:', items.length);
 
       items.forEach(function (item, index) {
         var link = item.querySelector('.app-nav-link');
-        var menu = item.querySelector('.app-mega-menu');
+        var menu = item.querySelector('.app-mega-menu') || document.querySelector('#mobile-mega-menu-' + index);
 
         console.log('[NAV] Item', index, '- link:', !!link, 'menu:', !!menu);
 
         if (link && menu) {
-          link.addEventListener('click', function (e) {
+          if (!menu.id) menu.id = 'mobile-mega-menu-' + index;
+
+          // Clean up old listener to prevent duplicates on resize
+          var newLink = link.cloneNode(true);
+          link.parentNode.replaceChild(newLink, link);
+
+          newLink.addEventListener('click', function (e) {
             console.log('[NAV] Link clicked!', index);
 
             if (isMobile()) {
@@ -338,9 +345,18 @@
                 }
               });
 
+              // Detach from scrollable parent to prevent clipping!
+              if (menu.parentElement !== wrapper) {
+                wrapper.appendChild(menu);
+              }
+
               // Toggle the current one
               menu.classList.toggle('mobile-open');
               console.log('[NAV] Toggled menu', index, 'to:', menu.classList.contains('mobile-open'));
+            } else {
+              if (menu.parentElement !== item) {
+                item.appendChild(menu);
+              }
             }
           });
           console.log('[NAV] Added click listener to item', index);
@@ -349,7 +365,7 @@
 
       // Close dropdown when clicking outside
       document.addEventListener('click', function (e) {
-        if (isMobile() && !e.target.closest('.app-nav-item')) {
+        if (isMobile() && !e.target.closest('.app-nav-item') && !e.target.closest('.app-mega-menu')) {
           console.log('[NAV] Clicked outside, closing all');
           closeAllDropdowns();
         }
