@@ -5,8 +5,88 @@
 ═══════════════════════════════════════════════════════════════════ -->
 <div class="app-nav-wrapper">
 
-  <!-- Hidden checkbox — pure-CSS mobile toggle engine -->
-  <input type="checkbox" id="app-nav-toggle" class="app-nav-toggle-check">
+  <!-- ── Hidden checkboxes for mobile pure-CSS toggle engine ── -->
+  <input type="checkbox" id="app-nav-toggle" class="app-nav-toggle-check" hidden>
+
+  <input type="radio" name="mobile-mega" id="nav-toggle-dashboard" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-analytics" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-policy" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-ai" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-reports" class="mobile-mega-toggle" hidden>
+  <!-- Radio button to clear/close all menus -->
+  <input type="radio" name="mobile-mega" id="nav-toggle-close" class="mobile-mega-toggle" hidden>
+
+  <!-- ── Mobile-only detached mega menus (rendered at root to avoid scroll clipping) ── -->
+  <!-- Dashboard Menu -->
+  <div class="app-mega-menu mobile-detached-menu" id="mobile-menu-dashboard">
+    <a class="app-menu-item" href="/1_Executive_Overview">
+      <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-chart-bar"></i></span>
+      <span class="app-mi-text"><strong>Executive Overview</strong><span>National KPIs &amp; trend
+          analysis</span></span>
+    </a>
+    <a class="app-menu-item" href="/2_Geographic_Intelligence">
+      <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-map-marked-alt"></i></span>
+      <span class="app-mi-text"><strong>Geographic Intelligence</strong><span>Interactive choropleth maps</span></span>
+    </a>
+    <a class="app-menu-item" href="/0_Data_Explorer">
+      <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-microscope"></i></span>
+      <span class="app-mi-text"><strong>Data Explorer</strong><span>Browse 47,000+ observations</span></span>
+    </a>
+  </div>
+
+  <!-- Analytics Menu -->
+  <div class="app-mega-menu mobile-detached-menu" id="mobile-menu-analytics">
+    <a class="app-menu-item" href="/4_Regression_Models">
+      <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-chart-line"></i></span>
+      <span class="app-mi-text"><strong>Regression Models</strong><span>OLS, Ridge, LASSO, Random Forest</span></span>
+    </a>
+    <a class="app-menu-item" href="/3_Correlation_Analysis">
+      <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-project-diagram"></i></span>
+      <span class="app-mi-text"><strong>Correlation Analysis</strong><span>Bivariate testing &amp;
+          matrices</span></span>
+    </a>
+    <a class="app-menu-item" href="/5_Equity_Disparities">
+      <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-balance-scale"></i></span>
+      <span class="app-mi-text"><strong>Equity Disparities</strong><span>Racial, urban-rural, income gaps</span></span>
+    </a>
+    <a class="app-menu-item" href="/6_County_Clustering">
+      <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-sitemap"></i></span>
+      <span class="app-mi-text"><strong>County Clustering</strong><span>K-Means + PCA projection</span></span>
+    </a>
+    <a class="app-menu-item" href="/7_Time_Series_Explorer">
+      <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-stream"></i></span>
+      <span class="app-mi-text"><strong>Time Series Explorer</strong><span>SARIMAX &amp; trend forecasting</span></span>
+    </a>
+    <a class="app-menu-item" href="/11_Anomaly_Detection">
+      <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-bullseye"></i></span>
+      <span class="app-mi-text"><strong>Anomaly Detection</strong><span>Isolation Forest, 3,142 counties</span></span>
+    </a>
+  </div>
+
+  <!-- Policy Scenarios Menu -->
+  <div class="app-mega-menu mobile-detached-menu" id="mobile-menu-policy">
+    <a class="app-menu-item" href="/8_Policy_Scenarios">
+      <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-flask"></i></span>
+      <span class="app-mi-text"><strong>Policy Scenarios</strong><span>DiD causal inference simulation</span></span>
+    </a>
+  </div>
+
+  <!-- AI Agent Menu -->
+  <div class="app-mega-menu mobile-detached-menu" id="mobile-menu-ai">
+    <a class="app-menu-item" href="/10_AI_Data_Analyst">
+      <span class="app-mi-icon" style="color:#a78bfa;"><i class="fas fa-robot"></i></span>
+      <span class="app-mi-text"><strong>AI Data Analyst</strong><span>Gemini 2.5 Flash + code execution</span></span>
+    </a>
+  </div>
+
+  <!-- Reports Menu -->
+  <div class="app-mega-menu mobile-detached-menu" id="mobile-menu-reports">
+    <a class="app-menu-item" href="/9_Data_Downloads">
+      <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-download"></i></span>
+      <span class="app-mi-text"><strong>Data Downloads</strong><span>Export CSV / Excel / JSON</span></span>
+    </a>
+  </div>
+
 
   <nav class="app-nav" id="main-nav" aria-label="Main navigation">
     <div class="nav-inner-bar">
@@ -22,411 +102,129 @@
 
         <!-- Home (links to landing page) -->
         <li class="app-nav-item">
-          <a href="/" class="app-nav-link">Home</a>
+          <label for="nav-toggle-close" class="app-nav-link-wrapper" style="cursor:pointer;">
+            <a href="/" class="app-nav-link" style="pointer-events:none;">Home</a>
+          </label>
         </li>
 
         <!-- Dashboard ▸ mega-menu (4 items, 2-col grid) -->
         <li class="app-nav-item">
-          <span class="app-nav-link">
+          <label for="nav-toggle-dashboard" class="app-nav-link">
             Dashboard&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
-          </span>
-          <div class="app-mega-menu" onclick="event.stopPropagation();">
+          </label>
+          <div class="app-mega-menu desktop-only-menu">
             <a class="app-menu-item" href="/1_Executive_Overview" data-img="___IMG_OVERVIEW___"
               data-label="Executive Overview — KPIs &amp; Trends">
-              <span class="app-mi-icon" style="color:#C5CAE9;">
-                <i class="fas fa-chart-bar"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Executive Overview</strong>
-                <span>National KPIs &amp; trend analysis</span>
-              </span>
+              <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-chart-bar"></i></span>
+              <span class="app-mi-text"><strong>Executive Overview</strong><span>National KPIs &amp; trend
+                  analysis</span></span>
             </a>
             <a class="app-menu-item" href="/2_Geographic_Intelligence" data-img="___IMG_MAP___"
               data-label="Geographic Intelligence — Choropleth Maps">
-              <span class="app-mi-icon" style="color:#2AD5FF;">
-                <i class="fas fa-map-marked-alt"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Geographic Intelligence</strong>
-                <span>Interactive choropleth maps</span>
-              </span>
+              <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-map-marked-alt"></i></span>
+              <span class="app-mi-text"><strong>Geographic Intelligence</strong><span>Interactive choropleth
+                  maps</span></span>
             </a>
             <a class="app-menu-item" href="/0_Data_Explorer">
-              <span class="app-mi-icon" style="color:#34d399;">
-                <i class="fas fa-microscope"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Data Explorer</strong>
-                <span>Browse 47,000+ observations</span>
-              </span>
+              <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-microscope"></i></span>
+              <span class="app-mi-text"><strong>Data Explorer</strong><span>Browse 47,000+ observations</span></span>
             </a>
           </div>
         </li>
 
         <!-- Analytics ▸ mega-menu (6 items, 2-col grid) -->
         <li class="app-nav-item">
-          <span class="app-nav-link">
+          <label for="nav-toggle-analytics" class="app-nav-link">
             Analytics&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
-          </span>
-          <div class="app-mega-menu" onclick="event.stopPropagation();">
+          </label>
+          <div class="app-mega-menu desktop-only-menu">
             <a class="app-menu-item" href="/4_Regression_Models" data-img="___IMG_REGRESSION___"
               data-label="Regression Models — OLS, Ridge, LASSO, Random Forest">
-              <span class="app-mi-icon" style="color:#f472b6;">
-                <i class="fas fa-chart-line"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Regression Models</strong>
-                <span>OLS, Ridge, LASSO, Random Forest</span>
-              </span>
+              <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-chart-line"></i></span>
+              <span class="app-mi-text"><strong>Regression Models</strong><span>OLS, Ridge, LASSO, Random
+                  Forest</span></span>
             </a>
             <a class="app-menu-item" href="/3_Correlation_Analysis">
-              <span class="app-mi-icon" style="color:#C5CAE9;">
-                <i class="fas fa-project-diagram"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Correlation Analysis</strong>
-                <span>Bivariate testing &amp; matrices</span>
-              </span>
+              <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-project-diagram"></i></span>
+              <span class="app-mi-text"><strong>Correlation Analysis</strong><span>Bivariate testing &amp;
+                  matrices</span></span>
             </a>
             <a class="app-menu-item" href="/5_Equity_Disparities">
-              <span class="app-mi-icon" style="color:#fbbf24;">
-                <i class="fas fa-balance-scale"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Equity Disparities</strong>
-                <span>Racial, urban-rural, income gaps</span>
-              </span>
+              <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-balance-scale"></i></span>
+              <span class="app-mi-text"><strong>Equity Disparities</strong><span>Racial, urban-rural, income
+                  gaps</span></span>
             </a>
             <a class="app-menu-item" href="/6_County_Clustering">
-              <span class="app-mi-icon" style="color:#2AD5FF;">
-                <i class="fas fa-sitemap"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>County Clustering</strong>
-                <span>K-Means + PCA projection</span>
-              </span>
+              <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-sitemap"></i></span>
+              <span class="app-mi-text"><strong>County Clustering</strong><span>K-Means + PCA projection</span></span>
             </a>
             <a class="app-menu-item" href="/7_Time_Series_Explorer" data-img="___IMG_TIMELINE___"
               data-label="Time Series Explorer — SARIMAX Forecasting">
-              <span class="app-mi-icon" style="color:#34d399;">
-                <i class="fas fa-stream"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Time Series Explorer</strong>
-                <span>SARIMAX &amp; trend forecasting</span>
-              </span>
+              <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-stream"></i></span>
+              <span class="app-mi-text"><strong>Time Series Explorer</strong><span>SARIMAX &amp; trend
+                  forecasting</span></span>
             </a>
             <a class="app-menu-item" href="/11_Anomaly_Detection">
-              <span class="app-mi-icon" style="color:#f472b6;">
-                <i class="fas fa-bullseye"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Anomaly Detection</strong>
-                <span>Isolation Forest, 3,142 counties</span>
-              </span>
+              <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-bullseye"></i></span>
+              <span class="app-mi-text"><strong>Anomaly Detection</strong><span>Isolation Forest, 3,142
+                  counties</span></span>
             </a>
           </div>
         </li>
 
         <!-- Policy Scenarios ▸ mega-menu (single item) -->
         <li class="app-nav-item">
-          <span class="app-nav-link">
+          <label for="nav-toggle-policy" class="app-nav-link">
             Policy Scenarios&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
-          </span>
-          <div class="app-mega-menu" onclick="event.stopPropagation();">
+          </label>
+          <div class="app-mega-menu desktop-only-menu">
             <a class="app-menu-item" href="/8_Policy_Scenarios">
-              <span class="app-mi-icon" style="color:#2AD5FF;">
-                <i class="fas fa-flask"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Policy Scenarios</strong>
-                <span>DiD causal inference simulation</span>
-              </span>
+              <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-flask"></i></span>
+              <span class="app-mi-text"><strong>Policy Scenarios</strong><span>DiD causal inference
+                  simulation</span></span>
             </a>
           </div>
         </li>
 
         <!-- AI Agent ▸ mega-menu (single item) -->
         <li class="app-nav-item">
-          <span class="app-nav-link">
+          <label for="nav-toggle-ai" class="app-nav-link">
             AI Agent&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
-          </span>
-          <div class="app-mega-menu" onclick="event.stopPropagation();">
+          </label>
+          <div class="app-mega-menu desktop-only-menu">
             <a class="app-menu-item" href="/10_AI_Data_Analyst">
-              <span class="app-mi-icon" style="color:#a78bfa;">
-                <i class="fas fa-robot"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>AI Data Analyst</strong>
-                <span>Gemini 2.5 Flash + code execution</span>
-              </span>
+              <span class="app-mi-icon" style="color:#a78bfa;"><i class="fas fa-robot"></i></span>
+              <span class="app-mi-text"><strong>AI Data Analyst</strong><span>Gemini 2.5 Flash + code
+                  execution</span></span>
             </a>
           </div>
         </li>
 
         <!-- Reports ▸ mega-menu (single item) -->
         <li class="app-nav-item">
-          <span class="app-nav-link">
+          <label for="nav-toggle-reports" class="app-nav-link">
             Reports&nbsp;<i class="fas fa-chevron-down app-nav-chevron"></i>
-          </span>
-          <div class="app-mega-menu" onclick="event.stopPropagation();">
+          </label>
+          <div class="app-mega-menu desktop-only-menu">
             <a class="app-menu-item" href="/9_Data_Downloads">
-              <span class="app-mi-icon" style="color:#fbbf24;">
-                <i class="fas fa-download"></i>
-              </span>
-              <span class="app-mi-text">
-                <strong>Data Downloads</strong>
-                <span>Export CSV / Excel / JSON</span>
-              </span>
+              <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-download"></i></span>
+              <span class="app-mi-text"><strong>Data Downloads</strong><span>Export CSV / Excel / JSON</span></span>
             </a>
           </div>
         </li>
 
       </ul>
 
-      <!-- ── Hamburger (label triggers the hidden checkbox) ──────── -->
+      <!-- ── Hamburger ──────── -->
       <label for="app-nav-toggle" class="app-hamburger" aria-label="Toggle mobile menu">
         <span></span><span></span><span></span>
       </label>
 
     </div><!-- /nav-inner-bar -->
 
-    <!-- ── Mobile slide-down menu ──────────────────────────────── -->
-    <div class="app-mobile-menu">
+    <!-- Global catch-all label to close menus on click outside -->
+    <label for="nav-toggle-close" class="mobile-close-overlay" aria-label="Close menus"></label>
 
-      <div class="app-mob-section">
-        <div class="app-mob-section-title">Dashboard</div>
-        <a class="app-mob-item" href="/">
-          <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-home"></i></span>
-          Home
-        </a>
-        <a class="app-mob-item" href="/1_Executive_Overview">
-          <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-chart-bar"></i></span>
-          Executive Overview
-        </a>
-        <a class="app-mob-item" href="/2_Geographic_Intelligence">
-          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-map-marked-alt"></i></span>
-          Geographic Intelligence
-        </a>
-        <a class="app-mob-item" href="/0_Data_Explorer">
-          <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-microscope"></i></span>
-          Data Explorer
-        </a>
-      </div>
-
-      <div class="app-mob-section">
-        <div class="app-mob-section-title">Analytics</div>
-        <a class="app-mob-item" href="/4_Regression_Models">
-          <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-chart-line"></i></span>
-          Regression Models
-        </a>
-        <a class="app-mob-item" href="/3_Correlation_Analysis">
-          <span class="app-mi-icon" style="color:#C5CAE9;"><i class="fas fa-project-diagram"></i></span>
-          Correlation Analysis
-        </a>
-        <a class="app-mob-item" href="/5_Equity_Disparities">
-          <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-balance-scale"></i></span>
-          Equity Disparities
-        </a>
-        <a class="app-mob-item" href="/6_County_Clustering">
-          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-sitemap"></i></span>
-          County Clustering
-        </a>
-        <a class="app-mob-item" href="/7_Time_Series_Explorer">
-          <span class="app-mi-icon" style="color:#34d399;"><i class="fas fa-stream"></i></span>
-          Time Series Explorer
-        </a>
-        <a class="app-mob-item" href="/11_Anomaly_Detection">
-          <span class="app-mi-icon" style="color:#f472b6;"><i class="fas fa-bullseye"></i></span>
-          Anomaly Detection
-        </a>
-      </div>
-
-      <div class="app-mob-section">
-        <div class="app-mob-section-title">Policy Scenarios</div>
-        <a class="app-mob-item" href="/8_Policy_Scenarios">
-          <span class="app-mi-icon" style="color:#2AD5FF;"><i class="fas fa-flask"></i></span>
-          Policy Scenarios
-        </a>
-      </div>
-
-      <div class="app-mob-section">
-        <div class="app-mob-section-title">AI Agent</div>
-        <a class="app-mob-item" href="/10_AI_Data_Analyst">
-          <span class="app-mi-icon" style="color:#a78bfa;"><i class="fas fa-robot"></i></span>
-          AI Data Analyst
-        </a>
-      </div>
-
-      <div class="app-mob-section">
-        <div class="app-mob-section-title">Reports</div>
-        <a class="app-mob-item" href="/9_Data_Downloads">
-          <span class="app-mi-icon" style="color:#fbbf24;"><i class="fas fa-download"></i></span>
-          Data Downloads
-        </a>
-      </div>
-
-      <div class="app-mob-cta">
-        <a href="https://github.com/LinusConradM/feeding_america" target="_blank" rel="noopener" class="app-m-primary">
-          <i class="fab fa-github"></i>&nbsp;GitHub
-        </a>
-      </div>
-
-    </div><!-- /app-mobile-menu -->
   </nav>
 
 </div><!-- /app-nav-wrapper -->
-
-// Mobile dropdown toggle script with debugging
-<script>
-  console.log('[NAV] Script starting...');
-
-  (function () {
-    console.log('[NAV] IIFE executing');
-
-    // Only run on mobile devices (match CSS breakpoint 1024px)
-    function isMobile() {
-      var mobile = window.innerWidth <= 1024;
-      console.log('[NAV] isMobile check:', mobile, 'width:', window.innerWidth);
-      return mobile;
-    }
-
-    // Close all open dropdowns
-    function closeAllDropdowns() {
-      console.log('[NAV] closeAllDropdowns called');
-      var menus = document.querySelectorAll('.app-mega-menu');
-      menus.forEach(function (menu) {
-        menu.classList.remove('mobile-open');
-      });
-    }
-
-    // Setup mobile dropdown functionality
-    function setupMobileDropdowns() {
-      console.log('[NAV] setupMobileDropdowns called, isMobile:', isMobile());
-
-      if (!isMobile()) {
-        console.log('[NAV] Not mobile, skipping setup');
-        return;
-      }
-
-      var items = document.querySelectorAll('.app-nav-item');
-      var wrapper = document.querySelector('.app-nav-wrapper');
-      console.log('[NAV] Found nav items:', items.length);
-
-      items.forEach(function (item, index) {
-        var link = item.querySelector('.app-nav-link');
-        var menu = item.querySelector('.app-mega-menu') || document.querySelector('#mobile-mega-menu-' + index);
-
-        console.log('[NAV] Item', index, '- link:', !!link, 'menu:', !!menu);
-
-        if (link && menu) {
-          if (!menu.id) menu.id = 'mobile-mega-menu-' + index;
-
-          // Prevent duplicate listeners on resize
-          if (!link.dataset.hasListener) {
-            link.dataset.hasListener = "true";
-
-            var toggleHandler = function (e) {
-              console.log('[NAV] Link toggled via touch/click!', index);
-              if (isMobile()) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                var isOpen = menu.classList.contains('mobile-open');
-
-                // Close all *other* dropdowns first
-                var allMenus = document.querySelectorAll('.app-mega-menu');
-                allMenus.forEach(function (m) {
-                  if (m !== menu) {
-                    m.classList.remove('mobile-open');
-                  }
-                });
-
-                // Detach from scrollable parent to prevent clipping!
-                if (menu.parentElement !== wrapper) {
-                  wrapper.appendChild(menu);
-                }
-
-                // Toggle the current one
-                if (isOpen) {
-                  menu.classList.remove('mobile-open');
-                } else {
-                  menu.classList.add('mobile-open');
-                }
-                console.log('[NAV] Toggled menu', index, 'to:', menu.classList.contains('mobile-open'));
-              } else {
-                if (menu.parentElement !== item) {
-                  item.appendChild(menu);
-                }
-              }
-            };
-
-            // Bind explicitly to both click and touchstart for iOS Safari compatibility
-            link.addEventListener('click', toggleHandler);
-            link.addEventListener('touchstart', toggleHandler, { passive: false });
-
-            console.log('[NAV] Added listener to item', index);
-          }
-        }
-      });
-
-      // Close dropdown when clicking outside
-      if (!document.dataset.hasOutsideListener) {
-        document.dataset.hasOutsideListener = "true";
-        var closeHandler = function (e) {
-          if (isMobile() && !e.target.closest('.app-nav-item') && !e.target.closest('.app-mega-menu')) {
-            console.log('[NAV] Touched/Clicked outside, closing all');
-            closeAllDropdowns();
-          }
-        };
-        document.addEventListener('click', closeHandler);
-        document.addEventListener('touchstart', closeHandler, { passive: true });
-      }
-
-      // Close dropdown when clicking a menu item
-      var menuItems = document.querySelectorAll('.app-menu-item');
-      menuItems.forEach(function (item) {
-        if (!item.dataset.hasSubListener) {
-          item.dataset.hasSubListener = "true";
-          var subHandler = function () {
-            if (isMobile()) {
-              console.log('[NAV] Menu item selected, closing all');
-              closeAllDropdowns();
-            }
-          };
-          item.addEventListener('click', subHandler);
-          item.addEventListener('touchstart', subHandler, { passive: true });
-        }
-      });
-
-      console.log('[NAV] Setup complete');
-    }
-
-    // Initialize
-    console.log('[NAV] Document ready state:', document.readyState);
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
-        console.log('[NAV] DOMContentLoaded fired');
-        setupMobileDropdowns();
-      });
-    } else {
-      console.log('[NAV] Document already loaded, running setup');
-      setupMobileDropdowns();
-    }
-
-    // Re-initialize on resize
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        console.log('[NAV] Resize detected');
-        closeAllDropdowns();
-        setupMobileDropdowns();
-      }, 250);
-    });
-
-    console.log('[NAV] IIFE complete');
-  })();
-
-  console.log('[NAV] Script complete');
-</script>

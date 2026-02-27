@@ -187,6 +187,7 @@ header[data-testid="stHeader"] {
 }
 
 @media (max-width: 768px) {
+
     .nav-inner,
     .nav-inner-bar {
         justify-content: flex-start;
@@ -202,6 +203,7 @@ header[data-testid="stHeader"] {
         height: 56px;
         flex-wrap: nowrap;
     }
+
     .nav-inner::-webkit-scrollbar,
     .nav-inner-bar::-webkit-scrollbar {
         display: none;
@@ -257,18 +259,30 @@ header[data-testid="stHeader"] {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
-.fi-ticker::-webkit-scrollbar { display: none; }
+
+.fi-ticker::-webkit-scrollbar {
+    display: none;
+}
+
 .fi-ticker-track {
     display: inline-block;
     animation: fi-scroll 70s linear infinite;
 }
+
 .fi-ticker-item {
     margin-right: 1.5rem;
 }
+
 @keyframes fi-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
+
 @media (max-width: 768px) {
     .fi-ticker {
         display: inline-block;
@@ -280,7 +294,11 @@ header[data-testid="stHeader"] {
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
     }
-    .fi-ticker::-webkit-scrollbar { display: none; }
+
+    .fi-ticker::-webkit-scrollbar {
+        display: none;
+    }
+
     .fi-ticker-track {
         animation-duration: 90s;
     }
@@ -463,7 +481,7 @@ header[data-testid="stHeader"] {
     transition: all 0.2s;
     display: flex;
     align-items: center;
-        gap: 0.45rem;
+    gap: 0.45rem;
     text-decoration: none;
 }
 
@@ -487,7 +505,7 @@ header[data-testid="stHeader"] {
     transition: all 0.2s;
     display: flex;
     align-items: center;
-        gap: 0.45rem;
+    gap: 0.45rem;
     box-shadow: 0 0 20px rgba(34, 81, 255, 0.25);
     text-decoration: none;
 }
@@ -942,23 +960,27 @@ header[data-testid="stHeader"] {
         linear-gradient(#000 0 0) content-box,
         linear-gradient(#000 0 0);
     mask-composite: exclude;
-    box-shadow: 0 0 16px rgba(255,255,255,0.10);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.10);
 }
 
 @keyframes kpiBorderOrbit {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
 }
 
 @keyframes kpiBorderBloom {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.45;
         filter: saturate(1) brightness(0.95);
     }
+
     50% {
         opacity: 1;
         filter: saturate(1.15) brightness(1.1);
@@ -966,46 +988,38 @@ header[data-testid="stHeader"] {
 }
 
 .kpi-glass.k1::before {
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg 20deg,
-        var(--blue) 55deg,
-        var(--indigo) 120deg,
-        transparent 170deg 360deg
-    );
+    background: conic-gradient(from 0deg,
+            transparent 0deg 20deg,
+            var(--blue) 55deg,
+            var(--indigo) 120deg,
+            transparent 170deg 360deg);
     animation-delay: 0s;
 }
 
 .kpi-glass.k2::before {
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg 18deg,
-        var(--teal) 52deg,
-        var(--green) 118deg,
-        transparent 172deg 360deg
-    );
+    background: conic-gradient(from 0deg,
+            transparent 0deg 18deg,
+            var(--teal) 52deg,
+            var(--green) 118deg,
+            transparent 172deg 360deg);
     animation-delay: 0.2s;
 }
 
 .kpi-glass.k3::before {
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg 20deg,
-        var(--purple) 58deg,
-        var(--pink) 126deg,
-        transparent 178deg 360deg
-    );
+    background: conic-gradient(from 0deg,
+            transparent 0deg 20deg,
+            var(--purple) 58deg,
+            var(--pink) 126deg,
+            transparent 178deg 360deg);
     animation-delay: 0.4s;
 }
 
 .kpi-glass.k4::before {
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg 20deg,
-        var(--amber) 58deg,
-        #f97316 126deg,
-        transparent 178deg 360deg
-    );
+    background: conic-gradient(from 0deg,
+            transparent 0deg 20deg,
+            var(--amber) 58deg,
+            #f97316 126deg,
+            transparent 178deg 360deg);
     animation-delay: 0.6s;
 }
 
@@ -1487,7 +1501,7 @@ header[data-testid="stHeader"] {
 .source-tags {
     display: flex;
     flex-wrap: wrap;
-        gap: 0.45rem;
+    gap: 0.45rem;
 }
 
 .stag {
@@ -1630,7 +1644,7 @@ header[data-testid="stHeader"] {
     .nav-cta {
         display: none;
     }
-    
+
     /* Show app-nav-links on mobile instead of hamburger menu */
     .app-nav-links {
         display: flex !important;
@@ -1642,7 +1656,7 @@ header[data-testid="stHeader"] {
         flex: 1;
         min-width: 0;
     }
-    
+
     .app-nav-links::-webkit-scrollbar {
         display: none;
     }
@@ -1652,7 +1666,7 @@ header[data-testid="stHeader"] {
     .app-hamburger {
         display: none !important;
     }
-    
+
     /* Hide the mobile slide-down menu */
     .mobile-menu,
     .app-mobile-menu {
@@ -1818,35 +1832,35 @@ header[data-testid="stHeader"] {
         padding: 1rem;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
-    
+
     .mega-menu.wide,
     .app-mega-wide {
         grid-template-columns: 1fr;
         gap: 0.5rem;
     }
-    
-    /* Mobile dropdown is hidden by default, shown with .mobile-open class */
+
+    /* Mobile dropdown is hidden by default, shown when hidden checkbox is checked */
     .app-mega-menu {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
         display: block;
     }
-    
-    .app-mega-menu.mobile-open {
+
+    .mobile-mega-toggle:checked~.app-mega-menu {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
         display: block;
     }
-    
+
     /* Make menu items more touch-friendly on mobile */
     .app-menu-item {
         padding: 1rem;
         font-size: 0.95rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .app-mi-icon {
         width: 40px;
         height: 40px;
@@ -1930,17 +1944,88 @@ header[data-testid="stHeader"] {
         scrollbar-width: none;
         display: flex !important;
     }
+
     .app-nav-links::-webkit-scrollbar {
         display: none;
     }
+
     .app-nav-item {
         width: auto;
         flex-shrink: 0;
     }
-    
+
     /* Make nav links more touch-friendly on mobile */
     .app-nav-link {
         padding: 0.6rem 0.9rem;
         font-size: 0.88rem;
+    }
+}
+
+/* ── PURE CSS MOBILE DROPDOWN ENGINE ── */
+.mobile-detached-menu {
+    display: none;
+}
+
+.mobile-close-overlay {
+    display: none;
+}
+
+.mobile-mega-toggle {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .desktop-only-menu {
+        display: none !important;
+    }
+
+    .mobile-detached-menu {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        min-width: 100%;
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+        border-radius: 0;
+        z-index: 9999;
+        background: rgba(7, 9, 58, 0.98);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Checkbox hack logic */
+    #nav-toggle-dashboard:checked~#mobile-menu-dashboard,
+    #nav-toggle-analytics:checked~#mobile-menu-analytics,
+    #nav-toggle-policy:checked~#mobile-menu-policy,
+    #nav-toggle-ai:checked~#mobile-menu-ai,
+    #nav-toggle-reports:checked~#mobile-menu-reports {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    /* Overlay to close menus when clicking anywhere else */
+    #nav-toggle-dashboard:checked~nav .mobile-close-overlay,
+    #nav-toggle-analytics:checked~nav .mobile-close-overlay,
+    #nav-toggle-policy:checked~nav .mobile-close-overlay,
+    #nav-toggle-ai:checked~nav .mobile-close-overlay,
+    #nav-toggle-reports:checked~nav .mobile-close-overlay {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9998;
+        background: transparent;
     }
 }
