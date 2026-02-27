@@ -277,16 +277,16 @@
 
 </div><!-- /app-nav-wrapper -->
 
-<!-- Mobile dropdown toggle script with debugging -->
+// Mobile dropdown toggle script with debugging
 <script>
   console.log('[NAV] Script starting...');
 
   (function () {
     console.log('[NAV] IIFE executing');
 
-    // Only run on mobile devices
+    // Only run on mobile devices (match CSS breakpoint 1024px)
     function isMobile() {
-      var mobile = window.innerWidth <= 768;
+      var mobile = window.innerWidth <= 1024;
       console.log('[NAV] isMobile check:', mobile, 'width:', window.innerWidth);
       return mobile;
     }
@@ -295,7 +295,6 @@
     function closeAllDropdowns() {
       console.log('[NAV] closeAllDropdowns called');
       var menus = document.querySelectorAll('.app-mega-menu');
-      console.log('[NAV] Found menus:', menus.length);
       menus.forEach(function (menu) {
         menu.classList.remove('mobile-open');
       });
@@ -323,64 +322,81 @@
         if (link && menu) {
           if (!menu.id) menu.id = 'mobile-mega-menu-' + index;
 
-          // Clean up old listener to prevent duplicates on resize
-          var newLink = link.cloneNode(true);
-          link.parentNode.replaceChild(newLink, link);
+          // Prevent duplicate listeners on resize
+          if (!link.dataset.hasListener) {
+            link.dataset.hasListener = "true";
 
-          newLink.addEventListener('click', function (e) {
-            console.log('[NAV] Link clicked!', index);
+            var toggleHandler = function (e) {
+              console.log('[NAV] Link toggled via touch/click!', index);
+              if (isMobile()) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            if (isMobile()) {
-              e.preventDefault();
-              e.stopPropagation();
+                var isOpen = menu.classList.contains('mobile-open');
 
-              var isOpen = menu.classList.contains('mobile-open');
-              console.log('[NAV] Menu was open:', isOpen);
+                // Close all *other* dropdowns first
+                var allMenus = document.querySelectorAll('.app-mega-menu');
+                allMenus.forEach(function (m) {
+                  if (m !== menu) {
+                    m.classList.remove('mobile-open');
+                  }
+                });
 
-              // Close all *other* dropdowns first
-              var allMenus = document.querySelectorAll('.app-mega-menu');
-              allMenus.forEach(function (m) {
-                if (m !== menu) {
-                  m.classList.remove('mobile-open');
+                // Detach from scrollable parent to prevent clipping!
+                if (menu.parentElement !== wrapper) {
+                  wrapper.appendChild(menu);
                 }
-              });
 
-              // Detach from scrollable parent to prevent clipping!
-              if (menu.parentElement !== wrapper) {
-                wrapper.appendChild(menu);
+                // Toggle the current one
+                if (isOpen) {
+                  menu.classList.remove('mobile-open');
+                } else {
+                  menu.classList.add('mobile-open');
+                }
+                console.log('[NAV] Toggled menu', index, 'to:', menu.classList.contains('mobile-open'));
+              } else {
+                if (menu.parentElement !== item) {
+                  item.appendChild(menu);
+                }
               }
+            };
 
-              // Toggle the current one
-              menu.classList.toggle('mobile-open');
-              console.log('[NAV] Toggled menu', index, 'to:', menu.classList.contains('mobile-open'));
-            } else {
-              if (menu.parentElement !== item) {
-                item.appendChild(menu);
-              }
-            }
-          });
-          console.log('[NAV] Added click listener to item', index);
+            // Bind explicitly to both click and touchstart for iOS Safari compatibility
+            link.addEventListener('click', toggleHandler);
+            link.addEventListener('touchstart', toggleHandler, { passive: false });
+
+            console.log('[NAV] Added listener to item', index);
+          }
         }
       });
 
       // Close dropdown when clicking outside
-      document.addEventListener('click', function (e) {
-        if (isMobile() && !e.target.closest('.app-nav-item') && !e.target.closest('.app-mega-menu')) {
-          console.log('[NAV] Clicked outside, closing all');
-          closeAllDropdowns();
-        }
-      });
+      if (!document.dataset.hasOutsideListener) {
+        document.dataset.hasOutsideListener = "true";
+        var closeHandler = function (e) {
+          if (isMobile() && !e.target.closest('.app-nav-item') && !e.target.closest('.app-mega-menu')) {
+            console.log('[NAV] Touched/Clicked outside, closing all');
+            closeAllDropdowns();
+          }
+        };
+        document.addEventListener('click', closeHandler);
+        document.addEventListener('touchstart', closeHandler, { passive: true });
+      }
 
       // Close dropdown when clicking a menu item
       var menuItems = document.querySelectorAll('.app-menu-item');
-      console.log('[NAV] Found menu items:', menuItems.length);
       menuItems.forEach(function (item) {
-        item.addEventListener('click', function () {
-          if (isMobile()) {
-            console.log('[NAV] Menu item clicked, closing all');
-            closeAllDropdowns();
-          }
-        });
+        if (!item.dataset.hasSubListener) {
+          item.dataset.hasSubListener = "true";
+          var subHandler = function () {
+            if (isMobile()) {
+              console.log('[NAV] Menu item selected, closing all');
+              closeAllDropdowns();
+            }
+          };
+          item.addEventListener('click', subHandler);
+          item.addEventListener('touchstart', subHandler, { passive: true });
+        }
       });
 
       console.log('[NAV] Setup complete');
