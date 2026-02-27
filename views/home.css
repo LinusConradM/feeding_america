@@ -2029,4 +2029,29 @@ header[data-testid="stHeader"] {
         z-index: 9998;
         background: transparent;
     }
+
+    /* Double-tap to close logic */
+    .app-nav-item {
+        position: relative;
+    }
+
+    .app-nav-link-close-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        cursor: pointer;
+    }
+
+    /* When a menu is open, show its specific close overlay over the nav link */
+    #nav-toggle-dashboard:checked~nav .app-nav-links .app-nav-item:nth-child(2) .app-nav-link-close-overlay,
+    #nav-toggle-analytics:checked~nav .app-nav-links .app-nav-item:nth-child(3) .app-nav-link-close-overlay,
+    #nav-toggle-policy:checked~nav .app-nav-links .app-nav-item:nth-child(4) .app-nav-link-close-overlay,
+    #nav-toggle-ai:checked~nav .app-nav-links .app-nav-item:nth-child(5) .app-nav-link-close-overlay,
+    #nav-toggle-reports:checked~nav .app-nav-links .app-nav-item:nth-child(6) .app-nav-link-close-overlay {
+        display: block;
+    }
 }
