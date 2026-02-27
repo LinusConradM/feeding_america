@@ -6,15 +6,16 @@
 <div class="app-nav-wrapper">
 
   <!-- ── Hidden checkboxes for mobile pure-CSS toggle engine ── -->
-  <input type="checkbox" id="app-nav-toggle" class="app-nav-toggle-check" hidden>
+  <input type="checkbox" id="app-nav-toggle" class="app-nav-toggle-check"
+    style="position:absolute; opacity:0; pointer-events:none;">
 
-  <input type="radio" name="mobile-mega" id="nav-toggle-dashboard" class="mobile-mega-toggle" hidden>
-  <input type="radio" name="mobile-mega" id="nav-toggle-analytics" class="mobile-mega-toggle" hidden>
-  <input type="radio" name="mobile-mega" id="nav-toggle-policy" class="mobile-mega-toggle" hidden>
-  <input type="radio" name="mobile-mega" id="nav-toggle-ai" class="mobile-mega-toggle" hidden>
-  <input type="radio" name="mobile-mega" id="nav-toggle-reports" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-dashboard" class="mobile-mega-toggle">
+  <input type="radio" name="mobile-mega" id="nav-toggle-analytics" class="mobile-mega-toggle">
+  <input type="radio" name="mobile-mega" id="nav-toggle-policy" class="mobile-mega-toggle">
+  <input type="radio" name="mobile-mega" id="nav-toggle-ai" class="mobile-mega-toggle">
+  <input type="radio" name="mobile-mega" id="nav-toggle-reports" class="mobile-mega-toggle">
   <!-- Radio button to clear/close all menus -->
-  <input type="radio" name="mobile-mega" id="nav-toggle-close" class="mobile-mega-toggle" hidden>
+  <input type="radio" name="mobile-mega" id="nav-toggle-close" class="mobile-mega-toggle">
 
   <!-- ── Mobile-only detached mega menus (rendered at root to avoid scroll clipping) ── -->
   <!-- Dashboard Menu -->
@@ -102,9 +103,7 @@
 
         <!-- Home (links to landing page) -->
         <li class="app-nav-item">
-          <label for="nav-toggle-close" class="app-nav-link-wrapper" style="cursor:pointer;">
-            <a href="/" class="app-nav-link" style="pointer-events:none;">Home</a>
-          </label>
+          <a href="/" class="app-nav-link">Home</a>
         </li>
 
         <!-- Dashboard ▸ mega-menu (4 items, 2-col grid) -->
