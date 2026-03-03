@@ -13,7 +13,6 @@ from utils.theme import inject_tailwind, COLORS
 from utils.data_loader import load_data
 from utils.llm import _get_api_key, _get_groq_key
 
-st.set_page_config(page_title="AI Data Analyst", page_icon="🤖", layout="wide")
 inject_tailwind()
 
 # ── Custom CSS ───────────────────────────────────────────────────────────────

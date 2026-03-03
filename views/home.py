@@ -115,12 +115,11 @@ def _get_fi_ticker_html() -> str:
         return '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
 
 
-_ticker_html = _get_fi_ticker_html()
-
-
 # ── 1. Inject CSS via st.markdown so it reaches the real document head ────────
-# CRITICAL: st.html() sandboxes content in an iframe; CSS inside it cannot
-# affect the Streamlit chrome (body, fixed nav, etc.).
+# CRITICAL: Must be the very first st.* call so the sidebar and Streamlit chrome
+# are hidden immediately — before any data loading triggers a render cycle.
+# st.html() sandboxes content in an iframe; CSS inside it cannot affect the
+# Streamlit chrome (body, fixed nav, etc.).
 # st.markdown(unsafe_allow_html=True) injects directly into the page head.
 # OPTIMIZATION: CSS is now cached to avoid re-reading file on every page load
 css_raw = _load_css()
@@ -133,6 +132,12 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 """, unsafe_allow_html=True)
+
+
+# ── Load ticker data AFTER CSS is injected ───────────────────────────────────
+# Moved here so the sidebar-hiding CSS is already applied before load_data()
+# runs (even with cache, there is a brief render window otherwise).
+_ticker_html = _get_fi_ticker_html()
 
 
 

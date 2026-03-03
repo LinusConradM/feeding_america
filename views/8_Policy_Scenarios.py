@@ -12,7 +12,6 @@ from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
-st.set_page_config(page_title="Policy Scenarios", page_icon="🔮", layout="wide")
 inject_tailwind()
 
 data = load_data()
