@@ -142,16 +142,7 @@ _ticker_html = _get_fi_ticker_html()
 
 
 # ── 3. Navigation ────────────────────────────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
-nav_tmpl = _load_template("nav.html")
-nav_html = (nav_tmpl
-    .replace("___IMG_OVERVIEW___",   IMGS["overview"])
-    .replace("___IMG_MAP___",        IMGS["map"])
-    .replace("___IMG_REGRESSION___", IMGS["regression"])
-    .replace("___IMG_TIMELINE___",   IMGS["timeline"])
-    .replace("__FI_TICKER__", _ticker_html)
-)
-st.html(nav_html)
+# Global navigation is now injected in app.py via inject_global_nav()
 
 
 # ── 4. Hero section ───────────────────────────────────────────────────────────
