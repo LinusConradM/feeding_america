@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
 
 from utils.theme import inject_tailwind
+from utils.data_loader import load_data
 
 st.set_page_config(
     page_title="U.S. Food Insecurity Analytics",
@@ -19,6 +20,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 inject_tailwind()
+
+# ── Pre-warm data cache ───────────────────────────────────────────────────────
+# load_data() reads ~10.7 MB of Excel files the first time it runs.
+# Calling it here (before pg.run()) means the cache is hot before any page
+# executes, so the home page — and every other page — never blocks on I/O.
+# @st.cache_data ensures this only does real work once per Streamlit process;
+# all subsequent calls return the cached DataFrame instantly.
+load_data()
 
 # ── Sidebar Branding ─────────────────────────────────────────────────────────
 with st.sidebar:
