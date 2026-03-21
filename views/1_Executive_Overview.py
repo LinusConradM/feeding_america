@@ -47,8 +47,6 @@ with st.sidebar:
 year_data = data[data["year"] == selected_year]
 prev_data = data[data["year"] == selected_year - 1] if selected_year > data["year"].min() else None
 
-page_header("Executive Overview", f"National food insecurity snapshot for {selected_year}", "chart-bar")
-
 
 # --- KPI CALCULATIONS ---
 def safe_pct_change(current, previous):
@@ -100,30 +98,32 @@ def format_comparison(state_val, national_val, is_percentage=False):
         return f"(National: {national_val:,.0f})"
 
 
-# ============================================================================
-# SECTION 1: HERO SECTION
-# ============================================================================
-section_header("Overview", f"National food insecurity for {selected_year}", "chart-bar")
-
-# Generate contextual summary sentence
-context_summary = ""
-if prev_fi and pd.notna(prev_fi) and pd.notna(fi_rate):
-    change = fi_rate - prev_fi
-    change_pct = abs(change / prev_fi * 100)
-    direction = "increased" if change > 0 else "decreased"
-    context_summary = f"The national food insecurity rate has {direction} by {change_pct:.1f}% compared to {selected_year - 1}."
+# ── Hero Banner ───────────────────────────────────────────────────────────────
+hero_html = """
+<div style="background:linear-gradient(135deg, #051C2C 0%, #0D1452 50%, #1A237E 100%);
+            border-radius:1rem;padding:3.5rem 2.5rem 3rem;margin-bottom:2rem;
+            box-shadow:0 10px 25px -5px rgba(5,28,44,0.3);text-align:center">
+    <h1 style="font-family:Georgia,serif;color:#FFFFFF;font-size:clamp(2rem,5vw,3.5rem);
+               font-weight:800;line-height:1.1;margin:0 0 0.3rem 0;letter-spacing:-0.02em">
+        Executive Overview
+    </h1>
+    <p style="font-family:Georgia,serif;color:rgba(255,255,255,0.55);
+              font-size:clamp(1.8rem,4.5vw,3.2rem);font-weight:700;
+              line-height:1.1;margin:0 0 2rem 0;letter-spacing:-0.01em">
+        Where Hunger Persists — and Why
+    </p>
+    <p style="color:rgba(255,255,255,0.75);font-size:clamp(0.9rem,1.8vw,1.1rem);
+              line-height:1.6;max-width:700px;margin:0 auto">
+        Investigating patterns, disparities, and socioeconomic drivers of food insecurity across
+        <strong style="color:#FFFFFF">3,100+ U.S. counties</strong> — 15 years of longitudinal data,
+        built for policymakers, researchers, and practitioners.
+    </p>
+</div>
+"""
+if hasattr(st, "html"):
+    st.html(hero_html)
 else:
-    context_summary = f"National food insecurity data for {selected_year}."
-
-# Render hero section component
-from utils.components import hero_section
-hero_section(
-    year=selected_year,
-    primary_metric=fi_rate if pd.notna(fi_rate) else 0.0,
-    previous_metric=prev_fi if prev_fi and pd.notna(prev_fi) else None,
-    context_summary=context_summary,
-    show_quick_tips=True
-)
+    st.markdown(hero_html, unsafe_allow_html=True)
 
 # LLM Insight Engine
 context_dict = {
