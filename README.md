@@ -105,6 +105,8 @@ gp-food-basket/
 git clone https://github.com/LinusConradM/gp-food-basket.git
 cd gp-food-basket
 
+source .venv/bin/activate
+
 # Install dependencies
 pip install -r requirements.txt
 
