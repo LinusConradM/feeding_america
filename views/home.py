@@ -39,13 +39,14 @@ def _load_and_encode_image(img_path: str) -> str:
         return ""
 
 
+@st.cache_data(show_spinner=False)
 def _load_template(template_name: str) -> str:
     """
     Load HTML template file. Cached to avoid re-reading on every page load.
-    
+
     Args:
         template_name: Name of template file (e.g., 'nav.html')
-        
+
     Returns:
         Template content as string
     """
@@ -55,6 +56,7 @@ def _load_template(template_name: str) -> str:
         return ""
 
 
+@st.cache_data(show_spinner=False)
 def _load_css() -> str:
     """
     Load CSS file. Cached to avoid re-reading on every page load.
