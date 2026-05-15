@@ -202,7 +202,34 @@ st.html(hero_html)
 
 # ── 5. KPI strip ─────────────────────────────────────────────────────────────
 # OPTIMIZATION: Template loading is now cached
-st.html(_load_template("kpi.html"))
+@st.cache_data(show_spinner=False, ttl=3600)
+def _get_kpi_html() -> str:
+    """Render the KPI strip with the lead 'Americans affected' value computed live.
+
+    The historical hardcoded "44.2M" was of unconfirmed origin (Q2 in
+    HOME_REDESIGN_DECISIONS.md). Compute fresh from the latest year in
+    load_data() so the headline number is always a published, verifiable figure.
+    """
+    try:
+        from utils.data_loader import load_data
+
+        _df = load_data()
+        _latest_year = int(_df["year"].max())
+        _latest = _df[_df["year"] == _latest_year]
+        _total = float(_latest["no_of_food_insecure_persons_overall"].sum())
+        _val = f"{_total / 1_000_000:.1f}M"
+        _note = f"Feeding America MMG · {_latest_year}"
+    except Exception:
+        _val = "—"
+        _note = "Source unavailable"
+    return (
+        _load_template("kpi.html")
+        .replace("__KPI_AMERICANS_VAL__", _val)
+        .replace("__KPI_AMERICANS_NOTE__", _note)
+    )
+
+
+st.html(_get_kpi_html())
 
 
 # ── 6. Marquee ───────────────────────────────────────────────────────────────
