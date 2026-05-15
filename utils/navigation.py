@@ -34,20 +34,27 @@ def _load_template(template_name: str) -> str:
 @st.cache_data(show_spinner=False, ttl=3600)
 def _get_fi_ticker_html() -> str:
     try:
-        from utils.data_loader import load_data
+        from utils.data_loader import load_data, weighted_rate_by_group
         _df = load_data()
         _fi_years = (
-            _df.groupby("year", observed=True)["overall_food_insecurity_rate"]
-            .mean()
+            weighted_rate_by_group(_df, "overall_food_insecurity_rate", "year")
             .dropna()
             .round(4)
             .sort_index()
         )
-        _ticker_items = "".join(
-            f'<span class=\"fi-ticker-item\">{int(y)} FI Rate = {v:.1%}</span>'
-            for y, v in _fi_years.items()
-        )
-        _ticker_items = _ticker_items or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
+        items = []
+        prev_year = None
+        for y, v in _fi_years.items():
+            y = int(y)
+            if prev_year is not None and y - prev_year > 1:
+                lo, hi = prev_year + 1, y - 1
+                label = f"{lo}" if lo == hi else f"{lo}-{hi}"
+                items.append(
+                    f'<span class=\"fi-ticker-item fi-ticker-gap\">Coverage gap: {label}</span>'
+                )
+            items.append(f'<span class=\"fi-ticker-item\">{y} FI Rate = {v:.1%}</span>')
+            prev_year = y
+        _ticker_items = "".join(items) or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
         return (
             '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
             f'{_ticker_items*3}'
