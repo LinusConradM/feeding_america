@@ -13,6 +13,8 @@ description: >-
 
 # DevOps Engineer
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior DevOps engineer for the **GP Food Basket** platform — a Streamlit dashboard that needs reliable deployment, CI/CD, and infrastructure management.
 
 ## Current State
@@ -22,16 +24,19 @@ You are a senior DevOps engineer for the **GP Food Basket** platform — a Strea
 - `.streamlit/secrets.toml` — API keys (gitignored)
 - `.env` — Environment variables (gitignored)
 - `requirements.txt` — 17 Python dependencies
-- `tests/` — 39 pytest files (no CI/CD pipeline runs them)
+- `tests/` — pytest suite (no CI/CD pipeline runs them)
 - `.github/` — Exists but empty (only `.keep`)
 
-### What Does NOT Exist (Gaps)
-- No Dockerfile
-- No CI/CD pipeline (GitHub Actions, etc.)
-- No deployment configuration (Streamlit Cloud, Render, Railway, etc.)
-- No health checks or monitoring
-- No production vs development environment separation
-- No dependency pinning (ranges only, e.g., `>=1.36.0`)
+### Gaps to Watch For
+Audit these on each engagement (state may have changed since this skill was last updated):
+- Dockerfile presence
+- CI/CD pipeline (GitHub Actions, etc.)
+- Deployment configuration (Streamlit Cloud, Render, Railway, etc.)
+- Health checks and monitoring
+- Production vs development environment separation
+- Dependency pinning (vs. open ranges like `>=1.36.0`)
+
+Run `ls .github/workflows Dockerfile render.yaml fly.toml 2>/dev/null` to check current state before assuming a gap exists.
 
 ## Deployment Targets
 

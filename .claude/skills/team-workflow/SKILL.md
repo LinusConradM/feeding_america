@@ -3,8 +3,8 @@ name: team-workflow
 description: >-
   Orchestrates a full team workflow across all available roles: Project Manager,
   Software Engineer, Data Scientist, AI Engineer, UX Designer, QA Tester,
-  DevOps Engineer, and Project Reviewer. Use /team-assembler first to pick
-  the right team, then /team-workflow to execute. This skill coordinates
+  DevOps Engineer, and Project Reviewer. Run the `team-assembler` skill first to pick
+  the right team, then `team-workflow` to execute. This skill coordinates
   planning, design, implementation, testing, review, and deployment in a
   structured pipeline. Use when the user wants a complete end-to-end workflow
   with task breakdown, role-based execution, and quality review.
@@ -20,11 +20,16 @@ You coordinate a professional software team to deliver changes to the **GP Food 
 | Role | Skill | Handles |
 |------|-------|---------|
 | Project Manager | `project-manager` | Task breakdown, scoping, acceptance criteria, progress |
-| UX Designer | `ux-designer` | Layout, visual hierarchy, accessibility, responsive design |
+| UX Designer | `ux-designer` | User flows, information architecture, accessibility, responsive design |
+| UI Designer | `ui-designer` | Visual polish, design tokens, component states, chart styling |
 | Software Engineer | `software-engineer` | UI, components, pages, Streamlit code, CSS, responsive |
-| Data Scientist | `data-scientist` | Analysis, models, stats, visualizations, data pipeline |
+| Data Scientist | `data-scientist` | Modeling, statistical tests, clustering, anomaly detection |
+| Data Analyst | `data-analyst` | KPI summaries, rankings, stakeholder briefs, descriptive cuts |
 | AI Engineer | `ai-engineer` | LLM features, prompts, Gemini/Groq, AI insights |
+| Stakeholder Advocate | `stakeholder-advocate` | User-voice review, copy clarity, audience-fit pushback |
 | QA Tester | `qa-tester` | pytest, property tests, accessibility validation |
+| WCAG Auditor | `wcag-audit` | WCAG 2.2 AA source-level audit when UI ships |
+| Python Linter | `python-linter` | Ruff lint + format check across the codebase |
 | Project Reviewer | `project-reviewer` | Code review, quality, security, design system compliance |
 | DevOps Engineer | `devops-engineer` | Deployment, CI/CD, Docker, secrets, infrastructure |
 
@@ -100,6 +105,20 @@ After all implementation and testing subtasks complete:
 4. Produce a structured review report
 5. If critical issues found: fix them before proceeding
 6. If warnings found: note them in the report
+
+### Phase 5b: Audit (WCAG Auditor / Python Linter — if on team)
+
+If WCAG Auditor is on the team:
+1. Run the WCAG 2.2 AA audit procedure on changed views/components
+2. Produce findings report grouped by severity
+3. Critical findings block deploy until fixed
+
+If Python Linter is on the team:
+1. Run `ruff check` and `ruff format --check` against scope
+2. Report findings by severity bucket
+3. Wait for explicit fix instruction before applying `--fix`
+
+Skip this phase if neither is on the team.
 
 ### Phase 6: Deploy (DevOps Engineer — if on team)
 
