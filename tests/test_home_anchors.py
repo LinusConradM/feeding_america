@@ -23,6 +23,26 @@ def _all_templates():
     return sorted(TEMPLATE_DIR.glob("*.html"))
 
 
+def test_hero_reactive_js_targets_real_nav_selector():
+    """Task 2.3: the hero reactive-screenshot JS must select `.app-menu-item`
+    (matches nav.html), not the legacy `.menu-item` that never matched anything
+    on the live site."""
+    src = (REPO_ROOT / "views" / "home.py").read_text()
+    nav = (TEMPLATE_DIR / "nav.html").read_text()
+    assert "app-menu-item" in nav, (
+        "views/templates/nav.html no longer uses .app-menu-item — this test's "
+        "premise is stale; update both the selector and this guard."
+    )
+    assert ".menu-item[data-img]" not in src, (
+        "views/home.py reactive-screenshot JS still uses '.menu-item[data-img]', "
+        "which doesn't match anything on the live page. Use '.app-menu-item[data-img]'."
+    )
+    assert ".app-menu-item[data-img]" in src, (
+        "views/home.py should select '.app-menu-item[data-img]' for the hero "
+        "reactive-screenshot feature (matches the class in nav.html)."
+    )
+
+
 def test_gallery_template_deleted():
     """views/templates/gallery.html was deprecated per Q4 in HOME_REDESIGN_DECISIONS.md."""
     gallery = TEMPLATE_DIR / "gallery.html"

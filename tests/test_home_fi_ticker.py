@@ -1,17 +1,23 @@
 """
 T2 — FI ticker tests.
 
-Pairs with Phase 1 task 1.1: the home/nav FI ticker must use a population-weighted
-national mean per year (not a simple mean across counties), and must surface a
-caveat span for any year gap in the underlying data (e.g., MMG coverage gap 2011-2012).
+Pairs with:
+  - Phase 1 task 1.1: the FI ticker must use a population-weighted national
+    mean per year (not a simple mean across counties), and must surface a
+    "Coverage gap: YYYY-YYYY" caveat for any year gap (e.g., MMG 2011-2012).
+  - Phase 2 task 2.2: the ticker must live in a single module (utils/ticker.py)
+    so home.py and the global nav ribbon share one cache + one load_data()
+    read per page render.
 
-Direct HTML-output testing is deferred until task 2.2 extracts the ticker into
-utils/ticker.py. For now this file asserts:
-  1. The two ticker call sites (views/home.py, utils/navigation.py) import the
-     population-weighted helper and do not compute FI rate via groupby.mean().
-  2. weighted_rate_by_group produces population-weighted means that differ from
-     a simple groupby.mean() when populations are unequal — the bug the audit
-     measured at +1.74pp in 2019.
+Assertions:
+  1. utils/ticker.py is the single source of truth (imports weighted helper,
+     emits coverage-gap caveat, doesn't use unweighted .mean()).
+  2. The two call sites (views/home.py, utils/navigation.py) import from
+     utils.ticker — neither defines its own copy of the function.
+  3. weighted_rate_by_group produces population-weighted means that differ
+     from a simple groupby.mean() when populations are unequal — the bug the
+     audit measured at +1.74pp in 2019.
+  4. get_fi_ticker_html() renders well-formed HTML against real load_data().
 """
 from pathlib import Path
 
@@ -23,43 +29,76 @@ from utils.data_loader import weighted_rate_by_group
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+TICKER_MODULE = "utils/ticker.py"
+CALL_SITES = ["views/home.py", "utils/navigation.py"]
 
 
 def _read(path: str) -> str:
     return (REPO_ROOT / path).read_text()
 
 
-@pytest.mark.parametrize("source_path", ["views/home.py", "utils/navigation.py"])
-def test_ticker_imports_weighted_helper(source_path):
-    """Both ticker call sites must import the population-weighted helper."""
-    src = _read(source_path)
+def test_ticker_module_imports_weighted_helper():
+    """utils/ticker.py must import the population-weighted helper."""
+    src = _read(TICKER_MODULE)
     assert "weighted_rate_by_group" in src, (
-        f"{source_path} should import weighted_rate_by_group from utils.data_loader. "
+        f"{TICKER_MODULE} should import weighted_rate_by_group from utils.data_loader. "
         "Simple groupby().mean() over-weights small-population counties and produces "
         "a +1.74pp error vs published 2019 national rate."
     )
 
 
-@pytest.mark.parametrize("source_path", ["views/home.py", "utils/navigation.py"])
-def test_ticker_does_not_use_unweighted_mean(source_path):
+def test_ticker_module_does_not_use_unweighted_mean():
     """Regression guard: the buggy .mean() pattern should not return."""
-    src = _read(source_path)
+    src = _read(TICKER_MODULE)
     forbidden = '["overall_food_insecurity_rate"]\n            .mean()'
     forbidden_compact = '["overall_food_insecurity_rate"].mean()'
     assert forbidden not in src and forbidden_compact not in src, (
-        f"{source_path} still computes FI rate via unweighted .mean(). "
+        f"{TICKER_MODULE} still computes FI rate via unweighted .mean(). "
         "Use weighted_rate_by_group(_df, 'overall_food_insecurity_rate', 'year') instead."
     )
 
 
-@pytest.mark.parametrize("source_path", ["views/home.py", "utils/navigation.py"])
-def test_ticker_surfaces_coverage_gap(source_path):
-    """Both ticker sites must render a 'Coverage gap' caveat when years are missing."""
-    src = _read(source_path)
+def test_ticker_module_surfaces_coverage_gap():
+    """utils/ticker.py must render a 'Coverage gap' caveat when years are missing."""
+    src = _read(TICKER_MODULE)
     assert "Coverage gap" in src, (
-        f"{source_path} should emit a 'Coverage gap' span when consecutive years "
+        f"{TICKER_MODULE} should emit a 'Coverage gap' span when consecutive years "
         "are missing (e.g., MMG 2011-2012)."
     )
+
+
+@pytest.mark.parametrize("source_path", CALL_SITES)
+def test_call_sites_import_from_utils_ticker(source_path):
+    """home.py and navigation.py must import from utils.ticker — no duplicated logic."""
+    src = _read(source_path)
+    assert "from utils.ticker import" in src, (
+        f"{source_path} should import the ticker function from utils.ticker so the "
+        "two render paths share one cache. Two local copies = two load_data() reads."
+    )
+
+
+@pytest.mark.parametrize("source_path", CALL_SITES)
+def test_call_sites_do_not_redefine_ticker_function(source_path):
+    """Neither call site should declare its own `def _get_fi_ticker_html`."""
+    src = _read(source_path)
+    assert "def _get_fi_ticker_html" not in src, (
+        f"{source_path} still defines its own _get_fi_ticker_html. The function "
+        "moved to utils/ticker.py as part of task 2.2; this file should import it."
+    )
+
+
+def test_get_fi_ticker_html_renders_against_real_data():
+    """End-to-end: the ticker function returns a non-empty HTML string with the expected shape."""
+    from utils.ticker import get_fi_ticker_html
+
+    html = get_fi_ticker_html()
+    assert isinstance(html, str) and len(html) > 0
+    # Has the marquee container
+    assert '<div class="fi-ticker">' in html
+    # Renders at least one rate item — the format is "YYYY FI Rate = X.X%"
+    assert "FI Rate =" in html
+    # Surfaces the MMG 2011-2012 coverage gap caveat against real data
+    assert "Coverage gap" in html
 
 
 def test_weighted_rate_by_group_differs_from_unweighted_when_populations_unequal():

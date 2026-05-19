@@ -8,8 +8,11 @@ Every section maps to a template in views/templates/.
 import streamlit as st
 import warnings
 import base64
+import logging
 from pathlib import Path
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
@@ -23,19 +26,22 @@ _IMG_DIR   = _ROOT_DIR / "images"
 # ── OPTIMIZATION: Cached helper functions ────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def _load_and_encode_image(img_path: str) -> str:
+    """Load and base64-encode an image. Cached to avoid re-encoding on every page load.
+
+    Returns an empty string on failure (so callers can keep building the page),
+    but logs a warning so the failure is visible in logs instead of being
+    silently swallowed — the pre-task-2.4 behavior masked missing-file bugs
+    (e.g., the "Critical Path.png" -> "critical_path.png" rename in task 2.6)
+    and exception types alike.
     """
-    Load and base64-encode an image. Cached to avoid re-encoding on every page load.
-    
-    Args:
-        img_path: Path to image file relative to images directory
-        
-    Returns:
-        Base64-encoded data URI string
-    """
+    path = _IMG_DIR / img_path
+    if not path.exists():
+        logger.warning("Image file not found: %s (resolved: %s)", img_path, path)
+        return ""
     try:
-        path = _IMG_DIR / img_path
         return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
     except Exception:
+        logger.exception("Failed to base64-encode image: %s", path)
         return ""
 
 
@@ -70,58 +76,30 @@ def _load_css() -> str:
         return ""
 
 
-# Pre-encode all gallery images with caching (OPTIMIZATION: ~80% faster load time)
-IMGS = {
-    "overview":   _load_and_encode_image("OverviewPage.png"),
-    "map":        _load_and_encode_image("ExplorationMap.png"),
-    "data":       _load_and_encode_image("ExplorationDataView.png"),
-    "regression": _load_and_encode_image("AnalysisRegression.png"),
-    "timeline":   _load_and_encode_image("Timeline.png"),
-    "critical":   _load_and_encode_image("Critical Path.png"),
-}
+def _warm_image_cache() -> dict:
+    """Eagerly base64-encode every gallery image used on the home page (task 2.4).
 
-# ── OPTIMIZATION: FI Rate ticker data (cached, lightweight) ─────────────────
-@st.cache_data(show_spinner=False, ttl=3600)  # Cache for 1 hour
-def _get_fi_ticker_html() -> str:
+    Previously this dict was built at module import time, so the first
+    user-facing error from a missing image would surface at app startup —
+    before any page even rendered. Wrapping the pre-load in a function lets
+    home.py call it once at render time (where the result is needed) and
+    keeps the @st.cache_data cache warm thereafter.
     """
-    Generate FI rate ticker HTML. Cached to avoid loading full dataset on every page load.
-    
-    OPTIMIZATION: Only loads aggregated year data instead of full 47,000+ row dataset.
-    This reduces memory usage and speeds up page load by ~60%.
-    
-    Returns:
-        HTML string for FI rate ticker
-    """
-    try:
-        from utils.data_loader import load_data, weighted_rate_by_group
+    return {
+        "overview":   _load_and_encode_image("OverviewPage.png"),
+        "map":        _load_and_encode_image("ExplorationMap.png"),
+        "data":       _load_and_encode_image("ExplorationDataView.png"),
+        "regression": _load_and_encode_image("AnalysisRegression.png"),
+        "timeline":   _load_and_encode_image("Timeline.png"),
+        "critical":   _load_and_encode_image("critical_path.png"),
+    }
 
-        _df = load_data()
-        _fi_years = (
-            weighted_rate_by_group(_df, "overall_food_insecurity_rate", "year")
-            .dropna()
-            .round(4)
-            .sort_index()
-        )
-        items = []
-        prev_year = None
-        for y, v in _fi_years.items():
-            y = int(y)
-            if prev_year is not None and y - prev_year > 1:
-                lo, hi = prev_year + 1, y - 1
-                label = f"{lo}" if lo == hi else f"{lo}-{hi}"
-                items.append(
-                    f'<span class=\"fi-ticker-item fi-ticker-gap\">Coverage gap: {label}</span>'
-                )
-            items.append(f'<span class=\"fi-ticker-item\">{y} FI Rate = {v:.1%}</span>')
-            prev_year = y
-        _ticker_items = "".join(items) or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
-        return (
-            '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
-            f'{_ticker_items*3}'
-            '</div></div>'
-        )
-    except Exception:
-        return '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
+
+IMGS = _warm_image_cache()
+
+# FI rate ticker lives in utils/ticker.py (task 2.2: single source of truth
+# shared with the global nav ribbon to avoid two load_data() reads per page).
+from utils.ticker import get_fi_ticker_html as _get_fi_ticker_html
 
 
 # ── 1. Inject CSS via st.markdown so it reaches the real document head ────────
@@ -201,34 +179,86 @@ st.html(hero_html)
 
 
 # ── 5. KPI strip ─────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner=False, ttl=3600)
-def _get_kpi_html() -> str:
-    """Render the KPI strip with the lead 'Americans affected' value computed live.
+def _compute_home_kpis() -> dict:
+    """Compute all four home-page KPIs from load_data() (task 2.1).
 
-    The historical hardcoded "44.2M" was of unconfirmed origin (Q2 in
-    HOME_REDESIGN_DECISIONS.md). Compute fresh from the latest year in
-    load_data() so the headline number is always a published, verifiable figure.
+    Returns a dict of placeholder -> formatted string. All four values are
+    derived from the same load_data() call so the page stays internally
+    consistent even if the data file is updated.
+
+    Falls back to em-dash + 'Source unavailable' on any exception — never
+    silently returns the historical hardcoded values ('44.2M', '3,100+', etc).
     """
     try:
         from utils.data_loader import load_data
 
         _df = load_data()
         _latest_year = int(_df["year"].max())
+        _earliest_year = int(_df["year"].min())
         _latest = _df[_df["year"] == _latest_year]
-        _total = float(_latest["no_of_food_insecure_persons_overall"].sum())
-        _val = f"{_total / 1_000_000:.1f}M"
-        _note = f"Feeding America MMG · {_latest_year}"
+
+        _total_persons = float(_latest["no_of_food_insecure_persons_overall"].sum())
+        _counties = int(_df["fips"].nunique())
+        _span = _latest_year - _earliest_year + 1
+        _obs = len(_df)
+
+        return {
+            "americans_val": f"{_total_persons / 1_000_000:.1f}M",
+            "americans_note": f"Feeding America MMG · {_latest_year}",
+            "counties_val": f"{_counties:,}",
+            "span_val": f"{_span} yrs",
+            "obs_val": f"{_obs:,}",
+        }
     except Exception:
-        _val = "—"
-        _note = "Source unavailable"
+        return {
+            "americans_val": "—",
+            "americans_note": "Source unavailable",
+            "counties_val": "—",
+            "span_val": "—",
+            "obs_val": "—",
+        }
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def _get_kpi_html() -> str:
+    """Render the KPI strip with all four values computed live from load_data().
+
+    The historical hardcoded values (44.2M, 3,100+, 15 yrs, 47K+) were either
+    unverifiable (Q2 in HOME_REDESIGN_DECISIONS.md for 44.2M) or drift-prone
+    snapshots that go stale every data refresh. _compute_home_kpis() fills all
+    four placeholders from the latest load_data() so the strip always reflects
+    the data actually being analyzed.
+    """
+    kpis = _compute_home_kpis()
     return (
         _load_template("kpi.html")
-        .replace("__KPI_AMERICANS_VAL__", _val)
-        .replace("__KPI_AMERICANS_NOTE__", _note)
+        .replace("__KPI_AMERICANS_VAL__", kpis["americans_val"])
+        .replace("__KPI_AMERICANS_NOTE__", kpis["americans_note"])
+        .replace("__KPI_COUNTIES_VAL__", kpis["counties_val"])
+        .replace("__KPI_SPAN_VAL__", kpis["span_val"])
+        .replace("__KPI_OBS_VAL__", kpis["obs_val"])
     )
 
 
 st.html(_get_kpi_html())
+
+# MMG methodology disclaimer (task 2.5). The Map the Meal Gap methodology was
+# revised in 2020; before/after series are not perfectly comparable. Surface
+# the caveat next to the headline numbers so policymaker/researcher audiences
+# can interpret the figures correctly.
+st.html(
+    '<small class="mmg-disclaimer" '
+    'style="display:block;text-align:center;font-size:0.78rem;line-height:1.45;'
+    'color:rgba(220,225,240,0.55);margin:0.25rem auto 1.5rem;max-width:780px;'
+    'padding:0 1rem;">'
+    'Estimates derived from Feeding America\'s '
+    '<a href="https://map.feedingamerica.org" target="_blank" rel="noopener" '
+    'style="color:rgba(220,225,240,0.7);text-decoration:underline;">'
+    'Map the Meal Gap'
+    '</a>. Methodology revised in 2020; pre- and post-2020 series are not '
+    'directly comparable.'
+    '</small>'
+)
 
 
 # ── 6. Marquee ───────────────────────────────────────────────────────────────
@@ -291,8 +321,11 @@ hero_js = f"""
     }}, 150);
   }}
 
-  // Attach to every menu-item that has data-img
-  document.querySelectorAll('.menu-item[data-img]').forEach(function(el) {{
+  // Attach to every nav menu item that has data-img.
+  // Selector matches `.app-menu-item` in views/templates/nav.html — the
+  // previous `.menu-item` selector never matched, leaving the reactive-
+  // screenshot feature dead on the live site (task 2.3).
+  document.querySelectorAll('.app-menu-item[data-img]').forEach(function(el) {{
     el.addEventListener('mouseenter', function() {{
       setHeroImg(el.dataset.img, el.dataset.label);
     }});

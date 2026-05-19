@@ -3,7 +3,10 @@ Global Navigation Ribbon extracted from home.py
 """
 import streamlit as st
 import base64
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 _UTILS_DIR = Path(__file__).parent
 _ROOT_DIR = _UTILS_DIR.parent
@@ -13,13 +16,18 @@ _IMG_DIR = _ROOT_DIR / "images"
 
 @st.cache_data(show_spinner=False)
 def _load_and_encode_image(img_path: str) -> str:
+    """Load and base64-encode an image. Logs warnings on failure so missing
+    files / encode errors are visible in logs (task 2.4) instead of being
+    silently swallowed into an empty string."""
+    path = _IMG_DIR / img_path
+    if not path.exists():
+        logger.warning("Image file not found: %s (resolved: %s)", img_path, path)
+        return ""
     try:
-        path = _IMG_DIR / img_path
-        if path.exists():
-            return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
+        return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
     except Exception:
-        pass
-    return ""
+        logger.exception("Failed to base64-encode image: %s", path)
+        return ""
 
 @st.cache_data(show_spinner=False)
 def _load_template(template_name: str) -> str:
@@ -31,37 +39,9 @@ def _load_template(template_name: str) -> str:
         pass
     return ""
 
-@st.cache_data(show_spinner=False, ttl=3600)
-def _get_fi_ticker_html() -> str:
-    try:
-        from utils.data_loader import load_data, weighted_rate_by_group
-        _df = load_data()
-        _fi_years = (
-            weighted_rate_by_group(_df, "overall_food_insecurity_rate", "year")
-            .dropna()
-            .round(4)
-            .sort_index()
-        )
-        items = []
-        prev_year = None
-        for y, v in _fi_years.items():
-            y = int(y)
-            if prev_year is not None and y - prev_year > 1:
-                lo, hi = prev_year + 1, y - 1
-                label = f"{lo}" if lo == hi else f"{lo}-{hi}"
-                items.append(
-                    f'<span class=\"fi-ticker-item fi-ticker-gap\">Coverage gap: {label}</span>'
-                )
-            items.append(f'<span class=\"fi-ticker-item\">{y} FI Rate = {v:.1%}</span>')
-            prev_year = y
-        _ticker_items = "".join(items) or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
-        return (
-            '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
-            f'{_ticker_items*3}'
-            '</div></div>'
-        )
-    except Exception:
-        return '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
+# FI rate ticker lives in utils/ticker.py (task 2.2: single source of truth
+# shared with views/home.py to avoid two load_data() reads per page).
+from utils.ticker import get_fi_ticker_html as _get_fi_ticker_html
 
 def inject_global_nav():
     """Injects the global top ribbon navigation bar into the app."""
@@ -75,7 +55,7 @@ def inject_global_nav():
         "data":       _load_and_encode_image("ExplorationDataView.png"),
         "regression": _load_and_encode_image("AnalysisRegression.png"),
         "timeline":   _load_and_encode_image("Timeline.png"),
-        "critical":   _load_and_encode_image("Critical Path.png"),
+        "critical":   _load_and_encode_image("critical_path.png"),
     }
 
     _ticker_html = _get_fi_ticker_html()

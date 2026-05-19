@@ -3,34 +3,21 @@ Executive Overview - National KPIs, trends, regional comparisons.
 """
 
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import pandas as pd
 import numpy as np
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
-from utils.components import kpi_row, kpi_row_grouped, section_header, stat_card, llm_explainer_ui, hero_section, collapsible_section, geographic_section
-from utils.data_loader import load_data, STATE_NAMES
+from utils.theme import COLORS, PLOTLY_LAYOUT
+from utils.components import kpi_row_grouped, section_header, llm_explainer_ui, collapsible_section, geographic_section
+from utils.data_loader import load_data, STATE_NAMES, weighted_rate, weighted_rate_by_group
 from utils.responsive import get_viewport_profile
 from utils.llm import explain_plot
-
-
 
 
 data = load_data()
 viewport = get_viewport_profile()
 IS_MOBILE = viewport.is_mobile
 IS_PORTRAIT = viewport.is_portrait
-
-
-def layout_responsive(**kwargs):
-    """Merge base Plotly layout with responsive overrides safely."""
-    layout = dict(PLOTLY_LAYOUT)
-    margin = kwargs.pop("margin", None)
-    layout.update(kwargs)
-    if margin:
-        layout["margin"] = margin
-    return layout
 
 # Sidebar controls
 with st.sidebar:
@@ -57,34 +44,58 @@ def safe_pct_change(current, previous):
     return f"{sign}{change:.1f}%"
 
 
-# Calculate national metrics
-fi_rate = year_data["overall_food_insecurity_rate"].mean()
-fi_persons = year_data["no_of_food_insecure_persons_overall"].sum()
-child_fi = year_data["child_food_insecurity_rate"].mean()
-cost_meal = year_data["cost_per_meal"].mean()
-poverty = year_data["poverty_rate"].mean()
-med_income = year_data["median_income"].median()
-unemp = year_data["unemployment_rate"].mean()
-shortfall = year_data["weighted_annual_food_budget_shortfall"].mean()
+# Calculate national metrics (population-weighted for rates)
+def calc_metrics(df):
+    """Calculate all KPI metrics from a DataFrame, using population-weighted means for rates."""
+    # SNAP rate may not exist in all year ranges
+    snap = weighted_rate(df, "snap_rate") if "snap_rate" in df.columns and df["snap_rate"].notna().any() else np.nan
+    rent = weighted_rate(df, "rent_burden") if "rent_burden" in df.columns and df["rent_burden"].notna().any() else np.nan
+    fi_children = df["no_of_food_insecure_children"].sum() if "no_of_food_insecure_children" in df.columns else np.nan
+    return {
+        "fi_rate": weighted_rate(df, "overall_food_insecurity_rate"),
+        "fi_persons": df["no_of_food_insecure_persons_overall"].sum(),
+        "child_fi": weighted_rate(df, "child_food_insecurity_rate"),
+        "fi_children": fi_children,
+        "cost_meal": weighted_rate(df, "cost_per_meal"),
+        "poverty": weighted_rate(df, "poverty_rate"),
+        "med_income": df["median_income"].median(),
+        "unemp": weighted_rate(df, "unemployment_rate"),
+        "shortfall": weighted_rate(df, "weighted_annual_food_budget_shortfall"),
+        "snap_rate": snap,
+        "rent_burden": rent,
+    }
 
-prev_fi = prev_data["overall_food_insecurity_rate"].mean() if prev_data is not None else None
-prev_persons = prev_data["no_of_food_insecure_persons_overall"].sum() if prev_data is not None else None
-prev_child = prev_data["child_food_insecurity_rate"].mean() if prev_data is not None else None
-prev_cost = prev_data["cost_per_meal"].mean() if prev_data is not None else None
-prev_poverty = prev_data["poverty_rate"].mean() if prev_data is not None else None
-prev_med_income = prev_data["median_income"].median() if prev_data is not None else None
-prev_unemp = prev_data["unemployment_rate"].mean() if prev_data is not None else None
-prev_shortfall = prev_data["weighted_annual_food_budget_shortfall"].mean() if prev_data is not None else None
+m = calc_metrics(year_data)
+fi_rate, fi_persons, child_fi = m["fi_rate"], m["fi_persons"], m["child_fi"]
+fi_children = m["fi_children"]
+cost_meal, poverty, med_income = m["cost_meal"], m["poverty"], m["med_income"]
+unemp, shortfall = m["unemp"], m["shortfall"]
+snap_rate, rent_burden = m["snap_rate"], m["rent_burden"]
+
+if prev_data is not None:
+    pm = calc_metrics(prev_data)
+    prev_fi, prev_persons, prev_child = pm["fi_rate"], pm["fi_persons"], pm["child_fi"]
+    prev_fi_children = pm["fi_children"]
+    prev_cost, prev_poverty, prev_med_income = pm["cost_meal"], pm["poverty"], pm["med_income"]
+    prev_unemp, prev_shortfall = pm["unemp"], pm["shortfall"]
+    prev_snap, prev_rent = pm["snap_rate"], pm["rent_burden"]
+else:
+    prev_fi = prev_persons = prev_child = prev_fi_children = prev_cost = None
+    prev_poverty = prev_med_income = prev_unemp = prev_shortfall = None
+    prev_snap = prev_rent = None
 
 # Store national metrics for comparison
 national_fi_rate = fi_rate
 national_fi_persons = fi_persons
 national_child_fi = child_fi
+national_fi_children = fi_children
 national_cost_meal = cost_meal
 national_poverty = poverty
 national_med_income = med_income
 national_unemp = unemp
 national_shortfall = shortfall
+national_snap = snap_rate
+national_rent = rent_burden
 
 
 def format_comparison(state_val, national_val, is_percentage=False):
@@ -98,32 +109,28 @@ def format_comparison(state_val, national_val, is_percentage=False):
         return f"(National: {national_val:,.0f})"
 
 
-# ── Hero Banner ───────────────────────────────────────────────────────────────
-hero_html = """
-<div style="background:linear-gradient(135deg, #051C2C 0%, #0D1452 50%, #1A237E 100%);
-            border-radius:1rem;padding:3.5rem 2.5rem 3rem;margin-bottom:2rem;
-            box-shadow:0 10px 25px -5px rgba(5,28,44,0.3);text-align:center">
-    <h1 style="font-family:Georgia,serif;color:#FFFFFF;font-size:clamp(2rem,5vw,3.5rem);
-               font-weight:800;line-height:1.1;margin:0 0 0.3rem 0;letter-spacing:-0.02em">
+# ── Page Header ───────────────────────────────────────────────────────────────
+st.markdown(f"""
+<div role="banner" aria-label="Executive Overview header"
+     style="text-align:center;padding:1.5rem 1rem 1rem;margin-bottom:1.5rem;
+            border-bottom:2px solid {COLORS['pearl']};">
+    <h1 style="font-family:Georgia,serif;color:{COLORS['ink']};font-size:clamp(2rem,5vw,3rem);
+               font-weight:800;line-height:1.1;margin:0 0 0.25rem 0;letter-spacing:-0.02em">
         Executive Overview
     </h1>
-    <p style="font-family:Georgia,serif;color:rgba(255,255,255,0.55);
-              font-size:clamp(1.8rem,4.5vw,3.2rem);font-weight:700;
-              line-height:1.1;margin:0 0 2rem 0;letter-spacing:-0.01em">
+    <p style="font-family:Georgia,serif;color:{COLORS['slate']};
+              font-size:clamp(1.1rem,3vw,1.5rem);font-weight:600;
+              line-height:1.2;margin:0 0 1rem 0">
         Where Hunger Persists — and Why
     </p>
-    <p style="color:rgba(255,255,255,0.75);font-size:clamp(0.9rem,1.8vw,1.1rem);
+    <p style="font-family:Inter,sans-serif;color:{COLORS['steel']};font-size:clamp(0.9rem,1.8vw,1.05rem);
               line-height:1.6;max-width:700px;margin:0 auto">
         Investigating patterns, disparities, and socioeconomic drivers of food insecurity across
-        <strong style="color:#FFFFFF">3,100+ U.S. counties</strong> — 15 years of longitudinal data,
+        <strong style="color:{COLORS['ink']}">3,100+ U.S. counties</strong> — 15 years of longitudinal data,
         built for policymakers, researchers, and practitioners.
     </p>
 </div>
-"""
-if hasattr(st, "html"):
-    st.html(hero_html)
-else:
-    st.markdown(hero_html, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # LLM Insight Engine
 context_dict = {
@@ -146,25 +153,20 @@ if st.session_state.get('selected_state'):
     state_prev_data = prev_data[prev_data["state"] == state_code] if prev_data is not None else None
     
     if not state_year_data.empty:
-        # Recalculate metrics for selected state
-        fi_rate = state_year_data["overall_food_insecurity_rate"].mean()
-        fi_persons = state_year_data["no_of_food_insecure_persons_overall"].sum()
-        child_fi = state_year_data["child_food_insecurity_rate"].mean()
-        cost_meal = state_year_data["cost_per_meal"].mean()
-        poverty = state_year_data["poverty_rate"].mean()
-        med_income = state_year_data["median_income"].median()
-        unemp = state_year_data["unemployment_rate"].mean()
-        shortfall = state_year_data["weighted_annual_food_budget_shortfall"].mean()
-        
+        sm = calc_metrics(state_year_data)
+        fi_rate, fi_persons, child_fi = sm["fi_rate"], sm["fi_persons"], sm["child_fi"]
+        fi_children = sm["fi_children"]
+        cost_meal, poverty, med_income = sm["cost_meal"], sm["poverty"], sm["med_income"]
+        unemp, shortfall = sm["unemp"], sm["shortfall"]
+        snap_rate, rent_burden = sm["snap_rate"], sm["rent_burden"]
+
         if state_prev_data is not None and not state_prev_data.empty:
-            prev_fi = state_prev_data["overall_food_insecurity_rate"].mean()
-            prev_persons = state_prev_data["no_of_food_insecure_persons_overall"].sum()
-            prev_child = state_prev_data["child_food_insecurity_rate"].mean()
-            prev_cost = state_prev_data["cost_per_meal"].mean()
-            prev_poverty = state_prev_data["poverty_rate"].mean()
-            prev_med_income = state_prev_data["median_income"].median()
-            prev_unemp = state_prev_data["unemployment_rate"].mean()
-            prev_shortfall = state_prev_data["weighted_annual_food_budget_shortfall"].mean()
+            spm = calc_metrics(state_prev_data)
+            prev_fi, prev_persons, prev_child = spm["fi_rate"], spm["fi_persons"], spm["child_fi"]
+            prev_fi_children = spm["fi_children"]
+            prev_cost, prev_poverty, prev_med_income = spm["cost_meal"], spm["poverty"], spm["med_income"]
+            prev_unemp, prev_shortfall = spm["unemp"], spm["shortfall"]
+            prev_snap, prev_rent = spm["snap_rate"], spm["rent_burden"]
 
 # KPI Cards - Organized into two logical groups
 # Update titles to show state name if selected
@@ -198,6 +200,14 @@ kpi_row_grouped(
                     "icon": "child",
                     "gradient": "plum",
                     "tooltip": "Percentage of children under 18 experiencing food insecurity"
+                },
+                {
+                    "title": "Food Insecure Children",
+                    "value": f"{fi_children/1e6:.1f}M" if pd.notna(fi_children) and fi_children > 0 else "N/A",
+                    "change": safe_pct_change(fi_children, prev_fi_children) if not st.session_state.get('selected_state') else "",
+                    "icon": "child",
+                    "gradient": "coral",
+                    "tooltip": "Total number of children under 18 experiencing food insecurity"
                 },
                 {
                     "title": "Cost Per Meal",
@@ -237,12 +247,20 @@ kpi_row_grouped(
                     "tooltip": "Percentage of labor force that is unemployed"
                 },
                 {
-                    "title": "Budget Shortfall",
-                    "value": f"${shortfall:,.0f}" if pd.notna(shortfall) else "N/A",
-                    "change": safe_pct_change(shortfall, prev_shortfall),
-                    "icon": "exclamation-triangle",
+                    "title": "SNAP Rate",
+                    "value": f"{snap_rate:.1%}" if pd.notna(snap_rate) else "N/A",
+                    "change": safe_pct_change(snap_rate, prev_snap) if not st.session_state.get('selected_state') else format_comparison(snap_rate, national_snap, is_percentage=True),
+                    "icon": "id-card",
                     "gradient": "navy",
-                    "tooltip": "Annual funding gap to meet food security needs"
+                    "tooltip": "SNAP (food stamps) participation rate"
+                },
+                {
+                    "title": "Rent Burden",
+                    "value": f"{rent_burden:.1%}" if pd.notna(rent_burden) else "N/A",
+                    "change": safe_pct_change(rent_burden, prev_rent) if not st.session_state.get('selected_state') else format_comparison(rent_burden, national_rent, is_percentage=True),
+                    "icon": "home",
+                    "gradient": "coral",
+                    "tooltip": "Share of households spending 30%+ of income on rent"
                 },
             ]
         }
@@ -251,6 +269,102 @@ kpi_row_grouped(
 )
 
 st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
+
+
+# ============================================================================
+# DS-8: COUNTIES IN CRISIS CALLOUT
+# ============================================================================
+if "fi_category" in year_data.columns:
+    crisis_counts = year_data["fi_category"].value_counts()
+    very_high = int(crisis_counts.get("Very High", 0))
+    high = int(crisis_counts.get("High", 0))
+    total_counties = len(year_data)
+    if very_high > 0 or high > 0:
+        # Top 5 worst counties
+        worst_5 = year_data.nlargest(5, "overall_food_insecurity_rate")[["county", "state", "overall_food_insecurity_rate"]]
+        worst_list = " &bull; ".join(
+            f"<strong>{r['county']}, {r['state']}</strong> ({r['overall_food_insecurity_rate']:.1%})"
+            for _, r in worst_5.iterrows()
+        )
+        crisis_html = f"""
+        <div role="alert" aria-label="Counties in crisis"
+             style="background:linear-gradient(135deg, #1a0000 0%, #3b0d0d 100%);
+                    border:1px solid {COLORS['ruby']};border-radius:1rem;padding:1.5rem 2rem;
+                    margin-bottom:1.5rem;box-shadow:0 4px 12px rgba(214,48,49,0.15);">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">&#9888;</span>
+                <h3 style="font-family:Georgia,serif;color:{COLORS['white']};font-size:1.15rem;font-weight:700;margin:0;">
+                    Counties in Crisis ({selected_year})
+                </h3>
+            </div>
+            <div style="display:flex;gap:2rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                <div>
+                    <span style="font-family:Georgia,serif;font-size:1.8rem;font-weight:800;color:{COLORS['ruby']};">{very_high:,}</span>
+                    <span style="color:rgba(255,255,255,0.6);font-size:0.875rem;margin-left:0.4rem;">Very High (&gt;20%)</span>
+                </div>
+                <div>
+                    <span style="font-family:Georgia,serif;font-size:1.8rem;font-weight:800;color:{COLORS['amber']};">{high:,}</span>
+                    <span style="color:rgba(255,255,255,0.6);font-size:0.875rem;margin-left:0.4rem;">High (15-20%)</span>
+                </div>
+                <div>
+                    <span style="font-family:Georgia,serif;font-size:1.8rem;font-weight:800;color:rgba(255,255,255,0.4);">{total_counties - very_high - high:,}</span>
+                    <span style="color:rgba(255,255,255,0.6);font-size:0.875rem;margin-left:0.4rem;">Below 15%</span>
+                </div>
+            </div>
+            <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:0;">
+                <strong style="color:rgba(255,255,255,0.7);">Worst 5:</strong> {worst_list}
+            </p>
+        </div>
+        """
+        st.markdown(crisis_html, unsafe_allow_html=True)
+
+
+# ============================================================================
+# DS-5: DISPARITY SNAPSHOT
+# ============================================================================
+def _render_disparity_snapshot():
+    """Render Gini, Urban-Rural gap, and Racial FI gap as compact cards."""
+    items = []
+    # Gini
+    if "gini" in year_data.columns and year_data["gini"].notna().any():
+        gini_val = weighted_rate(year_data, "gini")
+        items.append(("Gini Coefficient", f"{gini_val:.3f}", COLORS["amethyst"], "Income inequality index (0=equal, 1=unequal)"))
+    # Urban-Rural gap
+    if "urban_rural" in year_data.columns:
+        rural = year_data[year_data["urban_rural"] == "Rural"]
+        urban = year_data[year_data["urban_rural"] == "Urban"]
+        if not rural.empty and not urban.empty:
+            rural_fi = weighted_rate(rural, "overall_food_insecurity_rate")
+            urban_fi = weighted_rate(urban, "overall_food_insecurity_rate")
+            gap = rural_fi - urban_fi
+            items.append(("Rural-Urban Gap", f"{gap:+.1%}", COLORS["sapphire"], "FI rate difference: rural minus urban counties"))
+    # Racial gap (post-2019 data)
+    black_col = "food_insecurity_rate_among_black_persons_all_ethnicities"
+    white_col = "food_insecurity_rate_among_white_non_hispanic_persons"
+    if black_col in year_data.columns and white_col in year_data.columns:
+        b = year_data[black_col].dropna()
+        w = year_data[white_col].dropna()
+        if len(b) > 50 and len(w) > 50:
+            racial_gap = b.mean() - w.mean()
+            items.append(("Black-White FI Gap", f"{racial_gap:+.1%}", COLORS["ruby"], "FI rate difference between Black and White populations"))
+
+    if items:
+        section_header("Disparity Snapshot", f"Inequality indicators for {selected_year}", "balance-scale")
+        cols = st.columns(len(items))
+        for col, (label, value, color, tip) in zip(cols, items):
+            with col:
+                st.markdown(
+                    f"""<div style="background:{COLORS['snow']};border-radius:1rem;padding:1.2rem;text-align:center;
+                                   border-left:4px solid {color};min-height:100px;" title="{tip}">
+                        <div style="font-family:Inter,sans-serif;font-size:0.875rem;font-weight:600;color:{COLORS['slate']};
+                                   text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.4rem;">{label}</div>
+                        <div style="font-family:Georgia,serif;font-size:1.8rem;font-weight:800;color:{color};">{value}</div>
+                    </div>""",
+                    unsafe_allow_html=True
+                )
+        st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
+
+_render_disparity_snapshot()
 
 
 # ============================================================================
@@ -266,11 +380,10 @@ from utils.responsive import StateSummary
 if 'selected_state' not in st.session_state:
     st.session_state.selected_state = None
 
-# Prepare state rankings for rank calculation
-state_rankings = (year_data.groupby("state", observed=True)["overall_food_insecurity_rate"]
-                  .mean().reset_index()
-                  .sort_values("overall_food_insecurity_rate"))
+# Prepare state rankings (population-weighted) — reused in rankings section below
+state_rankings = weighted_rate_by_group(year_data, "overall_food_insecurity_rate", "state").reset_index()
 state_rankings.columns = ["State", "FI Rate"]
+state_rankings = state_rankings.sort_values("FI Rate")
 state_rankings["Rank"] = range(1, len(state_rankings) + 1)
 
 # Callback function to handle state selection
@@ -311,68 +424,36 @@ def on_state_select(state_code: str):
     # Display summary card
     display_dict = summary.to_display_dict()
     
-    # Create a styled summary card
+    # Create a styled summary card using COLORS tokens
+    card_metrics = [
+        ("FI Rate", display_dict['FI Rate']),
+        ("Rank", display_dict['Rank']),
+        ("Food Insecure", display_dict['Food Insecure']),
+        ("Cost/Meal", display_dict['Cost/Meal']),
+        ("Poverty Rate", display_dict['Poverty']),
+    ]
+    metrics_html = "".join(
+        f"""<div>
+            <div style="color:{COLORS['slate']};font-family:Inter,sans-serif;font-size:0.875rem;font-weight:600;
+                       text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>
+            <div style="color:{COLORS['ink']};font-family:Georgia,serif;font-size:1.5rem;font-weight:700;">{val}</div>
+        </div>"""
+        for label, val in card_metrics
+    )
     st.markdown(
         f"""
-        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-                    border: 2px solid #2251FF;
-                    border-radius: 1rem;
-                    padding: 1.5rem;
-                    margin-top: 1rem;
-                    margin-bottom: 1.5rem;
-                    box-shadow: 0 4px 6px -1px rgba(34, 81, 255, 0.1);">
-            <h3 style="color: #1E40AF; font-size: 1.25rem; font-weight: 700; 
-                       margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-map-marker-alt"></i>
+        <div role="region" aria-label="State summary for {display_dict['State']}"
+             style="background:linear-gradient(135deg, {COLORS['snow']} 0%, {COLORS['pearl']} 100%);
+                    border:2px solid {COLORS['sapphire']};border-radius:1rem;padding:1.5rem;
+                    margin-top:1rem;margin-bottom:1.5rem;
+                    box-shadow:0 4px 6px -1px rgba(34,81,255,0.1);">
+            <h3 style="color:{COLORS['ink']};font-family:Georgia,serif;font-size:1.25rem;font-weight:700;
+                       margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 {display_dict['State']}
             </h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-                        gap: 1rem;">
-                <div>
-                    <div style="color: #6B7280; font-size: 0.75rem; font-weight: 600; 
-                               text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        FI Rate
-                    </div>
-                    <div style="color: #1E40AF; font-size: 1.5rem; font-weight: 700;">
-                        {display_dict['FI Rate']}
-                    </div>
-                </div>
-                <div>
-                    <div style="color: #6B7280; font-size: 0.75rem; font-weight: 600; 
-                               text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        Rank
-                    </div>
-                    <div style="color: #1E40AF; font-size: 1.5rem; font-weight: 700;">
-                        {display_dict['Rank']}
-                    </div>
-                </div>
-                <div>
-                    <div style="color: #6B7280; font-size: 0.75rem; font-weight: 600; 
-                               text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        Food Insecure
-                    </div>
-                    <div style="color: #1E40AF; font-size: 1.5rem; font-weight: 700;">
-                        {display_dict['Food Insecure']}
-                    </div>
-                </div>
-                <div>
-                    <div style="color: #6B7280; font-size: 0.75rem; font-weight: 600; 
-                               text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        Cost/Meal
-                    </div>
-                    <div style="color: #1E40AF; font-size: 1.5rem; font-weight: 700;">
-                        {display_dict['Cost/Meal']}
-                    </div>
-                </div>
-                <div>
-                    <div style="color: #6B7280; font-size: 0.75rem; font-weight: 600; 
-                               text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        Poverty Rate
-                    </div>
-                    <div style="color: #1E40AF; font-size: 1.5rem; font-weight: 700;">
-                        {display_dict['Poverty']}
-                    </div>
-                </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                {metrics_html}
             </div>
         </div>
         """,
@@ -404,21 +485,43 @@ section_header("National Trend (2009-2023)", "Average food insecurity rate over 
 from utils.responsive import ChartConfig
 chart_config = ChartConfig.for_viewport(viewport)
 
-# Prepare trend data
-trend = data.groupby("year", observed=True)["overall_food_insecurity_rate"].mean().reset_index()
+# Prepare trend data (population-weighted)
+trend = weighted_rate_by_group(data, "overall_food_insecurity_rate", "year").reset_index()
 trend.columns = ["Year", "FI Rate"]
+
+# DS-3: Compute +/- 1 std dev band for confidence visualization
+trend_std = data.groupby("year", observed=True)["overall_food_insecurity_rate"].std().reset_index()
+trend_std.columns = ["Year", "Std"]
+trend = trend.merge(trend_std, on="Year", how="left")
+trend["Upper"] = trend["FI Rate"] + trend["Std"]
+trend["Lower"] = (trend["FI Rate"] - trend["Std"]).clip(lower=0)
+
+# DS-2: Child FI trend overlay
+child_trend = weighted_rate_by_group(data, "child_food_insecurity_rate", "year").reset_index()
+child_trend.columns = ["Year", "Child FI Rate"]
 
 # Apply data point reduction for mobile viewports (30% reduction = keep 70%)
 if chart_config.data_point_reduction < 1.0:
-    # Calculate number of points to keep
     total_points = len(trend)
     points_to_keep = int(total_points * chart_config.data_point_reduction)
-    # Sample evenly across the range
     indices = np.linspace(0, total_points - 1, points_to_keep, dtype=int)
     trend = trend.iloc[indices].reset_index(drop=True)
+    child_trend = child_trend.iloc[indices].reset_index(drop=True)
 
 fig_trend = go.Figure()
-fill_color = "rgba(34, 81, 255, 0.05)" if IS_MOBILE else "rgba(34, 81, 255, 0.08)"
+fill_color = f"rgba(34, 81, 255, {'0.05' if IS_MOBILE else '0.08'})"
+
+# DS-3: Add confidence band (±1 std dev)
+fig_trend.add_trace(go.Scatter(
+    x=pd.concat([trend["Year"], trend["Year"][::-1]]),
+    y=pd.concat([trend["Upper"], trend["Lower"][::-1]]),
+    fill="toself",
+    fillcolor="rgba(34, 81, 255, 0.08)",
+    line=dict(color="rgba(0,0,0,0)"),
+    name="±1 Std Dev",
+    showlegend=True,
+    hoverinfo="skip",
+))
 
 # Add national trend line
 fig_trend.add_trace(go.Scatter(
@@ -428,22 +531,30 @@ fig_trend.add_trace(go.Scatter(
     marker=dict(size=chart_config.marker_size, color=COLORS["blue"]),
     fill="tozeroy",
     fillcolor=fill_color,
-    name="National Average",
-    hovertemplate="<b>%{x}</b><br>National FI Rate: %{y:.1%}<extra></extra>",
+    name="Overall FI Rate",
+    hovertemplate="<b>%{x}</b><br>Overall FI Rate: %{y:.1%}<extra></extra>",
+))
+
+# DS-2: Add child FI trend overlay
+fig_trend.add_trace(go.Scatter(
+    x=child_trend["Year"], y=child_trend["Child FI Rate"],
+    mode="lines+markers",
+    line=dict(color=COLORS["amethyst"], width=chart_config.line_width, dash="dash"),
+    marker=dict(size=chart_config.marker_size - 1, color=COLORS["amethyst"]),
+    name="Child FI Rate",
+    hovertemplate="<b>%{x}</b><br>Child FI Rate: %{y:.1%}<extra></extra>",
 ))
 
 # Add state-specific trend line if a state is selected
 if st.session_state.selected_state:
-    state_trend = data[data["state"] == st.session_state.selected_state].groupby("year", observed=True)["overall_food_insecurity_rate"].mean().reset_index()
+    state_data_for_trend = data[data["state"] == st.session_state.selected_state]
+    state_trend = weighted_rate_by_group(state_data_for_trend, "overall_food_insecurity_rate", "year").reset_index()
     state_trend.columns = ["Year", "FI Rate"]
-    
-    # Apply same data point reduction for mobile
     if chart_config.data_point_reduction < 1.0:
         total_points = len(state_trend)
         points_to_keep = int(total_points * chart_config.data_point_reduction)
         indices = np.linspace(0, total_points - 1, points_to_keep, dtype=int)
         state_trend = state_trend.iloc[indices].reset_index(drop=True)
-    
     state_name = STATE_NAMES.get(st.session_state.selected_state, st.session_state.selected_state)
     fig_trend.add_trace(go.Scatter(
         x=state_trend["Year"], y=state_trend["FI Rate"],
@@ -454,11 +565,18 @@ if st.session_state.selected_state:
         hovertemplate=f"<b>%{{x}}</b><br>{state_name} FI Rate: %{{y:.1%}}<extra></extra>",
     ))
 
-# Add recession/COVID bands
+# DS-7: Policy event annotations + recession/COVID bands
 fig_trend.add_vrect(x0=2009, x1=2010, fillcolor="rgba(192,57,43,0.08)",
                     line_width=0, annotation_text="Recession", annotation_position="top left")
 fig_trend.add_vrect(x0=2020, x1=2021, fillcolor="rgba(192,57,43,0.08)",
                     line_width=0, annotation_text="COVID-19", annotation_position="top left")
+# Policy milestones
+for yr, label in [(2010, "Hunger-Free Kids Act"), (2014, "ACA Medicaid Expansion"),
+                  (2021, "Child Tax Credit"), (2023, "SNAP Emergency End")]:
+    fig_trend.add_vline(x=yr, line=dict(color="rgba(148,163,184,0.4)", width=1, dash="dot"))
+    fig_trend.add_annotation(x=yr, y=1.02, yref="paper", text=label,
+                             showarrow=False, font=dict(size=9, color="#94a3b8"),
+                             textangle=-45 if IS_MOBILE else 0)
 
 # Apply responsive tick spacing
 dtick = 2 if IS_MOBILE else None
@@ -530,7 +648,17 @@ overlay_css = """
     background: linear-gradient(90deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
     border-radius: 14px 14px 0 0;
 }
-.trend-wrap:hover .trend-explainer {
+/* Desktop: show on hover */
+@media (hover: hover) {
+    .trend-wrap:hover .trend-explainer {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+}
+/* Mobile/touch: toggle on tap via JS class */
+.trend-explainer.is-visible {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -583,7 +711,16 @@ trend_html = f"""
 {overlay_css}
 <div class="trend-wrap">
   {trend_div}
-  <div class="trend-explainer">
+  <button onclick="var el=this.nextElementSibling;el.classList.toggle('is-visible');"
+          aria-label="Toggle chart explanation"
+          style="position:absolute;top:8px;right:8px;z-index:10;
+                 width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);
+                 background:rgba(26,35,126,0.8);color:#e5eaff;cursor:pointer;
+                 font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+                 backdrop-filter:blur(8px);">
+    ?
+  </button>
+  <div class="trend-explainer" role="tooltip" aria-label="Chart explanation">
     <p style="margin:0;font-size:1.02rem;line-height:1.55;color:#f8fafc;">
       {trend_explainer.replace(chr(10), ' ')}
     </p>
@@ -611,11 +748,8 @@ st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
 
 def render_state_rankings():
     """Render state rankings content with responsive layout."""
-    # Prepare state rankings data (inside function to ensure it updates with year changes)
-    state_avg = (year_data.groupby("state", observed=True)["overall_food_insecurity_rate"]
-                 .mean().reset_index()
-                 .sort_values("overall_food_insecurity_rate"))
-    state_avg.columns = ["State", "FI Rate"]
+    # Reuse population-weighted state_rankings computed earlier
+    state_avg = state_rankings.copy()
     state_avg["State Name"] = state_avg["State"].map(STATE_NAMES)
     
     # Responsive layout: 2 columns for desktop/tablet, 1 column for mobile
@@ -685,43 +819,62 @@ st.markdown("<div class='gap-section'></div>", unsafe_allow_html=True)
 # ============================================================================
 
 def render_statistical_details():
-    """Render statistical details content."""
+    """Render statistical details with distribution histogram + summary cards."""
+    import plotly.express as px
     fi_vals = year_data["overall_food_insecurity_rate"].dropna()
+    weighted_avg = weighted_rate(year_data, "overall_food_insecurity_rate")
+
+    # Summary stat cards (compact row above histogram)
     cards = [
-        ("Median FI Rate", f"{fi_vals.median():.1%}", "#2251FF", "#eef4ff"),
-        ("Std Deviation", f"{fi_vals.std():.1%}", "#7C3AED", "#f8efff"),
-        ("Range", f"{fi_vals.min():.1%} - {fi_vals.max():.1%}", "#B45309", "#fff8e6"),
-        ("Above Average", f"{(fi_vals > fi_vals.mean()).sum():,} counties", "#B91C1C", "#fff1f1"),
+        ("Median", f"{fi_vals.median():.1%}", COLORS["sapphire"], COLORS["snow"]),
+        ("Std Dev", f"{fi_vals.std():.1%}", COLORS["amethyst"], "#f8efff"),
+        ("Range", f"{fi_vals.min():.1%}-{fi_vals.max():.1%}", COLORS["amber"], "#fff8e6"),
+        ("Above Avg", f"{(fi_vals > weighted_avg).sum():,}", COLORS["ruby"], "#fff1f1"),
     ]
-    stat_cards_html = """
-<style>
-.stat-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; }
-@media (max-width: 820px) { .stat-grid { gap:12px; } }
-@media (max-width: 580px) { .stat-grid { gap:10px; } }
-.stat-card-box {
-    border-radius:16px; padding:1.05rem 0.9rem;
-    text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.04);
-    border:1px solid rgba(0,0,0,0.04); height:100%;
-}
-.stat-card-title {
-    font-size:0.78rem; font-weight:700; letter-spacing:0.04em;
-    color:#6B7280; margin-bottom:0.35rem; text-transform:uppercase;
-}
-.stat-card-value {
-    font-size:1.35rem; font-weight:800; margin:0;
-}
-</style>
-<div class="stat-grid">
-"""
+    stat_cards_html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;" role="list" aria-label="Statistical summary">'
     for title, value, fg, bg in cards:
         stat_cards_html += f"""
-<div class="stat-card-box" style="background:{bg};">
-    <div class="stat-card-title">{title}</div>
-    <div class="stat-card-value" style="color:{fg};">{value}</div>
-</div>
-"""
+<div role="listitem" style="background:{bg};border-radius:12px;padding:0.75rem 0.5rem;text-align:center;
+     box-shadow:0 1px 4px rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.04);">
+    <div style="font-family:Inter,sans-serif;font-size:0.75rem;font-weight:700;color:{COLORS['slate']};
+               text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.2rem;">{title}</div>
+    <div style="font-family:Georgia,serif;font-size:1.1rem;font-weight:800;color:{fg};">{value}</div>
+</div>"""
     stat_cards_html += "</div>"
     st.markdown(stat_cards_html, unsafe_allow_html=True)
+
+    # DS-6: Distribution histogram colored by fi_category
+    hist_data = year_data[["overall_food_insecurity_rate", "fi_category"]].dropna()
+    if not hist_data.empty:
+        cat_order = ["Low", "Moderate", "High", "Very High"]
+        cat_colors = {
+            "Low": COLORS["sapphire"], "Moderate": COLORS["amber"],
+            "High": "#e67e22", "Very High": COLORS["ruby"],
+        }
+        fig_hist = px.histogram(
+            hist_data, x="overall_food_insecurity_rate", color="fi_category",
+            nbins=35, category_orders={"fi_category": cat_order},
+            color_discrete_map=cat_colors,
+            labels={"overall_food_insecurity_rate": "Food Insecurity Rate", "fi_category": "Category"},
+        )
+        # Add weighted average reference line
+        fig_hist.add_vline(x=weighted_avg, line=dict(color=COLORS["ink"], width=2, dash="dash"),
+                           annotation_text=f"Weighted Avg: {weighted_avg:.1%}",
+                           annotation_position="top right",
+                           annotation_font=dict(size=11, color=COLORS["ink"]))
+        hist_layout = dict(PLOTLY_LAYOUT)
+        hist_layout["margin"] = dict(l=40, r=20, t=20, b=40)
+        hist_layout["legend"] = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=10))
+        hist_layout.pop("title", None)
+        fig_hist.update_layout(
+            **hist_layout,
+            title="",
+            height=280 if IS_MOBILE else 320,
+            xaxis_tickformat=".0%",
+            yaxis_title="Counties",
+            bargap=0.05,
+        )
+        st.plotly_chart(fig_hist, use_container_width=True, key="fi_distribution_hist")
 
 collapsible_section(
     title=f"Statistical Details ({selected_year})",

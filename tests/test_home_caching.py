@@ -23,11 +23,12 @@ CASES = [
     ("views/home.py", "_load_template"),
     ("views/home.py", "_load_css"),
     ("views/home.py", "_load_and_encode_image"),
-    ("views/home.py", "_get_fi_ticker_html"),
     ("views/home.py", "_get_kpi_html"),
     ("utils/navigation.py", "_load_template"),
     ("utils/navigation.py", "_load_and_encode_image"),
-    ("utils/navigation.py", "_get_fi_ticker_html"),
+    # FI ticker function moved to utils/ticker.py in task 2.2; one decorator
+    # site now serves both home.py and navigation.py via shared import.
+    ("utils/ticker.py", "get_fi_ticker_html"),
 ]
 
 
@@ -63,6 +64,57 @@ def test_function_has_cache_data_decorator(source_path, func_name):
         "The docstring/comments claim it is cached but the decorator is gone. "
         "Q5 in HOME_REDESIGN_DECISIONS.md resolved this as accidental strip; "
         "the decorator must be present."
+    )
+
+
+def test_load_and_encode_image_logs_on_missing_file(caplog):
+    """Task 2.4: _load_and_encode_image must log a warning when the file
+    doesn't exist, instead of silently returning ''."""
+    import logging
+    # Bypass Streamlit's @st.cache_data wrapper to call the underlying function
+    # directly (cache returns "" without re-invoking on repeat misses).
+    from views.home import _load_and_encode_image
+
+    raw_fn = getattr(_load_and_encode_image, "__wrapped__", _load_and_encode_image)
+
+    with caplog.at_level(logging.WARNING, logger="views.home"):
+        result = raw_fn("definitely-not-a-real-image.png")
+    assert result == ""
+    assert any("Image file not found" in r.message for r in caplog.records), (
+        "_load_and_encode_image should log a WARNING when the file is missing. "
+        "Silent failures hide bugs like missing renames or broken deploy paths."
+    )
+
+
+def test_no_image_paths_contain_spaces():
+    """Task 2.6: image filenames passed to _load_and_encode_image must not
+    contain spaces. Spaces are fragile across deployment OSes (Streamlit Cloud
+    URL-encoding, Posit Connect path handling, Docker COPY directives).
+    Regression guard against 'Critical Path.png' (or similar) drifting back."""
+    import re
+    sources = ["views/home.py", "utils/navigation.py"]
+    pattern = re.compile(r'_load_and_encode_image\(\s*["\']([^"\']+)["\']')
+    for src_path in sources:
+        text = (REPO_ROOT / src_path).read_text()
+        for match in pattern.finditer(text):
+            filename = match.group(1)
+            assert " " not in filename, (
+                f"{src_path} calls _load_and_encode_image with a space-containing "
+                f"filename: {filename!r}. Rename the image file to use underscores "
+                "or hyphens."
+            )
+
+
+def test_warm_image_cache_exists_in_home():
+    """Task 2.4: the import-time eager pre-load was moved into _warm_image_cache()."""
+    import ast
+    src = (REPO_ROOT / "views" / "home.py").read_text()
+    tree = ast.parse(src)
+    fn_names = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
+    assert "_warm_image_cache" in fn_names, (
+        "views/home.py should expose a _warm_image_cache() helper (task 2.4). "
+        "Bare module-level _load_and_encode_image() calls trigger image loading "
+        "at import time, before any error surface is wired up."
     )
 
 
