@@ -43,3 +43,6 @@ tests/testthat/_snaps/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Claude Code local-only settings (per-user permissions, paths)
+.claude/settings.local.json
