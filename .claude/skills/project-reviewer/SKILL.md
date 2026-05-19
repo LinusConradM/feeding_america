@@ -26,7 +26,7 @@ Run through each category systematically when reviewing changes.
 - Are Streamlit session state interactions correct?
 - Do filters and selectors produce expected data subsets?
 
-### 2. McKinsey Design System Compliance
+### 2. Editorial Design System Compliance
 Reference: `utils/theme.py`
 - Colors from `COLORS` dict only (primary `#051C2C`, accent `#2251FF`, etc.)
 - Headlines use Georgia (serif), body uses Inter (sans-serif)

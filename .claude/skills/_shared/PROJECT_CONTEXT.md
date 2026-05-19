@@ -34,7 +34,7 @@ data_raw/                       → Raw source data (read-only)
 tests/                          → pytest suite
 ```
 
-## Design System (McKinsey-Inspired)
+## Design System (Editorial — light surfaces, serif headlines)
 
 ### Color Palette (`utils/theme.py` → `COLORS` dict)
 
