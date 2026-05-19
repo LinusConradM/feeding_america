@@ -1,20 +1,31 @@
 """
-Theme — McKinsey-grade design system.
-Deep navy + electric blue + white. High contrast. Data-forward. Minimal.
+Theme — editorial design system for policy/research dashboards.
 
-Brand references (McKinsey & Company):
-  Primary dark:  #051C2C  (Black Pearl)
-  Accent blue:   #2251FF  (Blue Ribbon)
-  White:         #FFFFFF
-  Headlines:     Georgia (serif)   — McKinsey PowerPoint substitute for Bower
-  Body:          Inter / Arial     — McKinsey PowerPoint substitute for McKinsey Sans
+Per Q3 in HOME_REDESIGN_DECISIONS.md (resolved 2026-05-14, expanded scope),
+the system was previously framed as "McKinsey-grade." That framing was a
+direct reference to a third-party brand; the maintainer's resolution was
+to remove it across the whole app while keeping the token values and
+component look that were working.
+
+Design direction (set in PR #22 on Executive Overview + Geographic
+Intelligence, locked here as the standard):
+  - Light surfaces  (snow #F4F6F8, pearl #DDE3E9) with ink-on-pearl text
+  - Sapphire accent (#2251FF) for emphasis and interactive states
+  - Headlines:    Georgia (serif) — editorial, data-forward
+  - Body:         Inter / Arial   — clean, screen-optimized
+  - High contrast, minimal chrome
+
+Token names below are agnostic (ink/pearl/sapphire/etc) — they describe
+appearance, not provenance. Hex values are unchanged from the previous
+revision; this commit is a comment-only refresh. Per-view migration off
+hex literals onto these tokens lands in Phase 3.D.
 """
 
 import streamlit as st
 
 # ── Palette ──────────────────────────────────────────────────────────────────
 COLORS = {
-    # McKinsey core
+    # Core
     "dark": "#051C2C",
     "blue": "#2251FF",
     "white": "#FFFFFF",
@@ -93,7 +104,13 @@ SEQUENTIAL_COLORS = [
 
 # ── CSS injection ────────────────────────────────────────────────────────────
 def inject_tailwind():
-    """Inject McKinsey-grade CSS design system."""
+    """Inject the app-wide editorial CSS design system.
+
+    Name kept as `inject_tailwind` for back-compat with every view's import.
+    The function name is a misnomer (no Tailwind dependency); renaming is
+    deferred to Phase 3.D when call sites are touched anyway. See the
+    module-level docstring for the design direction.
+    """
     css = """
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -377,7 +394,7 @@ def inject_tailwind():
         }
 
         /* ================================================================== */
-        /*  McKINSEY KPI CARD (the signature element, upgraded)               */
+        /*  KPI CARD — the signature element                                  */
         /* ================================================================== */
         .kpi-card {
             background: #ffffff;
@@ -473,7 +490,7 @@ def inject_tailwind():
         }
 
         /* ================================================================== */
-        /*  SECTION HEADER (McKinsey style — clean line)                      */
+        /*  SECTION HEADER — clean line, serif heading                        */
         /* ================================================================== */
         .section-hdr {
             border-bottom: 2px solid #051C2C;
@@ -553,7 +570,7 @@ def inject_tailwind():
 
 # ── Reusable header ─────────────────────────────────────────────────────────
 def page_header(title: str, subtitle: str = "", icon: str = ""):
-    """McKinsey-style page header — serif title, thin rule below."""
+    """Page header — serif title, thin rule below. Editorial style."""
     icon_html = (
         f'<i class="fas fa-{icon}" style="color:#2251FF;margin-right:.6rem;font-size:.9em"></i>'
         if icon else ""

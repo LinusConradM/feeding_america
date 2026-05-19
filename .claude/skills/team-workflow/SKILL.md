@@ -96,7 +96,7 @@ After all implementation and testing subtasks complete:
 2. Read each changed file in full
 3. Check against the review checklist:
    - Correctness
-   - McKinsey design system compliance
+   - Editorial design system compliance
    - Responsive design
    - Data pipeline integrity
    - Security (OWASP)

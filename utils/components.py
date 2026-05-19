@@ -1,6 +1,11 @@
 """
-Reusable UI components — McKinsey-grade design.
+Reusable UI components — editorial design (light surfaces, Georgia serif).
 White cards, left accent bars, Georgia serif numbers, high-contrast.
+
+Design direction documented in utils/theme.py; per Q3 in
+HOME_REDESIGN_DECISIONS.md the system was previously labeled "McKinsey-grade"
+and has been renamed across the codebase. Visual look and component
+contracts are unchanged.
 
 Touch Target Sizing (Requirements 10.1, 10.2):
 - All interactive elements have minimum 44x44px touch targets on mobile (<768px)
@@ -283,7 +288,7 @@ def kpi_card(
     tooltip_text: str = None,
 ):
     """
-    Render a McKinsey-style KPI card — white bg, left accent bar, serif value.
+    Render a KPI card — white bg, left accent bar, serif value.
     
     Args:
         title: Card title/label
@@ -466,7 +471,7 @@ def stat_card(label: str, value: str, description: str = "", color: str = "blue"
 
 # ── Section Header ───────────────────────────────────────────────────────────
 def section_header(title: str, subtitle: str = "", icon: str = ""):
-    """McKinsey-style section divider — bold line, serif heading."""
+    """Section divider — bold line, serif heading. Editorial style."""
     ico = (
         f'<i class="fas fa-{icon}" style="color:#2251FF;margin-right:.5rem;font-size:.85em"></i>'
         if icon else ""
