@@ -2,7 +2,7 @@
 
 > **Living document.** Update on every state change. Do not let this drift from reality — a stale tracker is worse than no tracker.
 
-**Last updated:** 2026-05-18 by Claude (Phase 1 merged in [PR #14](https://github.com/LinusConradM/feeding_america/pull/14); first Phase 2 commit `b5a3957` lands on branch `phase-2` — Executive Overview overhaul (task 2.1 extended + DS-2/3/5/6/7/8 insight panels))
+**Last updated:** 2026-05-19 by Claude (Phase 1 hotfix [PR #18](https://github.com/LinusConradM/feeding_america/pull/18) merged — `weighted_rate` / `weighted_rate_by_group` helpers were imported by PR #14 but never staged into `utils/data_loader.py`, so the home page raised `ImportError` on any fresh checkout for ~4 hours. `phase-2` commit rebased to `2490ae6`.)
 **Source review:** Home Page Review consolidated report (May 5, 2026)
 **Source plan:** Home Page Remediation Execution Plan (May 5, 2026)
 **Maintainer:** Conrad Linus Muhirwe
@@ -19,16 +19,17 @@
 | 2 — Data backbone | 5 | 1 | 0 | 0 | 0 | 6 |
 | 3 — Component & tokens | 4 | 0 | 0 | 0 | 0 | 4 |
 | 4 — Audience redesign | 7 | 1 | 0 | 0 | 0 | 8 |
-| 5 — Test backfill | 3 | 0 | 0 | 4 | 0 | 7 |
+| 5 — Test backfill | 4 | 0 | 0 | 4 | 0 | 8 |
 | 6 — Backlog | 5 | 0 | 0 | 0 | 0 | 5 |
 | DS — Insight panels (new) | 0 | 6 | 0 | 0 | 0 | 6 |
 | Q — Maintainer Q's | 0 | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **24** | **8** | **0** | **17** | **0** | **49** |
+| **Total** | **25** | **8** | **0** | **17** | **0** | **50** |
 
-**Progress:** 35% complete (17 / 49 tasks merged on `main`), 16% in flight (8 WIP on branch `phase-2`).
+**Progress:** 34% complete (17 / 50 tasks merged on `main`), 16% in flight (8 WIP on branch `phase-2`).
 **Critical path:** Finish Phase 2 on branch `phase-2`. Remaining: extend `weighted_rate` migration to home page (2.1 home leg), dedupe FI ticker helper (2.2), fix `home.py:266` JS selector (2.3), `_load_and_encode_image` logging (2.4), MMG disclaimer banner (2.5), rename `Critical Path.png` (2.6).
-**Note:** Phase 3 scope was expanded by Q3 (McKinsey removed across whole app). The phase-2 commit (`b5a3957`) makes partial progress on 3.1 (COLORS tokens on Executive Overview hero + state card) and 4.4 (ARIA landmarks added on those surfaces). Still not blocking Phase 2.
-**New tasks added 2026-05-18:** DS-2..DS-8 insight panels landed pre-emptively in `b5a3957` on `phase-2`. Treated as in-flight (WIP) until that branch merges. See new "Phase DS" section below.
+**Note:** Phase 3 scope was expanded by Q3 (McKinsey removed across whole app). The phase-2 commit (`2490ae6`, was `b5a3957`) makes partial progress on 3.1 (COLORS tokens on Executive Overview hero + state card) and 4.4 (ARIA landmarks added on those surfaces). Still not blocking Phase 2.
+**New tasks added 2026-05-18:** DS-2..DS-8 insight panels landed pre-emptively on `phase-2`. Treated as in-flight (WIP) until that branch merges. See new "Phase DS" section below.
+**Process gap exposed 2026-05-19:** PR #14 merged with broken imports because no CI ran on the PR. Local dev passed because helpers existed as uncommitted WIP. Strong argument for prioritizing CI (currently a Phase 5 acceptance criterion — "post-CI: automated"). Recommend a Phase 0-equivalent CI bootstrap task before Phase 2 lands.
 
 ### Phase gate status
 
@@ -93,7 +94,7 @@ Goal: every visible number is correct or removed. The primary CTA works. The cac
 
 | ID | Status | Task | Owner | Deps | PR | Notes |
 |----|--------|------|-------|------|-----|-------|
-| 1.1 | DONE | FI ticker: replace `.mean()` with `weighted_rate_by_group` (helper at `data_loader.py:211`) | data-scientist | 0.2 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `5c55c40` | Merged 2026-05-19. Empirical error was +1.74pp in 2019. "Coverage gap: 2011-2012" caveat added. |
+| 1.1 | DONE | FI ticker: replace `.mean()` with `weighted_rate_by_group` (helper at `data_loader.py:201`) | data-scientist | 0.2 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `5c55c40` + hotfix [#18](https://github.com/LinusConradM/feeding_america/pull/18) `22eb4a1` | Merged 2026-05-19. Empirical error was +1.74pp in 2019. "Coverage gap: 2011-2012" caveat added. **Post-merge bug**: PR #14 imported the `weighted_rate_by_group` helper but never staged the function definition into `utils/data_loader.py` — home page broke on fresh checkouts until hotfix #18 landed ~4 hours later. |
 | 1.2 | DONE | KPI #1 "44.2M Americans" → compute from `df`, add year stamp + "Feeding America, MMG" | data-analyst | 0.2 (Q2) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `51072dd` | Merged 2026-05-19. 2023 actual = 46.7M. README updated to drop 44.2M figure. |
 | 1.3 | DONE | Fix dead `#gallery` CTA: restore template render OR repoint anchor | software-engineer | 0.2 (Q4) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `1b1177a` | Merged 2026-05-19. Gallery template deleted per Q4; primary CTA repointed to `/1_Executive_Overview`. |
 | 1.4 | DONE | Resolve caching lie: restore `@st.cache_data` on `_load_template`/`_load_css` OR delete the 6 lying inline comments + update perf doc | devops-engineer | 0.2 (Q5) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` | Merged 2026-05-19. Decorators restored per Q5 (accidental strip). |
@@ -113,7 +114,7 @@ Goal: home page reads from real data correctly, no silent failures, no duplicate
 
 | ID | Status | Task | Owner | Deps | PR | Notes |
 |----|--------|------|-------|------|-----|-------|
-| 2.1 | WIP | All 4 KPI cards data-derived; build `home_kpis()` helper | data-analyst + software-engineer | 1.2 | branch `phase-2` `b5a3957` (Exec Overview leg) | **Executive Overview leg done** in `b5a3957`: `calc_metrics(df)` helper plus `weighted_rate` / `weighted_rate_by_group` swapped in for every rate column on the Exec Overview page. **Home page leg still pending** — task closes only when the same migration lands in `views/home.py`. |
+| 2.1 | WIP | All 4 KPI cards data-derived; build `home_kpis()` helper | data-analyst + software-engineer | 1.2 | branch `phase-2` `2490ae6` (Exec Overview leg, rebased post-hotfix) | **Executive Overview leg done** on `phase-2`: `calc_metrics(df)` helper plus `weighted_rate` / `weighted_rate_by_group` swapped in for every rate column on the Exec Overview page. **Home page leg still pending** — task closes only when the same migration lands in `views/home.py`. |
 | 2.2 | TODO | De-duplicate `_get_fi_ticker_html` between `home.py` and `utils/navigation.py` → extract to `utils/ticker.py` | software-engineer | 1.1 | — | Currently two caches, two `load_data()` reads per page |
 | 2.3 | TODO | Fix `home.py:266` JS selector `.menu-item` → `.app-menu-item` | software-engineer + qa-tester | — | — | Reactive screenshot feature is dead code on live site |
 | 2.4 | TODO | Add explicit logging to `_load_and_encode_image`; move pre-loads from import-time to `_warm_image_cache()` | software-engineer | — | — | Currently swallows all exceptions silently |
@@ -138,7 +139,7 @@ If maintainer answers "intentional marketing surface" → compress Phase 3 to ~2
 
 | ID | Status | Task | Owner | Deps | PR | Notes |
 |----|--------|------|-------|------|-----|-------|
-| 3.1 | TODO | Replace `home.css:75-93` `:root` palette with `COLORS[]`-derived CSS-vars; restore Georgia for `.hero-title` / `.section-title` / `.kpi-val` | ui-designer + software-engineer | 0.2 (Q3) | partial: branch `phase-2` `b5a3957` (Exec Overview only) | Either generate from `theme.py` at app load, or hand-translate. **Partial credit:** `b5a3957` already migrated the Executive Overview hero banner and state summary card off hex literals onto `COLORS` tokens — pattern is proven, just needs to be applied to `home.css` and the rest of the app. |
+| 3.1 | TODO | Replace `home.css:75-93` `:root` palette with `COLORS[]`-derived CSS-vars; restore Georgia for `.hero-title` / `.section-title` / `.kpi-val` | ui-designer + software-engineer | 0.2 (Q3) | partial: branch `phase-2` `2490ae6` (Exec Overview only) | Either generate from `theme.py` at app load, or hand-translate. **Partial credit:** `b5a3957` already migrated the Executive Overview hero banner and state summary card off hex literals onto `COLORS` tokens — pattern is proven, just needs to be applied to `home.css` and the rest of the app. |
 | 3.2 | TODO | Migrate `home.py` to use `kpi_row` / `section_header` / `info_banner` / `hero_section` from `utils/components.py`; delete equivalent template HTML | ui-designer + software-engineer | 3.1, 0.2 (Q3) | — | Coordinate with Phase 4 — touches same files |
 | 3.3 | TODO | Snap every spacing/radius/shadow value in `home.css` to design grid: spacing ∈ {4,8,12,16,24,32,48,64}, radius ∈ {4,6,8,999}, one shadow elevation | ui-designer | 3.1 | — | Verify with `test_home_design_system.py` (T7) |
 | 3.4 | TODO | Add `:focus-visible` styles + `@media (prefers-reduced-motion: reduce)` overrides | ui-designer + ux-designer | 3.1 | — | Disable marquee, KPI orbit, ticker scroll, badge pulse under reduced-motion |
@@ -161,7 +162,7 @@ Goal: home page serves all three target audiences in <10 seconds. **Runs concurr
 | 4.1 | TODO | Rewrite hero subhead with three audience-routed CTAs (policymaker / nonprofit / researcher) | stakeholder-advocate + ux-designer | 0.2 (Q7) | — | Replaces builder-voice "Investigating patterns…" |
 | 4.2 | TODO | Cut marquee strip, LaTeX tile, terminal mockup; replace 3 of 4 KPIs with insight numbers (national rate, counties >20% FI, YoY change) | stakeholder-advocate + data-analyst | 2.1 | — | Keep "Americans affected" as anchor |
 | 4.3 | TODO | Mobile nav fix: scroll affordance, 44×44px touch targets, flatten single-item dropdowns | ux-designer | — | — | Policy Scenarios / AI Agent / Reports → top-level on mobile |
-| 4.4 | WIP | Add `<main role="main">` landmark + "skip to main content" anchor | ux-designer | — | branch `phase-2` `b5a3957` (Exec Overview only) | Basic landmark a11y. **Partial credit:** `b5a3957` added `role="banner"` to the Exec Overview hero, `role="region"` to the state summary card, and `aria-label` on the trend explainer toggle button. Still missing: site-wide `<main>` landmark and the skip-link anchor. |
+| 4.4 | WIP | Add `<main role="main">` landmark + "skip to main content" anchor | ux-designer | — | branch `phase-2` `2490ae6` (Exec Overview only) | Basic landmark a11y. **Partial credit:** `b5a3957` added `role="banner"` to the Exec Overview hero, `role="region"` to the state summary card, and `aria-label` on the trend explainer toggle button. Still missing: site-wide `<main>` landmark and the skip-link anchor. |
 | 4.5 | TODO | Drill-through links: each KPI + bento card links to relevant analytics page | ux-designer + software-engineer | 2.1 | — | KPIs are currently dead-ended |
 | 4.6 | TODO | Rewrite bento card titles in question-led copy ("Ask in plain English", not "Autonomous Agentic Reasoning") | stakeholder-advocate | — | — | |
 | 4.7 | TODO | Reframe footer: drop "DATA-613 Practicum" framing | stakeholder-advocate | — | — | Replace with "Independent research, methodology peer-reviewed at American University." |
@@ -185,10 +186,11 @@ Goal: every home-page concern has a test. **Runs throughout, days 1–end. Each 
 | T1 | DONE | `tests/test_home_kpi_values.py` | KPI cards data-derived; year stamps present; source citations present; computed values match reference data | 1.2, 2.1 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `51072dd` | Merged 2026-05-19. Reference values from latest year of `load_data()`. |
 | T2 | DONE | `tests/test_home_fi_ticker.py` | Ticker uses weighted rate; handles NaN years; has 2011-2012 caveat; renders ≥10 entries | 1.1, 2.2 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `5c55c40` | Merged 2026-05-19. Full HTML-render assertion deferred to 2.2 when ticker is extracted to its own module. |
 | T3 | DONE | `tests/test_home_anchors.py` | Every internal `href="#..."` matches an existing `id` in rendered HTML | 1.3 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `1b1177a` | Merged 2026-05-19. Catches future dead-anchor regressions. |
-| T4 | DONE | `tests/test_home_caching.py` | Decorator presence on `_load_template`, `_load_css`, `_get_fi_ticker_html`, `_load_and_encode_image` | 1.4 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` | Merged 2026-05-19. Also covers `_get_kpi_html` and lints `# OPTIMIZATION` comment claims. |
+| T4 | DONE | `tests/test_home_caching.py` | Decorator presence on `_load_template`, `_load_css`, `_get_fi_ticker_html`, `_load_and_encode_image` | 1.4 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` + hotfix [#18](https://github.com/LinusConradM/feeding_america/pull/18) `22eb4a1` | Merged 2026-05-19. Also covers `_get_kpi_html` and lints `# OPTIMIZATION` comment claims. **Hotfix #18** deleted 7 redundant call-site `# OPTIMIZATION: ... is cached` comments that triggered false positives once T4 finally ran (T4 had been blocked by the missing-import bug in 1.1). T2 also had a hard-coded `0.05149` expected value that should have been `0.05075` — fixed in #18. |
 | T5 | TODO | `tests/test_home_responsive.py` | Hypothesis property test: at 375/768/1024/1440 widths, KPI columns and chart heights match `ChartConfig.from_viewport` | 4.3 | — | Touch target 44×44px assertion included |
 | T6 | TODO | `tests/test_home_a11y.py` | `<main>` landmark present; skip-link present; no focusable element without `:focus-visible`; every `<img>` has alt | 3.4, 4.4 | — | Basic landmark/focus a11y, not full WCAG |
 | T7 | TODO | `tests/test_home_design_system.py` | No hex literals in `home.py` outside theme; no spacing values outside 4px grid in `home.css` | 3.1, 3.3 | — | Static analysis of source files |
+| T8 | TODO | CI bootstrap: GitHub Actions workflow that runs `pytest tests/` on every PR + push to `main` | devops-engineer | — | — | **Added 2026-05-19** after PR #14 merged with a broken import (PR #18 hotfix). Local tests had never run successfully because of the same bug. CI would have caught it immediately. Highest-leverage missing piece in the workflow. |
 
 ### Phase 5 acceptance criteria
 
@@ -214,16 +216,16 @@ Goal: nits and polish. None of these block the redesign.
 
 ## Phase DS — Insight Panels (added 2026-05-18)
 
-Goal: data-science-flavored panels that surfaced in the Phase 2 work but weren't in the original review. Tracked separately so they don't get conflated with Phase 2's data-plumbing fixes. All landed pre-emptively on `phase-2` in commit `b5a3957`; they close to `DONE` when that branch merges.
+Goal: data-science-flavored panels that surfaced in the Phase 2 work but weren't in the original review. Tracked separately so they don't get conflated with Phase 2's data-plumbing fixes. All landed pre-emptively on `phase-2` in commit `2490ae6` (was `b5a3957` pre-hotfix rebase); they close to `DONE` when that branch merges.
 
 | ID | Status | Task | Owner | Deps | PR | Notes |
 |----|--------|------|-------|------|-----|-------|
-| DS-2 | WIP | Child FI rate overlay on national trend chart (dashed line) | data-scientist | 2.1 | branch `phase-2` `b5a3957` | Uses `weighted_rate_by_group`. Shipped on Exec Overview; consider porting to home page after 2.1 home leg. |
-| DS-3 | WIP | ±1 std dev confidence band on national trend chart | data-scientist | 2.1 | branch `phase-2` `b5a3957` | Computed per-year std on `overall_food_insecurity_rate`. |
-| DS-5 | WIP | Disparity Snapshot: Gini, Rural-Urban gap, Black-White FI gap | data-scientist + stakeholder-advocate | 2.1 | branch `phase-2` `b5a3957` | Racial-gap card gated on >50 obs per group (post-2019 data). Verify the gating threshold with maintainer before merge. |
-| DS-6 | WIP | Distribution histogram in Statistical Details, colored by `fi_category`, with weighted-avg reference line | data-scientist | 2.1 | branch `phase-2` `b5a3957` | Lazy-imports `plotly.express` inside `render_statistical_details`. |
-| DS-7 | WIP | Policy event annotations on national trend chart (Hunger-Free Kids Act 2010, ACA 2014, CTC 2021, SNAP Emergency End 2023) | stakeholder-advocate | — | branch `phase-2` `b5a3957` | Verify the four chosen events with maintainer before merge — they shape the policy narrative. |
-| DS-8 | WIP | Counties in Crisis callout: Very High / High / Below 15% counts + worst-5 county list for selected year | data-analyst | — | branch `phase-2` `b5a3957` | Uses `fi_category` column. Confirm crisis tier thresholds (currently "Very High" = >20%, "High" = 15–20%) with the data-scientist before merge. |
+| DS-2 | WIP | Child FI rate overlay on national trend chart (dashed line) | data-scientist | 2.1 | branch `phase-2` `2490ae6` | Uses `weighted_rate_by_group`. Shipped on Exec Overview; consider porting to home page after 2.1 home leg. |
+| DS-3 | WIP | ±1 std dev confidence band on national trend chart | data-scientist | 2.1 | branch `phase-2` `2490ae6` | Computed per-year std on `overall_food_insecurity_rate`. |
+| DS-5 | WIP | Disparity Snapshot: Gini, Rural-Urban gap, Black-White FI gap | data-scientist + stakeholder-advocate | 2.1 | branch `phase-2` `2490ae6` | Racial-gap card gated on >50 obs per group (post-2019 data). Verify the gating threshold with maintainer before merge. |
+| DS-6 | WIP | Distribution histogram in Statistical Details, colored by `fi_category`, with weighted-avg reference line | data-scientist | 2.1 | branch `phase-2` `2490ae6` | Lazy-imports `plotly.express` inside `render_statistical_details`. |
+| DS-7 | WIP | Policy event annotations on national trend chart (Hunger-Free Kids Act 2010, ACA 2014, CTC 2021, SNAP Emergency End 2023) | stakeholder-advocate | — | branch `phase-2` `2490ae6` | Verify the four chosen events with maintainer before merge — they shape the policy narrative. |
+| DS-8 | WIP | Counties in Crisis callout: Very High / High / Below 15% counts + worst-5 county list for selected year | data-analyst | — | branch `phase-2` `2490ae6` | Uses `fi_category` column. Confirm crisis tier thresholds (currently "Very High" = >20%, "High" = 15–20%) with the data-scientist before merge. |
 
 ### Phase DS acceptance criteria
 
