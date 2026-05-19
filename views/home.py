@@ -286,8 +286,11 @@ hero_js = f"""
     }}, 150);
   }}
 
-  // Attach to every menu-item that has data-img
-  document.querySelectorAll('.menu-item[data-img]').forEach(function(el) {{
+  // Attach to every nav menu item that has data-img.
+  // Selector matches `.app-menu-item` in views/templates/nav.html — the
+  // previous `.menu-item` selector never matched, leaving the reactive-
+  // screenshot feature dead on the live site (task 2.3).
+  document.querySelectorAll('.app-menu-item[data-img]').forEach(function(el) {{
     el.addEventListener('mouseenter', function() {{
       setHeroImg(el.dataset.img, el.dataset.label);
     }});
