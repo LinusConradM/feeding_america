@@ -81,7 +81,9 @@ def test_weighted_rate_by_group_differs_from_unweighted_when_populations_unequal
         df["overall_food_insecurity_rate"], weights=df["population"]
     )
     assert weighted == pytest.approx(expected_weighted)
-    assert weighted == pytest.approx(0.05149, abs=1e-4)
+    # (0.05*1e6 + 0.05*1e6 + 0.20*5e3 + 0.20*5e3) / (1e6 + 1e6 + 5e3 + 5e3)
+    # = 102_000 / 2_010_000 = 0.050746...
+    assert weighted == pytest.approx(0.05075, abs=1e-4)
     assert unweighted == pytest.approx(0.125)
     assert abs(weighted - unweighted) > 0.05, (
         "Population-weighted mean should diverge sharply from simple mean when "
