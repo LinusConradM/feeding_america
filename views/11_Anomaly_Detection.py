@@ -8,11 +8,12 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT
 from utils.components import kpi_row, section_header, info_banner, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
-inject_tailwind()
+# inject_tailwind() is called globally in app.py — per-view call removed (Phase 3.D).
+# page_header() replaced with the pearl-bordered pattern from PR #22 below.
 
 data = load_data()
 
@@ -39,8 +40,21 @@ with st.sidebar:
         ["National Scan"] + sorted(data["state"].dropna().unique().tolist())
     )
 
-page_header("Anomaly Search Engine",
-            "Unsupervised Machine Learning scanning for severe macroeconomic decoupling", "satellite-dish")
+# ── Page Header ───────────────────────────────────────────────────────────────
+st.markdown(f"""
+<div role="banner" aria-label="Anomaly Search Engine header"
+     style="text-align:center;padding:1.5rem 1rem 1rem;margin-bottom:1.5rem;
+            border-bottom:2px solid {COLORS['pearl']};">
+    <h1 style="font-family:Georgia,serif;color:{COLORS['ink']};font-size:clamp(2rem,5vw,3rem);
+               font-weight:800;line-height:1.1;margin:0 0 0.25rem 0;letter-spacing:-0.02em">
+        Anomaly Search Engine
+    </h1>
+    <p style="font-family:Inter,sans-serif;color:{COLORS['steel']};font-size:clamp(0.9rem,1.8vw,1.05rem);
+              line-height:1.6;max-width:600px;margin:0 auto">
+        Unsupervised Machine Learning scanning for severe macroeconomic decoupling
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # --- ISOLATION FOREST PIPELINE ---
 filter_data = data[data["year"] == scan_year]
