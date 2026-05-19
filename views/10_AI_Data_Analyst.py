@@ -9,27 +9,17 @@ import traceback
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils.theme import inject_tailwind, COLORS
 from utils.data_loader import load_data
 from utils.llm import _get_api_key, _get_groq_key
 
-inject_tailwind()
+# inject_tailwind() is called globally in app.py — per-view call removed (Phase 3.D).
+# Custom AI-chat brand styling below remains intentional — purple/indigo gradient,
+# 6-color card variety, status-dot green is the page's identity, not McKinsey carryover.
 
 # ── Custom CSS ───────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-.ai-page-header { margin-bottom: 1.5rem; }
-.ai-page-icon {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 44px; height: 44px; border-radius: 10px;
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-    margin-bottom: 0.75rem;
-    font-size: 1.3rem;
-}
-.ai-page-title { font-size: 1.75rem; font-weight: 700; color: #1e293b; font-family: 'Inter', sans-serif; }
-.ai-page-sub   { color: #64748b; font-size: 0.95rem; margin-top: 0.1rem; }
 
 .filter-section {
     background: white; border: 1px solid #e2e8f0; border-radius: 12px;
@@ -297,13 +287,8 @@ def get_questions(year: int, state: str) -> list:
     ]
 
 # ── PAGE HEADER ──────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="ai-page-header">
-    <div class="ai-page-icon">🤖</div>
-    <div class="ai-page-title">AI Data Analyst</div>
-    <div class="ai-page-sub">Get intelligent, code-verified insights about U.S. food insecurity data</div>
-</div>
-""", unsafe_allow_html=True)
+st.title("AI Data Analyst")
+st.caption("Get intelligent, code-verified insights about U.S. food insecurity data")
 
 # ── FILTER ROW ────────────────────────────────────────────────────────────────
 years = sorted(df["year"].dropna().unique().tolist(), reverse=True)
