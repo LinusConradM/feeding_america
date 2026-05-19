@@ -63,10 +63,8 @@ with st.sidebar:
     income_boost = st.slider("Median Income Increase (%)", 0, 30, 5)
     unemployment_reduction = st.slider("Unemployment Reduction (%)", 0, 50, 10)
 
-section_header(
-    "Policy Scenarios",
-    "Causal Inference Engine using Difference-in-Differences (DiD)",
-)
+st.title("Policy Scenarios")
+st.caption("Causal Inference Engine using Difference-in-Differences (DiD)")
 
 # --- DiD MODELING ---
 with st.spinner("Constructing Control Group and running DiD Regression..."):
