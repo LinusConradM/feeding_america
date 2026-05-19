@@ -14,7 +14,7 @@ from utils.llm import _get_api_key, _get_groq_key
 
 # inject_tailwind() is called globally in app.py — per-view call removed (Phase 3.D).
 # Custom AI-chat brand styling below remains intentional — purple/indigo gradient,
-# 6-color card variety, status-dot green are the page's identity, not McKinsey carryover.
+# 6-color card variety, status-dot green is the page's identity, not McKinsey carryover.
 
 # ── Custom CSS ───────────────────────────────────────────────────────────────
 st.markdown("""
