@@ -8,11 +8,12 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import statsmodels.formula.api as smf
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
-inject_tailwind()
+# inject_tailwind() is called globally in app.py — per-view call removed (Phase 3.D).
+# page_header() replaced with section_header() below (Anomaly Detection template).
 
 data = load_data()
 
@@ -62,8 +63,10 @@ with st.sidebar:
     income_boost = st.slider("Median Income Increase (%)", 0, 30, 5)
     unemployment_reduction = st.slider("Unemployment Reduction (%)", 0, 50, 10)
 
-page_header("Policy Scenarios",
-            "Causal Inference Engine using Difference-in-Differences (DiD)", "balance-scale")
+section_header(
+    "Policy Scenarios",
+    "Causal Inference Engine using Difference-in-Differences (DiD)",
+)
 
 # --- DiD MODELING ---
 with st.spinner("Constructing Control Group and running DiD Regression..."):

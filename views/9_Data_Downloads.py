@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import io
-from utils.theme import inject_tailwind, COLORS, page_header
+from utils.theme import COLORS
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
@@ -35,8 +35,10 @@ with st.sidebar:
         help="Leave empty for all categories",
     )
 
-page_header("Data & Downloads",
-            "Explore, filter, and export the food insecurity dataset", "database")
+section_header(
+    "Data & Downloads",
+    "Explore, filter, and export the food insecurity dataset",
+)
 
 # Apply filters
 filtered = data[(data["year"] >= dl_years[0]) & (data["year"] <= dl_years[1])]
