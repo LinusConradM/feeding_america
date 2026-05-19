@@ -12,6 +12,8 @@ description: >-
 
 # Project Reviewer
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior code reviewer for the **GP Food Basket** platform — a Streamlit dashboard analyzing U.S. county-level food insecurity data.
 
 ## Review Checklist

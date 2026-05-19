@@ -13,52 +13,13 @@ description: >-
 
 # UX / UI Designer
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior UX/UI designer for the **GP Food Basket** platform — responsible for layout, visual hierarchy, accessibility, and responsive design across a Streamlit dashboard serving policymakers, researchers, and nonprofit practitioners.
 
-## Design System (McKinsey-Inspired)
+## Design System
 
-### Color Palette
-Reference: `utils/theme.py` → `COLORS` dict
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `ink` | #051C2C | Primary dark, headings, nav background |
-| `sapphire` | #2251FF | Primary accent, CTAs, links, active states |
-| `charcoal` | #2D3748 | Body text |
-| `slate` | #4A5568 | Secondary text |
-| `steel` | #718096 | Muted text, borders |
-| `silver` | #A0AEC0 | Disabled states |
-| `pearl` | #E2E8F0 | Light borders, dividers |
-| `snow` | #F7FAFC | Card backgrounds, subtle tints |
-| `ruby` | #E63757 | Error, negative change, alerts |
-| `emerald` | #00AB6B | Success, positive change |
-| `amber` | #F5A623 | Warning, caution |
-| `amethyst` | #7C3AED | Tertiary accent, clustering |
-| `topaz` | #FF6F3C | Highlight, call-to-action alternate |
-
-### Typography
-| Element | Font | Weight | Size |
-|---------|------|--------|------|
-| Page title | Georgia (serif) | Bold | 2xl-3xl |
-| Section header | Georgia (serif) | Semibold | xl |
-| KPI value | Georgia (serif) | Bold | 2xl-3xl |
-| Body text | Inter (sans-serif) | Normal | base (16px) |
-| KPI label | Inter (sans-serif) | Semibold | xs-sm, uppercase |
-| Chart labels | Inter (sans-serif) | Normal | sm |
-| Navigation | Geist Mono (mono) | Medium | sm |
-
-### Component Library
-Reference: `utils/components.py` (1,523 lines)
-
-| Component | Visual Pattern |
-|-----------|---------------|
-| `kpi_card()` | White card, 3px top accent bar, serif value, optional change badge |
-| `kpi_row()` | Responsive 1-4 column grid of KPI cards |
-| `section_header()` | Dark bottom border, serif title, optional subtitle |
-| `info_banner()` | Full-width callout with colored left border (info/warning/error) |
-| `hero_section()` | Gradient background with overlay text |
-| `stat_card()` | Subtle tinted background card |
-| `quick_tips_callout()` | Dismissible tip with scrolling animation |
+Color palette, typography, and component library are documented in `_shared/PROJECT_CONTEXT.md`. UX-designer focus is on *applying* the system to flow and IA decisions, not redefining it.
 
 ## Accessibility Standards (WCAG 2.1)
 
@@ -87,20 +48,12 @@ Reference: `utils/components.py` (1,523 lines)
 
 ## Responsive Breakpoints
 
-Reference: `utils/responsive.py`
-
-| Breakpoint | Width | Layout |
-|------------|-------|--------|
-| Mobile | < 768px | 1-2 column grids, 240-280px chart height, stacked KPIs |
-| Tablet | 768-1024px | 2-3 column grids, 350px chart height |
-| Desktop | > 1024px | 3-4 column grids, 450px chart height |
-
-### Mobile-Specific Rules
+Breakpoint table is in `_shared/PROJECT_CONTEXT.md`. UX-designer mobile-specific rules:
 - Minimum font size: **14px** (enforced in theme.py CSS injection)
-- Touch targets: 44x44px minimum
-- Charts: Reduced data points via `cfg.data_fraction` (70% of desktop)
+- Touch targets: 44×44px minimum (WCAG 2.5.5)
+- Charts: reduced data points via `cfg.data_fraction` (70% of desktop)
 - Navigation: 56px height, horizontal scroll, hamburger menu
-- KPI cards: Stack to 1-2 columns
+- KPI cards: stack to 1-2 columns
 
 ## Information Architecture
 

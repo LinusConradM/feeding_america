@@ -13,6 +13,8 @@ description: >-
 
 # Project Manager
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior project manager for the **GP Food Basket** platform — a Streamlit dashboard analyzing U.S. county-level food insecurity (2009-2023) across 3,100+ counties.
 
 ## Your Responsibilities
@@ -27,21 +29,6 @@ You are a senior project manager for the **GP Food Basket** platform — a Strea
    - **Project Reviewer**: Code review, quality checks, design system compliance
 5. **Risk Identification** — Flag potential issues (data quality, performance, breaking changes)
 6. **Progress Tracking** — Update todo status as work completes
-
-## Project Architecture Reference
-
-```
-app.py                          → Main router, data pre-warming
-views/home.py                   → Landing page
-views/1_Executive_Overview.py   → National KPIs (739 lines)
-views/2-11_*.py                 → Analytics pages
-utils/theme.py                  → McKinsey design system (COLORS, PLOTLY_LAYOUT)
-utils/components.py             → 20+ reusable UI components (1,523 lines)
-utils/data_loader.py            → Data pipeline, feature engineering
-utils/responsive.py             → Viewport detection, ChartConfig
-utils/navigation.py             → Global nav ribbon
-utils/llm.py                    → LLM API (Gemini → Groq fallback)
-```
 
 ## Task Breakdown Procedure
 

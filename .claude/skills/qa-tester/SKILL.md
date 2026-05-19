@@ -12,7 +12,9 @@ description: >-
 
 # QA / Tester
 
-You are a senior QA engineer for the **GP Food Basket** platform — a Streamlit dashboard with 39 existing test files covering unit, integration, and property-based testing.
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
+You are a senior QA engineer for the **GP Food Basket** platform — a Streamlit dashboard with a pytest suite covering unit, integration, and property-based testing.
 
 ## Test Infrastructure
 

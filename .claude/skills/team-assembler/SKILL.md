@@ -24,11 +24,16 @@ You analyze a task and assemble the optimal project team from the available rost
 | Project Manager | `project-manager` | Task breakdown, scoping, coordination, acceptance criteria |
 | Software Engineer | `software-engineer` | Streamlit pages, UI components, CSS, responsive code |
 | Data Scientist | `data-scientist` | Statistical analysis, modeling, Plotly visualizations, EDA |
+| Data Analyst | `data-analyst` | Descriptive stats, KPI summaries, rankings, stakeholder briefs |
 | AI Engineer | `ai-engineer` | LLM integration, prompt engineering, Gemini/Groq features |
-| UX Designer | `ux-designer` | Layout, visual hierarchy, accessibility, WCAG, responsive design |
+| UX Designer | `ux-designer` | User flows, information architecture, accessibility, WCAG, responsive design |
+| UI Designer | `ui-designer` | Visual polish, design tokens, component states, brand consistency |
+| Stakeholder Advocate | `stakeholder-advocate` | User-voice review, copy clarity, audience-fit pushback |
 | QA Tester | `qa-tester` | pytest, property tests, accessibility validation, regression testing |
 | DevOps Engineer | `devops-engineer` | Deployment, CI/CD, Docker, secrets, infrastructure |
 | Project Reviewer | `project-reviewer` | Code review, design system compliance, security audit |
+| WCAG Auditor | `wcag-audit` | WCAG 2.2 AA source-level audit, severity-rated findings |
+| Python Linter | `python-linter` | Ruff lint + format check across the codebase |
 
 ## Task Classification Matrix
 
@@ -44,13 +49,19 @@ Use this matrix to determine which roles a task requires. A task can match multi
 |------------------------|------------|--------|
 | New pages, components, widgets, CSS, Streamlit code | Software Engineer | Core implementation |
 | Charts, statistical analysis, data exploration, modeling | Data Scientist | Domain expertise |
+| KPI summaries, rankings, stakeholder briefs, descriptive cuts | Data Analyst | Decision-ready framing |
 | LLM features, AI insights, prompt design, Gemini/Groq | AI Engineer | AI specialization |
-| Layout changes, responsive fixes, accessibility, navigation | UX Designer | Design expertise |
+| User flows, information architecture, accessibility, navigation | UX Designer | Flow & IA expertise |
+| Visual polish, color/typography/spacing, component states | UI Designer | Design system execution |
+| Copy review, audience-fit check, "is this useful for X?" | Stakeholder Advocate | User-voice pushback |
 | New features, bug fixes, refactors touching >2 files | QA Tester | Test coverage |
 | Deployment, CI/CD, Docker, env config, secrets | DevOps Engineer | Infrastructure |
-| Visual design system changes, color/typography updates | UX Designer + Project Reviewer | Design integrity |
+| Visual design system changes, color/typography updates | UI Designer + Project Reviewer | Design integrity |
 | Data pipeline changes (data_loader.py, new columns) | Data Scientist + QA Tester | Data integrity |
 | Mobile/touch fixes | UX Designer + QA Tester | Accessibility validation |
+| Stakeholder-facing reports or briefs | Data Analyst + Stakeholder Advocate | Audience translation |
+| Accessibility audit, WCAG check, a11y compliance | WCAG Auditor | Spec-level conformance |
+| Code quality sweep, lint, style audit | Python Linter | Static analysis |
 | New analytics page (end-to-end) | ALL except DevOps | Full-stack feature |
 
 ## Assembly Procedure
@@ -67,7 +78,7 @@ Map the task to categories in the matrix above. A task can match multiple rows.
 ### Step 3: Select the Team
 Pick roles based on classification. Apply these rules:
 - **Minimum team**: Project Manager + 1 builder + Project Reviewer (3 roles)
-- **Maximum team**: All 8 roles (only for large cross-cutting features)
+- **Maximum team**: All 13 roles (only for large cross-cutting features)
 - **Prefer smaller teams** — only add a role if the task genuinely needs their expertise
 - **PM + Reviewer are always included** for any task with >1 subtask
 

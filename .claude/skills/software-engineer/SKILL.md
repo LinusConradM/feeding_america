@@ -12,15 +12,17 @@ description: >-
 
 # Software Engineer
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior software engineer working on the **GP Food Basket** platform — a Streamlit dashboard for U.S. county-level food insecurity analytics (2009-2023).
 
 ## Project Conventions
 
-### File Organization
-- **Pages**: `views/<N>_Page_Name.py` — numbered for nav ordering
-- **Utilities**: `utils/` — shared modules (theme, components, data_loader, responsive, llm)
+File organization, design tokens, components, responsive helpers, and data access are documented in `_shared/PROJECT_CONTEXT.md`. SWE-specific conventions:
+
+- **Pages** live in `views/<N>_Page_Name.py` — number prefix orders the nav
 - **Styles**: CSS injected via `st.markdown()`, not external files (except home.css, nav.css)
-- **Data**: `data/*.xlsx` — never modify raw data files
+- **Imports**: prefer `from utils.x import y` over `import utils.x`
 
 ### Page Template
 Every analytics page follows this pattern:
@@ -63,39 +65,6 @@ def run():
 
 run()
 ```
-
-### Design System (utils/theme.py)
-- **Colors**: Always use `COLORS["name"]` — never hardcode hex values
-  - Primary: `COLORS["ink"]` (#051C2C), Accent: `COLORS["sapphire"]` (#2251FF)
-  - Semantic: sapphire, ruby, emerald, amber, amethyst, topaz
-- **Typography**: Georgia for headlines/KPI values, Inter for body
-- **Plotly**: Apply `PLOTLY_LAYOUT` to all charts via `fig.update_layout(**PLOTLY_LAYOUT)`
-- **Headers**: Use `page_header(title, subtitle, icon)` at top of every page
-
-### Components (utils/components.py)
-Reuse these — never rewrite:
-- `kpi_card(label, value, accent, change, change_label)` — single metric card
-- `kpi_row(cards, columns)` — responsive row of KPI cards
-- `kpi_row_grouped(groups)` — grouped KPI sections with headers
-- `section_header(title, subtitle)` — section divider
-- `info_banner(text, type)` — info/warning/error callout
-- `stat_card(label, value, color)` — subtle stat display
-- `empty_state(message, icon)` — no-data placeholder
-- `hero_section(title, subtitle)` — page hero banner
-- `llm_explainer_ui(page, context)` — AI insight panel
-
-### Responsive Design (utils/responsive.py)
-- Call `vp = get_viewport()` at page top
-- Use `cfg = ChartConfig.from_viewport(vp)` for chart sizing
-- Access `vp.is_mobile`, `vp.kpi_columns`, `cfg.chart_height`
-- Apply `cfg.data_fraction` to reduce data points on mobile
-
-### Data Access (utils/data_loader.py)
-- Always use `data = load_data()` — never read Excel directly
-- Column names are snake_case (e.g., `food_insecurity_rate`, `median_household_income`)
-- Use `get_numeric_columns(df)` to get plottable columns
-- Use `get_variable_label(col)` for human-readable axis labels
-- Key columns: `fips`, `county`, `state`, `year`, `food_insecurity_rate`, `food_insecure_persons`
 
 ## Implementation Procedure
 

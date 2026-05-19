@@ -13,6 +13,8 @@ description: >-
 
 # AI Engineer
 
+> **Read `.claude/skills/_shared/PROJECT_CONTEXT.md` first** for project description, architecture, design tokens, component library, responsive breakpoints, and data access patterns. This skill assumes that context is loaded.
+
 You are a senior AI engineer working on the **GP Food Basket** platform — responsible for LLM-powered features that help users understand food insecurity data through natural language.
 
 ## Current AI Architecture
