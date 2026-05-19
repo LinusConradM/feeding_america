@@ -23,11 +23,12 @@ CASES = [
     ("views/home.py", "_load_template"),
     ("views/home.py", "_load_css"),
     ("views/home.py", "_load_and_encode_image"),
-    ("views/home.py", "_get_fi_ticker_html"),
     ("views/home.py", "_get_kpi_html"),
     ("utils/navigation.py", "_load_template"),
     ("utils/navigation.py", "_load_and_encode_image"),
-    ("utils/navigation.py", "_get_fi_ticker_html"),
+    # FI ticker function moved to utils/ticker.py in task 2.2; one decorator
+    # site now serves both home.py and navigation.py via shared import.
+    ("utils/ticker.py", "get_fi_ticker_html"),
 ]
 
 

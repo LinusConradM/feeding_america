@@ -31,37 +31,9 @@ def _load_template(template_name: str) -> str:
         pass
     return ""
 
-@st.cache_data(show_spinner=False, ttl=3600)
-def _get_fi_ticker_html() -> str:
-    try:
-        from utils.data_loader import load_data, weighted_rate_by_group
-        _df = load_data()
-        _fi_years = (
-            weighted_rate_by_group(_df, "overall_food_insecurity_rate", "year")
-            .dropna()
-            .round(4)
-            .sort_index()
-        )
-        items = []
-        prev_year = None
-        for y, v in _fi_years.items():
-            y = int(y)
-            if prev_year is not None and y - prev_year > 1:
-                lo, hi = prev_year + 1, y - 1
-                label = f"{lo}" if lo == hi else f"{lo}-{hi}"
-                items.append(
-                    f'<span class=\"fi-ticker-item fi-ticker-gap\">Coverage gap: {label}</span>'
-                )
-            items.append(f'<span class=\"fi-ticker-item\">{y} FI Rate = {v:.1%}</span>')
-            prev_year = y
-        _ticker_items = "".join(items) or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
-        return (
-            '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
-            f'{_ticker_items*3}'
-            '</div></div>'
-        )
-    except Exception:
-        return '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
+# FI rate ticker lives in utils/ticker.py (task 2.2: single source of truth
+# shared with views/home.py to avoid two load_data() reads per page).
+from utils.ticker import get_fi_ticker_html as _get_fi_ticker_html
 
 def inject_global_nav():
     """Injects the global top ribbon navigation bar into the app."""

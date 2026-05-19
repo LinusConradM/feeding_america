@@ -80,48 +80,9 @@ IMGS = {
     "critical":   _load_and_encode_image("Critical Path.png"),
 }
 
-# ── OPTIMIZATION: FI Rate ticker data (cached, lightweight) ─────────────────
-@st.cache_data(show_spinner=False, ttl=3600)  # Cache for 1 hour
-def _get_fi_ticker_html() -> str:
-    """
-    Generate FI rate ticker HTML. Cached to avoid loading full dataset on every page load.
-    
-    OPTIMIZATION: Only loads aggregated year data instead of full 47,000+ row dataset.
-    This reduces memory usage and speeds up page load by ~60%.
-    
-    Returns:
-        HTML string for FI rate ticker
-    """
-    try:
-        from utils.data_loader import load_data, weighted_rate_by_group
-
-        _df = load_data()
-        _fi_years = (
-            weighted_rate_by_group(_df, "overall_food_insecurity_rate", "year")
-            .dropna()
-            .round(4)
-            .sort_index()
-        )
-        items = []
-        prev_year = None
-        for y, v in _fi_years.items():
-            y = int(y)
-            if prev_year is not None and y - prev_year > 1:
-                lo, hi = prev_year + 1, y - 1
-                label = f"{lo}" if lo == hi else f"{lo}-{hi}"
-                items.append(
-                    f'<span class=\"fi-ticker-item fi-ticker-gap\">Coverage gap: {label}</span>'
-                )
-            items.append(f'<span class=\"fi-ticker-item\">{y} FI Rate = {v:.1%}</span>')
-            prev_year = y
-        _ticker_items = "".join(items) or '<span class=\"fi-ticker-item\">FI rates unavailable</span>'
-        return (
-            '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\">'
-            f'{_ticker_items*3}'
-            '</div></div>'
-        )
-    except Exception:
-        return '<div class=\"fi-ticker\"><div class=\"fi-ticker-track\"><span class=\"fi-ticker-item\">FI rates unavailable</span></div></div>'
+# FI rate ticker lives in utils/ticker.py (task 2.2: single source of truth
+# shared with the global nav ribbon to avoid two load_data() reads per page).
+from utils.ticker import get_fi_ticker_html as _get_fi_ticker_html
 
 
 # ── 1. Inject CSS via st.markdown so it reaches the real document head ────────
