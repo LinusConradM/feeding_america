@@ -41,10 +41,8 @@ with st.sidebar:
     )
 
 # ── Page Header ───────────────────────────────────────────────────────────────
-section_header(
-    "Anomaly Search Engine",
-    "Unsupervised Machine Learning scanning for severe macroeconomic decoupling",
-)
+st.title("Anomaly Search Engine")
+st.caption("Unsupervised Machine Learning scanning for severe macroeconomic decoupling")
 
 # --- ISOLATION FOREST PIPELINE ---
 filter_data = data[data["year"] == scan_year]

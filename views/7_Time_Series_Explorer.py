@@ -37,10 +37,8 @@ with st.sidebar:
         default=[],
     )
 
-section_header(
-    "Time Series Explorer",
-    "Analyze temporal patterns and trends in food insecurity",
-)
+st.title("Time Series Explorer")
+st.caption("Analyze temporal patterns and trends in food insecurity")
 
 filtered = data[(data["year"] >= year_range[0]) & (data["year"] <= year_range[1])]
 is_rate = "rate" in ts_variable

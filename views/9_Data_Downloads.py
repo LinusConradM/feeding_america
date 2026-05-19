@@ -35,10 +35,8 @@ with st.sidebar:
         help="Leave empty for all categories",
     )
 
-section_header(
-    "Data & Downloads",
-    "Explore, filter, and export the food insecurity dataset",
-)
+st.title("Data & Downloads")
+st.caption("Explore, filter, and export the food insecurity dataset")
 
 # Apply filters
 filtered = data[(data["year"] >= dl_years[0]) & (data["year"] <= dl_years[1])]
