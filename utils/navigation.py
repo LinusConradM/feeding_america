@@ -55,7 +55,7 @@ def inject_global_nav():
         "data":       _load_and_encode_image("ExplorationDataView.png"),
         "regression": _load_and_encode_image("AnalysisRegression.png"),
         "timeline":   _load_and_encode_image("Timeline.png"),
-        "critical":   _load_and_encode_image("Critical Path.png"),
+        "critical":   _load_and_encode_image("critical_path.png"),
     }
 
     _ticker_html = _get_fi_ticker_html()

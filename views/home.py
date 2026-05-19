@@ -31,7 +31,8 @@ def _load_and_encode_image(img_path: str) -> str:
     Returns an empty string on failure (so callers can keep building the page),
     but logs a warning so the failure is visible in logs instead of being
     silently swallowed — the pre-task-2.4 behavior masked missing-file bugs
-    (e.g., the "Critical Path.png" rename) and exception types alike.
+    (e.g., the "Critical Path.png" -> "critical_path.png" rename in task 2.6)
+    and exception types alike.
     """
     path = _IMG_DIR / img_path
     if not path.exists():
@@ -90,7 +91,7 @@ def _warm_image_cache() -> dict:
         "data":       _load_and_encode_image("ExplorationDataView.png"),
         "regression": _load_and_encode_image("AnalysisRegression.png"),
         "timeline":   _load_and_encode_image("Timeline.png"),
-        "critical":   _load_and_encode_image("Critical Path.png"),
+        "critical":   _load_and_encode_image("critical_path.png"),
     }
 
 

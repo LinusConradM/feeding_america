@@ -86,6 +86,25 @@ def test_load_and_encode_image_logs_on_missing_file(caplog):
     )
 
 
+def test_no_image_paths_contain_spaces():
+    """Task 2.6: image filenames passed to _load_and_encode_image must not
+    contain spaces. Spaces are fragile across deployment OSes (Streamlit Cloud
+    URL-encoding, Posit Connect path handling, Docker COPY directives).
+    Regression guard against 'Critical Path.png' (or similar) drifting back."""
+    import re
+    sources = ["views/home.py", "utils/navigation.py"]
+    pattern = re.compile(r'_load_and_encode_image\(\s*["\']([^"\']+)["\']')
+    for src_path in sources:
+        text = (REPO_ROOT / src_path).read_text()
+        for match in pattern.finditer(text):
+            filename = match.group(1)
+            assert " " not in filename, (
+                f"{src_path} calls _load_and_encode_image with a space-containing "
+                f"filename: {filename!r}. Rename the image file to use underscores "
+                "or hyphens."
+            )
+
+
 def test_warm_image_cache_exists_in_home():
     """Task 2.4: the import-time eager pre-load was moved into _warm_image_cache()."""
     import ast
