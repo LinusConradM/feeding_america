@@ -201,30 +201,64 @@ st.html(hero_html)
 
 
 # ── 5. KPI strip ─────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner=False, ttl=3600)
-def _get_kpi_html() -> str:
-    """Render the KPI strip with the lead 'Americans affected' value computed live.
+def _compute_home_kpis() -> dict:
+    """Compute all four home-page KPIs from load_data() (task 2.1).
 
-    The historical hardcoded "44.2M" was of unconfirmed origin (Q2 in
-    HOME_REDESIGN_DECISIONS.md). Compute fresh from the latest year in
-    load_data() so the headline number is always a published, verifiable figure.
+    Returns a dict of placeholder -> formatted string. All four values are
+    derived from the same load_data() call so the page stays internally
+    consistent even if the data file is updated.
+
+    Falls back to em-dash + 'Source unavailable' on any exception — never
+    silently returns the historical hardcoded values ('44.2M', '3,100+', etc).
     """
     try:
         from utils.data_loader import load_data
 
         _df = load_data()
         _latest_year = int(_df["year"].max())
+        _earliest_year = int(_df["year"].min())
         _latest = _df[_df["year"] == _latest_year]
-        _total = float(_latest["no_of_food_insecure_persons_overall"].sum())
-        _val = f"{_total / 1_000_000:.1f}M"
-        _note = f"Feeding America MMG · {_latest_year}"
+
+        _total_persons = float(_latest["no_of_food_insecure_persons_overall"].sum())
+        _counties = int(_df["fips"].nunique())
+        _span = _latest_year - _earliest_year + 1
+        _obs = len(_df)
+
+        return {
+            "americans_val": f"{_total_persons / 1_000_000:.1f}M",
+            "americans_note": f"Feeding America MMG · {_latest_year}",
+            "counties_val": f"{_counties:,}",
+            "span_val": f"{_span} yrs",
+            "obs_val": f"{_obs:,}",
+        }
     except Exception:
-        _val = "—"
-        _note = "Source unavailable"
+        return {
+            "americans_val": "—",
+            "americans_note": "Source unavailable",
+            "counties_val": "—",
+            "span_val": "—",
+            "obs_val": "—",
+        }
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def _get_kpi_html() -> str:
+    """Render the KPI strip with all four values computed live from load_data().
+
+    The historical hardcoded values (44.2M, 3,100+, 15 yrs, 47K+) were either
+    unverifiable (Q2 in HOME_REDESIGN_DECISIONS.md for 44.2M) or drift-prone
+    snapshots that go stale every data refresh. _compute_home_kpis() fills all
+    four placeholders from the latest load_data() so the strip always reflects
+    the data actually being analyzed.
+    """
+    kpis = _compute_home_kpis()
     return (
         _load_template("kpi.html")
-        .replace("__KPI_AMERICANS_VAL__", _val)
-        .replace("__KPI_AMERICANS_NOTE__", _note)
+        .replace("__KPI_AMERICANS_VAL__", kpis["americans_val"])
+        .replace("__KPI_AMERICANS_NOTE__", kpis["americans_note"])
+        .replace("__KPI_COUNTIES_VAL__", kpis["counties_val"])
+        .replace("__KPI_SPAN_VAL__", kpis["span_val"])
+        .replace("__KPI_OBS_VAL__", kpis["obs_val"])
     )
 
 
