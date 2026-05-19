@@ -41,20 +41,10 @@ with st.sidebar:
     )
 
 # ── Page Header ───────────────────────────────────────────────────────────────
-st.markdown(f"""
-<div role="banner" aria-label="Anomaly Search Engine header"
-     style="text-align:center;padding:1.5rem 1rem 1rem;margin-bottom:1.5rem;
-            border-bottom:2px solid {COLORS['pearl']};">
-    <h1 style="font-family:Georgia,serif;color:{COLORS['ink']};font-size:clamp(2rem,5vw,3rem);
-               font-weight:800;line-height:1.1;margin:0 0 0.25rem 0;letter-spacing:-0.02em">
-        Anomaly Search Engine
-    </h1>
-    <p style="font-family:Inter,sans-serif;color:{COLORS['steel']};font-size:clamp(0.9rem,1.8vw,1.05rem);
-              line-height:1.6;max-width:600px;margin:0 auto">
-        Unsupervised Machine Learning scanning for severe macroeconomic decoupling
-    </p>
-</div>
-""", unsafe_allow_html=True)
+section_header(
+    "Anomaly Search Engine",
+    "Unsupervised Machine Learning scanning for severe macroeconomic decoupling",
+)
 
 # --- ISOLATION FOREST PIPELINE ---
 filter_data = data[data["year"] == scan_year]
