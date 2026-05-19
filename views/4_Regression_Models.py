@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import cross_val_score
 import statsmodels.api as sm
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, get_numeric_columns
 
@@ -65,8 +65,8 @@ with st.sidebar:
 
     scale_data = st.checkbox("Standardize Variables", value=False)
 
-page_header("Regression Models",
-            f"Build and evaluate {MODEL_TYPES.get(model_type, 'regression')} models", "chart-line")
+st.title("Regression Models")
+st.caption(f"Build and evaluate {MODEL_TYPES.get(model_type, 'regression')} models")
 
 if not selected_predictors:
     info_banner("Select at least one independent variable to build a model.", "warning")
@@ -302,12 +302,12 @@ if run_model or "reg_results" in st.session_state:
             }
 
             st.markdown(
-                """
-                <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;
+                f"""
+                <div style="background:{COLORS['white']};border:1px solid {COLORS['pearl']};border-radius:8px;
                             padding:1.25rem;height:100%;">
-                    <div style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;
+                    <div style="font-size:0.75rem;font-weight:700;color:{COLORS['steel']};text-transform:uppercase;
                                 letter-spacing:0.05em;margin-bottom:0.75rem;">
-                        <i class="fas fa-robot" style="color:#5C45FD;margin-right:0.4rem;"></i>
+                        <i class="fas fa-robot" style="color:{COLORS['amethyst']};margin-right:0.4rem;"></i>
                         AI Model Interpretation
                     </div>
                 """,
@@ -328,7 +328,7 @@ if run_model or "reg_results" in st.session_state:
             if st.session_state.get(interp_key):
                 st.markdown(
                     f"""
-                    <div style="font-size:0.85rem;color:#374151;line-height:1.65;margin-top:0.5rem;">
+                    <div style="font-size:0.85rem;color:{COLORS['slate']};line-height:1.65;margin-top:0.5rem;">
                         {st.session_state[interp_key].replace(chr(10), "<br>")}
                     </div>
                     """,
@@ -336,8 +336,8 @@ if run_model or "reg_results" in st.session_state:
                 )
             else:
                 st.markdown(
-                    """
-                    <div style="font-size:0.83rem;color:#9CA3AF;margin-top:0.5rem;font-style:italic;">
+                    f"""
+                    <div style="font-size:0.83rem;color:{COLORS['silver']};margin-top:0.5rem;font-style:italic;">
                         Click <strong>Explain This Output</strong> above to get a plain-English
                         interpretation of the R², coefficient significance, F-statistic,
                         and model diagnostics — powered by Google Gemini.
@@ -429,12 +429,12 @@ COEFFICIENTS / FEATURE WEIGHTS
                 non_ols_context["Expanded Feature Count"] = res["p"]
 
             st.markdown(
-                """
-                <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;
+                f"""
+                <div style="background:{COLORS['white']};border:1px solid {COLORS['pearl']};border-radius:8px;
                             padding:1.25rem;">
-                    <div style="font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;
+                    <div style="font-size:0.75rem;font-weight:700;color:{COLORS['steel']};text-transform:uppercase;
                                 letter-spacing:0.05em;margin-bottom:0.75rem;">
-                        <i class="fas fa-robot" style="color:#5C45FD;margin-right:0.4rem;"></i>
+                        <i class="fas fa-robot" style="color:{COLORS['amethyst']};margin-right:0.4rem;"></i>
                         AI Model Interpretation
                     </div>
                 """,
@@ -455,7 +455,7 @@ COEFFICIENTS / FEATURE WEIGHTS
             if st.session_state.get(interp_key2):
                 st.markdown(
                     f"""
-                    <div style="font-size:0.85rem;color:#374151;line-height:1.65;margin-top:0.5rem;">
+                    <div style="font-size:0.85rem;color:{COLORS['slate']};line-height:1.65;margin-top:0.5rem;">
                         {st.session_state[interp_key2].replace(chr(10), "<br>")}
                     </div>
                     """,
@@ -463,8 +463,8 @@ COEFFICIENTS / FEATURE WEIGHTS
                 )
             else:
                 st.markdown(
-                    """
-                    <div style="font-size:0.83rem;color:#9CA3AF;margin-top:0.5rem;font-style:italic;">
+                    f"""
+                    <div style="font-size:0.83rem;color:{COLORS['silver']};margin-top:0.5rem;font-style:italic;">
                         Click <strong>Explain This Output</strong> above to get a plain-English
                         breakdown of R², RMSE, feature importances or regularization effects
                         — powered by Google Gemini.

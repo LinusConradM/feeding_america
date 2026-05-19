@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT
 from utils.components import kpi_row, section_header, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, get_numeric_columns
 
@@ -29,7 +29,8 @@ with st.sidebar:
     geo_filter = st.selectbox("State Filter", ["All Counties"] + sorted(data["state"].dropna().unique().tolist()))
     hist_var = st.selectbox("Variable for Distribution / Box Plot", available_vars, format_func=get_variable_label)
 
-page_header("Data Explorer", "Exploratory Data Analysis — quality, distributions, and rankings", "microscope")
+st.title("Data Explorer")
+st.caption("Exploratory Data Analysis — quality, distributions, and rankings")
 
 year_data = data[data["year"] == selected_year].copy()
 if geo_filter != "All Counties":
@@ -149,16 +150,16 @@ with col2:
 
     st.markdown(
         f"""
-        <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;padding:1.25rem;margin-top:0.5rem;">
-            <h4 style="font-size:0.8rem;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Shape Diagnostics</h4>
-            <table style="width:100%;font-size:0.82rem;color:#111827;border-collapse:collapse;">
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Mean</td><td style="font-weight:600;text-align:right;">{hist_data.mean():.4f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Median</td><td style="font-weight:600;text-align:right;">{hist_data.median():.4f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Std Dev</td><td style="font-weight:600;text-align:right;">{hist_data.std():.4f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Skewness</td><td style="font-weight:600;text-align:right;">{skew:.3f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Kurtosis</td><td style="font-weight:600;text-align:right;">{kurt:.3f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Min</td><td style="font-weight:600;text-align:right;">{hist_data.min():.4f}</td></tr>
-                <tr><td style="padding:0.3rem 0;color:#6B7280;">Max</td><td style="font-weight:600;text-align:right;">{hist_data.max():.4f}</td></tr>
+        <div style="background:{COLORS['white']};border:1px solid {COLORS['pearl']};border-radius:8px;padding:1.25rem;margin-top:0.5rem;">
+            <h4 style="font-size:0.8rem;font-weight:700;color:{COLORS['steel']};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Shape Diagnostics</h4>
+            <table style="width:100%;font-size:0.82rem;color:{COLORS['ink']};border-collapse:collapse;">
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Mean</td><td style="font-weight:600;text-align:right;">{hist_data.mean():.4f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Median</td><td style="font-weight:600;text-align:right;">{hist_data.median():.4f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Std Dev</td><td style="font-weight:600;text-align:right;">{hist_data.std():.4f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Skewness</td><td style="font-weight:600;text-align:right;">{skew:.3f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Kurtosis</td><td style="font-weight:600;text-align:right;">{kurt:.3f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Min</td><td style="font-weight:600;text-align:right;">{hist_data.min():.4f}</td></tr>
+                <tr><td style="padding:0.3rem 0;color:{COLORS['steel']};">Max</td><td style="font-weight:600;text-align:right;">{hist_data.max():.4f}</td></tr>
             </table>
             <div style="margin-top:0.75rem;padding:0.5rem;background:#F0FDF4;border-radius:6px;font-size:0.8rem;color:#166534;font-weight:500;">
                 📐 {skew_label}
