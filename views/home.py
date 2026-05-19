@@ -8,8 +8,11 @@ Every section maps to a template in views/templates/.
 import streamlit as st
 import warnings
 import base64
+import logging
 from pathlib import Path
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
@@ -23,19 +26,21 @@ _IMG_DIR   = _ROOT_DIR / "images"
 # ── OPTIMIZATION: Cached helper functions ────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def _load_and_encode_image(img_path: str) -> str:
+    """Load and base64-encode an image. Cached to avoid re-encoding on every page load.
+
+    Returns an empty string on failure (so callers can keep building the page),
+    but logs a warning so the failure is visible in logs instead of being
+    silently swallowed — the pre-task-2.4 behavior masked missing-file bugs
+    (e.g., the "Critical Path.png" rename) and exception types alike.
     """
-    Load and base64-encode an image. Cached to avoid re-encoding on every page load.
-    
-    Args:
-        img_path: Path to image file relative to images directory
-        
-    Returns:
-        Base64-encoded data URI string
-    """
+    path = _IMG_DIR / img_path
+    if not path.exists():
+        logger.warning("Image file not found: %s (resolved: %s)", img_path, path)
+        return ""
     try:
-        path = _IMG_DIR / img_path
         return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
     except Exception:
+        logger.exception("Failed to base64-encode image: %s", path)
         return ""
 
 
@@ -70,15 +75,26 @@ def _load_css() -> str:
         return ""
 
 
-# Pre-encode all gallery images with caching (OPTIMIZATION: ~80% faster load time)
-IMGS = {
-    "overview":   _load_and_encode_image("OverviewPage.png"),
-    "map":        _load_and_encode_image("ExplorationMap.png"),
-    "data":       _load_and_encode_image("ExplorationDataView.png"),
-    "regression": _load_and_encode_image("AnalysisRegression.png"),
-    "timeline":   _load_and_encode_image("Timeline.png"),
-    "critical":   _load_and_encode_image("Critical Path.png"),
-}
+def _warm_image_cache() -> dict:
+    """Eagerly base64-encode every gallery image used on the home page (task 2.4).
+
+    Previously this dict was built at module import time, so the first
+    user-facing error from a missing image would surface at app startup —
+    before any page even rendered. Wrapping the pre-load in a function lets
+    home.py call it once at render time (where the result is needed) and
+    keeps the @st.cache_data cache warm thereafter.
+    """
+    return {
+        "overview":   _load_and_encode_image("OverviewPage.png"),
+        "map":        _load_and_encode_image("ExplorationMap.png"),
+        "data":       _load_and_encode_image("ExplorationDataView.png"),
+        "regression": _load_and_encode_image("AnalysisRegression.png"),
+        "timeline":   _load_and_encode_image("Timeline.png"),
+        "critical":   _load_and_encode_image("Critical Path.png"),
+    }
+
+
+IMGS = _warm_image_cache()
 
 # FI rate ticker lives in utils/ticker.py (task 2.2: single source of truth
 # shared with the global nav ribbon to avoid two load_data() reads per page).

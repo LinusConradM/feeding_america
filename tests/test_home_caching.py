@@ -67,6 +67,38 @@ def test_function_has_cache_data_decorator(source_path, func_name):
     )
 
 
+def test_load_and_encode_image_logs_on_missing_file(caplog):
+    """Task 2.4: _load_and_encode_image must log a warning when the file
+    doesn't exist, instead of silently returning ''."""
+    import logging
+    # Bypass Streamlit's @st.cache_data wrapper to call the underlying function
+    # directly (cache returns "" without re-invoking on repeat misses).
+    from views.home import _load_and_encode_image
+
+    raw_fn = getattr(_load_and_encode_image, "__wrapped__", _load_and_encode_image)
+
+    with caplog.at_level(logging.WARNING, logger="views.home"):
+        result = raw_fn("definitely-not-a-real-image.png")
+    assert result == ""
+    assert any("Image file not found" in r.message for r in caplog.records), (
+        "_load_and_encode_image should log a WARNING when the file is missing. "
+        "Silent failures hide bugs like missing renames or broken deploy paths."
+    )
+
+
+def test_warm_image_cache_exists_in_home():
+    """Task 2.4: the import-time eager pre-load was moved into _warm_image_cache()."""
+    import ast
+    src = (REPO_ROOT / "views" / "home.py").read_text()
+    tree = ast.parse(src)
+    fn_names = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
+    assert "_warm_image_cache" in fn_names, (
+        "views/home.py should expose a _warm_image_cache() helper (task 2.4). "
+        "Bare module-level _load_and_encode_image() calls trigger image loading "
+        "at import time, before any error surface is wired up."
+    )
+
+
 def test_no_optimization_comment_lies():
     """
     Inline '# OPTIMIZATION:' comments that claim caching must be near an actual

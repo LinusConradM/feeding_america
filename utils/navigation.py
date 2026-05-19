@@ -3,7 +3,10 @@ Global Navigation Ribbon extracted from home.py
 """
 import streamlit as st
 import base64
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 _UTILS_DIR = Path(__file__).parent
 _ROOT_DIR = _UTILS_DIR.parent
@@ -13,13 +16,18 @@ _IMG_DIR = _ROOT_DIR / "images"
 
 @st.cache_data(show_spinner=False)
 def _load_and_encode_image(img_path: str) -> str:
+    """Load and base64-encode an image. Logs warnings on failure so missing
+    files / encode errors are visible in logs (task 2.4) instead of being
+    silently swallowed into an empty string."""
+    path = _IMG_DIR / img_path
+    if not path.exists():
+        logger.warning("Image file not found: %s (resolved: %s)", img_path, path)
+        return ""
     try:
-        path = _IMG_DIR / img_path
-        if path.exists():
-            return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
+        return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
     except Exception:
-        pass
-    return ""
+        logger.exception("Failed to base64-encode image: %s", path)
+        return ""
 
 @st.cache_data(show_spinner=False)
 def _load_template(template_name: str) -> str:
