@@ -9,7 +9,7 @@ A professional interactive dashboard analyzing county-level food insecurity patt
 This platform provides policymakers, researchers, and nonprofit practitioners with evidence-based insights into food insecurity disparities, socioeconomic drivers, and intervention impacts. The dashboard integrates data from Feeding America's Map the Meal Gap and the U.S. Census Bureau's American Community Survey.
 
 **Key Numbers:**
-- **44.2 million** Americans affected by food insecurity
+- **Tens of millions** of Americans affected by food insecurity each year — the current national figure is computed live from Feeding America's MMG data on the dashboard's home page (year-stamped + source-cited)
 - **3,100+** counties analyzed
 - **15 years** of longitudinal data (2009-2023)
 - **47,000+** county-year observations
