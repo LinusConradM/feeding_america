@@ -51,10 +51,8 @@ with st.sidebar:
         help="0 = standard clustering based solely on economic traits. > 0 = forces the algorithm to prioritize grouping counties that are physically close together."
     )
 
-section_header(
-    "County Clustering",
-    "Segment counties by food insecurity characteristics",
-)
+st.title("County Clustering")
+st.caption("Segment counties by food insecurity characteristics")
 
 if len(selected_vars) < 2:
     info_banner("Select at least 2 variables for clustering.", "warning")

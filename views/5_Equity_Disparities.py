@@ -20,10 +20,8 @@ with st.sidebar:
     eq_year = st.slider("Year", int(data["year"].min()), int(data["year"].max()),
                         int(data["year"].max()))
 
-section_header(
-    "Equity & Disparities",
-    "Analyzing food insecurity gaps across demographics and geography",
-)
+st.title("Equity & Disparities")
+st.caption("Analyzing food insecurity gaps across demographics and geography")
 
 year_data = data[data["year"] == eq_year].copy()
 
