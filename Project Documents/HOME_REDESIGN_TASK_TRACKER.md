@@ -2,7 +2,7 @@
 
 > **Living document.** Update on every state change. Do not let this drift from reality — a stale tracker is worse than no tracker.
 
-**Last updated:** 2026-05-14 by Claude (Phase 0 done, Phase 1 tasks 1.1–1.4 + tests T1–T4 in REVIEW on branch `home-redesign-phase-1`)
+**Last updated:** 2026-05-18 by Claude (Phase 1 tasks 1.1–1.4 + tests T1–T4 merged in [PR #14](https://github.com/LinusConradM/feeding_america/pull/14) on 2026-05-19; Phase 2 unblocked)
 **Source review:** Home Page Review consolidated report (May 5, 2026)
 **Source plan:** Home Page Remediation Execution Plan (May 5, 2026)
 **Maintainer:** Conrad Linus Muhirwe
@@ -15,23 +15,23 @@
 | Phase | TODO | WIP | REVIEW | DONE | BLOCKED | Total |
 |-------|-----:|----:|-------:|-----:|--------:|------:|
 | 0 — Pre-flight | 0 | 0 | 0 | 2 | 0 | 2 |
-| 1 — Stop misinformation | 0 | 0 | 4 | 0 | 0 | 4 |
+| 1 — Stop misinformation | 0 | 0 | 0 | 4 | 0 | 4 |
 | 2 — Data backbone | 6 | 0 | 0 | 0 | 0 | 6 |
 | 3 — Component & tokens | 4 | 0 | 0 | 0 | 0 | 4 |
 | 4 — Audience redesign | 8 | 0 | 0 | 0 | 0 | 8 |
-| 5 — Test backfill | 3 | 0 | 4 | 0 | 0 | 7 |
+| 5 — Test backfill | 3 | 0 | 0 | 4 | 0 | 7 |
 | 6 — Backlog | 5 | 0 | 0 | 0 | 0 | 5 |
 | Q — Maintainer Q's | 0 | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **26** | **0** | **8** | **9** | **0** | **43** |
+| **Total** | **26** | **0** | **0** | **17** | **0** | **43** |
 
-**Progress:** 40% in flight (17 / 43 tasks complete or in REVIEW; 9 fully DONE on `main`).
-**Critical path:** PR for branch `home-redesign-phase-1` (4 fixes + 4 tests) → review → merge. Then Phase 2 unblocked.
-**Note:** Phase 3 scope was expanded by Q3 (McKinsey removed across whole app, not just home) — re-plan Phase 3 before starting it. Not blocking Phase 2 or the in-review Phase 1 PR.
+**Progress:** 40% complete (17 / 43 tasks merged on `main`).
+**Critical path:** Phase 2 (data backbone) is now unblocked. Next: dedupe FI ticker helper (2.2), data-derive remaining 3 KPIs (2.1), add MMG disclaimer banner (2.5), fix `home.py:266` JS selector bug (2.3).
+**Note:** Phase 3 scope was expanded by Q3 (McKinsey removed across whole app, not just home) — re-plan Phase 3 before starting it. Not blocking Phase 2.
 
 ### Phase gate status
 
 - [x] Phase 0 complete → unblocks Phase 1 ✅ (2026-05-14)
-- [ ] Phase 1 complete → unblocks Phase 2
+- [x] Phase 1 complete → unblocks Phase 2 ✅ (2026-05-19, [PR #14](https://github.com/LinusConradM/feeding_america/pull/14))
 - [ ] Phase 2 complete → unblocks Phase 3 + Phase 4 (parallel)
 - [ ] Phase 3 + Phase 4 complete → unblocks final ship
 - [ ] Phase 5 — runs alongside, not gating
@@ -91,10 +91,10 @@ Goal: every visible number is correct or removed. The primary CTA works. The cac
 
 | ID | Status | Task | Owner | Deps | PR | Notes |
 |----|--------|------|-------|------|-----|-------|
-| 1.1 | REVIEW | FI ticker: replace `.mean()` with `weighted_rate_by_group` (helper at `data_loader.py:211`) | data-scientist | 0.2 | branch `home-redesign-phase-1` `5c55c40` | Empirical error currently +1.74pp in 2019. Add "Coverage gap: 2011-2012" caveat. **Done locally 2026-05-14**, awaiting PR. |
-| 1.2 | REVIEW | KPI #1 "44.2M Americans" → compute from `df`, add year stamp + "Feeding America, MMG" | data-analyst | 0.2 (Q2) | branch `home-redesign-phase-1` `51072dd` | 2023 actual = 46.7M. README updated to drop 44.2M figure. **Done locally 2026-05-14**, awaiting PR. |
-| 1.3 | REVIEW | Fix dead `#gallery` CTA: restore template render OR repoint anchor | software-engineer | 0.2 (Q4) | branch `home-redesign-phase-1` `1b1177a` | Gallery template deleted per Q4; primary CTA repointed to `/1_Executive_Overview`. **Done locally 2026-05-14**, awaiting PR. |
-| 1.4 | REVIEW | Resolve caching lie: restore `@st.cache_data` on `_load_template`/`_load_css` OR delete the 6 lying inline comments + update perf doc | devops-engineer | 0.2 (Q5) | branch `home-redesign-phase-1` `ee3506c` | Decorators restored per Q5 (accidental strip). **Done locally 2026-05-14**, awaiting PR. |
+| 1.1 | DONE | FI ticker: replace `.mean()` with `weighted_rate_by_group` (helper at `data_loader.py:211`) | data-scientist | 0.2 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `5c55c40` | Merged 2026-05-19. Empirical error was +1.74pp in 2019. "Coverage gap: 2011-2012" caveat added. |
+| 1.2 | DONE | KPI #1 "44.2M Americans" → compute from `df`, add year stamp + "Feeding America, MMG" | data-analyst | 0.2 (Q2) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `51072dd` | Merged 2026-05-19. 2023 actual = 46.7M. README updated to drop 44.2M figure. |
+| 1.3 | DONE | Fix dead `#gallery` CTA: restore template render OR repoint anchor | software-engineer | 0.2 (Q4) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `1b1177a` | Merged 2026-05-19. Gallery template deleted per Q4; primary CTA repointed to `/1_Executive_Overview`. |
+| 1.4 | DONE | Resolve caching lie: restore `@st.cache_data` on `_load_template`/`_load_css` OR delete the 6 lying inline comments + update perf doc | devops-engineer | 0.2 (Q5) | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` | Merged 2026-05-19. Decorators restored per Q5 (accidental strip). |
 
 ### Phase 1 acceptance criteria
 
@@ -180,10 +180,10 @@ Goal: every home-page concern has a test. **Runs throughout, days 1–end. Each 
 
 | ID | Status | Test File | Asserts | Pairs With | PR | Notes |
 |----|--------|-----------|---------|------------|-----|-------|
-| T1 | REVIEW | `tests/test_home_kpi_values.py` | KPI cards data-derived; year stamps present; source citations present; computed values match reference data | 1.2, 2.1 | branch `home-redesign-phase-1` `51072dd` | Reference values from latest year of `load_data()`. **Done locally 2026-05-14**. |
-| T2 | REVIEW | `tests/test_home_fi_ticker.py` | Ticker uses weighted rate; handles NaN years; has 2011-2012 caveat; renders ≥10 entries | 1.1, 2.2 | branch `home-redesign-phase-1` `5c55c40` | Compare to population-weighted reference. **Done locally 2026-05-14**. Full HTML-render assertion deferred to 2.2 when ticker is extracted to its own module. |
-| T3 | REVIEW | `tests/test_home_anchors.py` | Every internal `href="#..."` matches an existing `id` in rendered HTML | 1.3 | branch `home-redesign-phase-1` `1b1177a` | Catches future dead-anchor regressions. **Done locally 2026-05-14**. |
-| T4 | REVIEW | `tests/test_home_caching.py` | Decorator presence on `_load_template`, `_load_css`, `_get_fi_ticker_html`, `_load_and_encode_image` | 1.4 | branch `home-redesign-phase-1` `ee3506c` | Prevents silent cache strip recurrence. **Done locally 2026-05-14**. Also covers `_get_kpi_html` and lints `# OPTIMIZATION` comment claims. |
+| T1 | DONE | `tests/test_home_kpi_values.py` | KPI cards data-derived; year stamps present; source citations present; computed values match reference data | 1.2, 2.1 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `51072dd` | Merged 2026-05-19. Reference values from latest year of `load_data()`. |
+| T2 | DONE | `tests/test_home_fi_ticker.py` | Ticker uses weighted rate; handles NaN years; has 2011-2012 caveat; renders ≥10 entries | 1.1, 2.2 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `5c55c40` | Merged 2026-05-19. Full HTML-render assertion deferred to 2.2 when ticker is extracted to its own module. |
+| T3 | DONE | `tests/test_home_anchors.py` | Every internal `href="#..."` matches an existing `id` in rendered HTML | 1.3 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `1b1177a` | Merged 2026-05-19. Catches future dead-anchor regressions. |
+| T4 | DONE | `tests/test_home_caching.py` | Decorator presence on `_load_template`, `_load_css`, `_get_fi_ticker_html`, `_load_and_encode_image` | 1.4 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` | Merged 2026-05-19. Also covers `_get_kpi_html` and lints `# OPTIMIZATION` comment claims. |
 | T5 | TODO | `tests/test_home_responsive.py` | Hypothesis property test: at 375/768/1024/1440 widths, KPI columns and chart heights match `ChartConfig.from_viewport` | 4.3 | — | Touch target 44×44px assertion included |
 | T6 | TODO | `tests/test_home_a11y.py` | `<main>` landmark present; skip-link present; no focusable element without `:focus-visible`; every `<img>` has alt | 3.4, 4.4 | — | Basic landmark/focus a11y, not full WCAG |
 | T7 | TODO | `tests/test_home_design_system.py` | No hex literals in `home.py` outside theme; no spacing values outside 4px grid in `home.css` | 3.1, 3.3 | — | Static analysis of source files |
