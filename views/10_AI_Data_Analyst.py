@@ -9,7 +9,6 @@ import traceback
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils.theme import COLORS
 from utils.data_loader import load_data
 from utils.llm import _get_api_key, _get_groq_key
 
