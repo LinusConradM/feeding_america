@@ -8,11 +8,12 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT
 from utils.components import kpi_row, section_header, info_banner, stat_card, llm_explainer_ui
-from utils.data_loader import load_data, get_variable_label, STATE_NAMES
+from utils.data_loader import load_data
 
-inject_tailwind()
+# inject_tailwind() is called globally in app.py — per-view call removed (Phase 3.D).
+# page_header() replaced with the pearl-bordered pattern from PR #22 below.
 
 data = load_data()
 
@@ -39,8 +40,11 @@ with st.sidebar:
         ["National Scan"] + sorted(data["state"].dropna().unique().tolist())
     )
 
-page_header("Anomaly Search Engine",
-            "Unsupervised Machine Learning scanning for severe macroeconomic decoupling", "satellite-dish")
+# ── Page Header ───────────────────────────────────────────────────────────────
+section_header(
+    "Anomaly Search Engine",
+    "Unsupervised Machine Learning scanning for severe macroeconomic decoupling",
+)
 
 # --- ISOLATION FOREST PIPELINE ---
 filter_data = data[data["year"] == scan_year]
