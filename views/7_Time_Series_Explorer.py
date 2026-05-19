@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import warnings
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS
 from utils.components import kpi_row, section_header, stat_card, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label, STATE_NAMES
 
@@ -37,8 +37,10 @@ with st.sidebar:
         default=[],
     )
 
-page_header("Time Series Explorer",
-            "Analyze temporal patterns and trends in food insecurity", "clock")
+section_header(
+    "Time Series Explorer",
+    "Analyze temporal patterns and trends in food insecurity",
+)
 
 filtered = data[(data["year"] >= year_range[0]) & (data["year"] <= year_range[1])]
 is_rate = "rate" in ts_variable

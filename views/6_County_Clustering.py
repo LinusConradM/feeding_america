@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
-from utils.theme import inject_tailwind, COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS, page_header
+from utils.theme import COLORS, PLOTLY_LAYOUT, SEQUENTIAL_COLORS
 from utils.components import kpi_row, section_header, stat_card, info_banner, llm_explainer_ui
 from utils.data_loader import load_data, get_variable_label
 
@@ -51,8 +51,10 @@ with st.sidebar:
         help="0 = standard clustering based solely on economic traits. > 0 = forces the algorithm to prioritize grouping counties that are physically close together."
     )
 
-page_header("County Clustering",
-            "Segment counties by food insecurity characteristics", "layer-group")
+section_header(
+    "County Clustering",
+    "Segment counties by food insecurity characteristics",
+)
 
 if len(selected_vars) < 2:
     info_banner("Select at least 2 variables for clustering.", "warning")
