@@ -97,6 +97,25 @@ def test_home_py_does_not_render_raw_kpi_template():
     )
 
 
+def test_mmg_disclaimer_banner_present():
+    """Task 2.5: a methodology disclaimer must render under the KPI strip,
+    naming Feeding America's Map the Meal Gap and the 2020 methodology revision."""
+    src = _read("views/home.py")
+    assert "Map the Meal Gap" in src, (
+        "home.py should surface a 'Map the Meal Gap' disclaimer under the KPI "
+        "strip so audiences know which methodology produced the headline numbers."
+    )
+    assert "Methodology revised in 2020" in src, (
+        "Disclaimer should note the 2020 methodology revision — pre- and post-2020 "
+        "series are not directly comparable, and this is the highest-leverage "
+        "caveat for any non-specialist reader."
+    )
+    assert "mmg-disclaimer" in src, (
+        "Disclaimer should carry the 'mmg-disclaimer' class hook for downstream "
+        "styling/tests."
+    )
+
+
 def test_readme_no_longer_publishes_44_2m():
     """README must not publish the unverified '44.2 million' headline anymore."""
     src = _read("README.md")

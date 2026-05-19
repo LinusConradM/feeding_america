@@ -241,6 +241,24 @@ def _get_kpi_html() -> str:
 
 st.html(_get_kpi_html())
 
+# MMG methodology disclaimer (task 2.5). The Map the Meal Gap methodology was
+# revised in 2020; before/after series are not perfectly comparable. Surface
+# the caveat next to the headline numbers so policymaker/researcher audiences
+# can interpret the figures correctly.
+st.html(
+    '<small class="mmg-disclaimer" '
+    'style="display:block;text-align:center;font-size:0.78rem;line-height:1.45;'
+    'color:rgba(220,225,240,0.55);margin:0.25rem auto 1.5rem;max-width:780px;'
+    'padding:0 1rem;">'
+    'Estimates derived from Feeding America\'s '
+    '<a href="https://map.feedingamerica.org" target="_blank" rel="noopener" '
+    'style="color:rgba(220,225,240,0.7);text-decoration:underline;">'
+    'Map the Meal Gap'
+    '</a>. Methodology revised in 2020; pre- and post-2020 series are not '
+    'directly comparable.'
+    '</small>'
+)
+
 
 # ── 6. Marquee ───────────────────────────────────────────────────────────────
 # Generate pills in Python so no JS is needed inside the st.html() iframe
