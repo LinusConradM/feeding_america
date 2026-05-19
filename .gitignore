@@ -37,3 +37,9 @@ README_files/
 .env
 .env
 tests/testthat/_snaps/
+
+# Test caches (locally generated, not source of truth)
+.hypothesis/
+.pytest_cache/
+.coverage
+htmlcov/
