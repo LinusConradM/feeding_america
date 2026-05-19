@@ -130,7 +130,6 @@ def _get_fi_ticker_html() -> str:
 # st.html() sandboxes content in an iframe; CSS inside it cannot affect the
 # Streamlit chrome (body, fixed nav, etc.).
 # st.markdown(unsafe_allow_html=True) injects directly into the page head.
-# OPTIMIZATION: CSS is now cached to avoid re-reading file on every page load
 css_raw = _load_css()
 st.markdown(f"<style>{css_raw}</style>", unsafe_allow_html=True)
 
@@ -157,7 +156,6 @@ _ticker_html = _get_fi_ticker_html()
 # ── 4. Hero section ───────────────────────────────────────────────────────────
 # The hero uses a split layout: text left, reactive screenshot right.
 # Images are base64 so Streamlit serves them correctly without a static file server.
-# OPTIMIZATION: Template loading is now cached
 hero_tmpl = _load_template("hero.html")
 
 # Build the right-side screenshot pane inline (needs JS for reactive switching)
@@ -203,7 +201,6 @@ st.html(hero_html)
 
 
 # ── 5. KPI strip ─────────────────────────────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
 @st.cache_data(show_spinner=False, ttl=3600)
 def _get_kpi_html() -> str:
     """Render the KPI strip with the lead 'Americans affected' value computed live.
@@ -258,22 +255,18 @@ st.html(f'<div class="marquee-section"><div class="marquee-track">{pills_3x}</di
 
 
 # ── 7. Bento grid (Platform Architecture) ────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
 st.html(_load_template("bento.html"))
 
 
 # ── 8. Statistical Methods ────────────────────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
 st.html(_load_template("methods.html"))
 
 
 # ── 9. Data Sources ─────────────────────────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
 st.html(_load_template("sources.html"))
 
 
 # ── 10. Footer + nav JS ───────────────────────────────────────────────────────
-# OPTIMIZATION: Template loading is now cached
 st.html(_load_template("footer.html"))
 
 # Close the home-page-wrap div opened in step 4

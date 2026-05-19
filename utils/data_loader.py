@@ -198,6 +198,28 @@ def load_data() -> pd.DataFrame:
     return food_data
 
 
+def weighted_rate(df: pd.DataFrame, col: str, weight_col: str = "population") -> float:
+    """Population-weighted mean for rate columns. Falls back to unweighted if weights unavailable."""
+    if weight_col not in df.columns:
+        return df[col].mean()
+    valid = df[[col, weight_col]].dropna()
+    if valid.empty or valid[weight_col].sum() == 0:
+        return df[col].mean()
+    return np.average(valid[col], weights=valid[weight_col])
+
+
+def weighted_rate_by_group(df: pd.DataFrame, value_col: str, group_col: str, weight_col: str = "population") -> pd.Series:
+    """Population-weighted mean grouped by a column (e.g., year or state)."""
+    def _wm(group):
+        if weight_col not in group.columns:
+            return group[value_col].mean()
+        valid = group[[value_col, weight_col]].dropna()
+        if valid.empty or valid[weight_col].sum() == 0:
+            return group[value_col].mean()
+        return np.average(valid[value_col], weights=valid[weight_col])
+    return df.groupby(group_col, observed=True).apply(_wm)
+
+
 def get_numeric_columns(df: pd.DataFrame) -> list:
     """Get numeric columns suitable for analysis (excludes IDs, coordinates)."""
     exclude = {"fips", "lat", "lon", "year", "state_fips"}
