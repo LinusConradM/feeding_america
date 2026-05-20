@@ -67,7 +67,7 @@ This platform provides policymakers, researchers, and nonprofit practitioners wi
 ## Project Structure
 
 ```
-gp-food-basket/
+feeding_america/
 ├── app.py                          # Streamlit entry point + global nav
 ├── requirements.txt                # Python dependencies
 ├── pyproject.toml                  # pytest config
@@ -120,8 +120,8 @@ gp-food-basket/
 
 ```bash
 # Clone the repository
-git clone https://github.com/LinusConradM/gp-food-basket.git
-cd gp-food-basket
+git clone https://github.com/LinusConradM/feeding_america.git
+cd feeding_america
 
 source .venv/bin/activate
 
@@ -203,7 +203,7 @@ This work is licensed under the **Creative Commons Attribution 4.0 International
 
 ```
 Muhirwe, C. L. (2025). U.S. Food Insecurity Analytics Platform.
-American University. https://github.com/LinusConradM/gp-food-basket
+American University. https://github.com/LinusConradM/feeding_america
 
 Data sources:
 - Feeding America. (2025). Map the Meal Gap. https://www.feedingamerica.org/research/map-the-meal-gap
