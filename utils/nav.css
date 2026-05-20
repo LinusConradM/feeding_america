@@ -512,8 +512,6 @@
 .mob-item,
 .app-mob-item {
     min-height: 44px;
-    display: flex;
-    align-items: center;
 }
 /* Hamburger is icon-only; needs min-width too so the tap area is square. */
 .app-hamburger {
