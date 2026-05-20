@@ -53,18 +53,36 @@ def test_hamburger_has_square_touch_target():
     """The hamburger is icon-only — needs min-width too so the tap area is square."""
     src = _nav_css()
     # Find any rule whose selector starts with `.app-hamburger` (standalone or in
-    # a comma-list) and check whether it sets min-width: 44px.
+    # a comma-list) and check whether it sets min-width: 44px. Also guard the
+    # default hidden state so a later global `display: flex` regression is caught.
     import re
     rule_pattern = re.compile(r"([^{}]*)\{([^{}]*)\}", re.DOTALL)
-    found = False
+    has_min_width = False
+    has_display_none = False
+    forces_display_flex = False
     for selector, body in rule_pattern.findall(src):
-        if ".app-hamburger" in selector and "min-width: 44px" in body:
-            found = True
-            break
-    assert found, (
+        if ".app-hamburger" not in selector:
+            continue
+        if "min-width: 44px" in body:
+            has_min_width = True
+        if "display: none" in body:
+            has_display_none = True
+        if "display: flex" in body:
+            forces_display_flex = True
+    assert has_min_width, (
         "utils/nav.css should declare `min-width: 44px` on .app-hamburger. "
         "An icon-only element without a min-width can be narrower than 44px "
         "even with min-height: 44px set, missing WCAG 2.5.5."
+    )
+    assert has_display_none, (
+        "utils/nav.css should preserve the default hidden state for "
+        "`.app-hamburger` with `display: none` so it is not shown globally "
+        "outside the intended responsive/mobile context."
+    )
+    assert not forces_display_flex, (
+        "utils/nav.css should not force `.app-hamburger` to `display: flex` "
+        "globally; that can override the default hidden state and surface the "
+        "hamburger outside the intended responsive/mobile context."
     )
 
 
