@@ -41,7 +41,7 @@ HEX_RE = re.compile(r"#[0-9A-Fa-f]{6}\b")
 
 
 def _count_hex(path: Path) -> int:
-    return len(HEX_RE.findall(path.read_text()))
+    return len(HEX_RE.findall(path.read_text(encoding="utf-8")))
 
 
 # ── 1. theme.py is the palette source of truth ───────────────────────────────
