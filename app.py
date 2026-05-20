@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings("ignore", message=".*Mean of empty slice.*")
 warnings.filterwarnings("ignore", message=".*All-NaN slice encountered.*")
 
-from utils.theme import inject_tailwind
+from utils.theme import inject_tailwind, inject_main_landmark
 from utils.data_loader import load_data
 from utils.navigation import inject_global_nav
 
@@ -76,6 +76,11 @@ pg = st.navigation([
 
 # Inject Global Navigation Ribbon
 inject_global_nav()
+
+# Phase 4.4: skip-link target. Must come AFTER inject_global_nav() so the
+# anchor is positioned past the navigation in the DOM — that's what makes
+# the skip-link a real time-saver for keyboard users.
+inject_main_landmark()
 
 # Run the selected page
 pg.run()

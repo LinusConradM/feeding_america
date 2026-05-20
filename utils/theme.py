@@ -582,12 +582,83 @@ def inject_tailwind():
                 scroll-behavior: auto !important;
             }
         }
+
+        /* ── A11y: skip link + sr-only utility (Phase 4.4) ───────────────── */
+        /* Skip link is offscreen until it receives keyboard focus, at which
+           point it pops to the top-left corner. Activating it moves focus to
+           the #main-content anchor emitted by inject_main_landmark() after
+           the global nav. */
+        .skip-link {
+            position: absolute;
+            top: -50px;
+            left: 8px;
+            z-index: 99999;
+            padding: 0.6rem 1rem;
+            background: #FFFFFF;
+            color: #2251FF;   /* COLORS["sapphire"] */
+            font-weight: 600;
+            font-family: 'Inter', Arial, sans-serif;
+            text-decoration: none;
+            border: 2px solid #2251FF;
+            border-radius: 6px;
+            transition: top 0.2s ease;
+        }
+        .skip-link:focus {
+            top: 8px;
+        }
+        /* WCAG-recommended visually-hidden helper. Used by the
+           #main-content sentinel anchor so screen-reader users hear
+           "Main content" when the skip-link target receives focus. */
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0,0,0,0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
         </style>
     """
     if hasattr(st, "html"):
         st.html(css)
     else:
         st.markdown(css, unsafe_allow_html=True)
+
+    # Phase 4.4: skip link emitted early in the DOM. Activating it scrolls/
+    # focuses #main-content (emitted by inject_main_landmark() after the
+    # global nav ribbon).
+    st.markdown(
+        '<a class="skip-link" href="#main-content">Skip to main content</a>',
+        unsafe_allow_html=True,
+    )
+
+
+def inject_main_landmark():
+    """Emit a focusable sentinel anchor that marks the start of page content.
+
+    Streamlit's DOM does not expose a wrappable element where we could
+    place a literal `<main>` tag around the page content, so this is the
+    pragmatic accessibility pattern: a hidden, programmatically-focusable
+    `<a id="main-content">` placed immediately after the global nav. The
+    skip-link injected by inject_tailwind() targets `#main-content`, so a
+    keyboard user can Tab to the skip-link and bypass the nav in one step.
+
+    Should be called once per page, after inject_global_nav() and before
+    the view module's content. See app.py.
+
+    Known limitation: this does not establish a formal `<main role="main">`
+    ARIA landmark for screen-reader navigation by region. Achieving that
+    without rewriting Streamlit's DOM would require a custom Streamlit
+    component (separate front-end build); the skip-link + named-anchor
+    pattern is the WCAG-equivalent for keyboard users in the meantime.
+    """
+    st.markdown(
+        '<a id="main-content" tabindex="-1" class="sr-only">Main content</a>',
+        unsafe_allow_html=True,
+    )
 
 
 # ── Reusable header ─────────────────────────────────────────────────────────
