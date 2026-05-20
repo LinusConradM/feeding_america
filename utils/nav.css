@@ -495,3 +495,94 @@
     color: #fff;
     box-shadow: 0 0 20px rgba(34, 81, 255, 0.25);
 }
+
+/* ================================================================== */
+/*  Phase 4.3 — Mobile nav accessibility                              */
+/*  - WCAG 2.5.5 Target Size (44x44px) on interactive nav elements   */
+/*  - Horizontal scroll affordance (fade gradient indicators)        */
+/*  - Flatten 3 single-item dropdowns on mobile (Policy, AI, Reports)*/
+/* ================================================================== */
+
+/* WCAG 2.5.5 — interactive nav elements ≥ 44×44px touch target.
+   Apply at all viewports (desktop hover targets also benefit but are
+   only enforced where the existing size was below the threshold). */
+.app-nav-link,
+.app-menu-item,
+.app-hamburger,
+.mob-item,
+.app-mob-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+/* Hamburger is icon-only; needs min-width too so the tap area is square. */
+.app-hamburger {
+    min-width: 44px;
+    justify-content: center;
+}
+
+/* Mobile-only changes ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* Scroll affordance: fade gradient indicates the nav is scrollable
+       horizontally. Uses the existing overflow-x: auto on .nav-inner-bar
+       and adds soft edges so users see content is being clipped. */
+    .nav-inner-bar {
+        position: relative;
+        background-image:
+            linear-gradient(to right,  rgba(7, 9, 58, 0.95) 0%, transparent 24px),
+            linear-gradient(to left,   rgba(7, 9, 58, 0.95) 0%, transparent 24px);
+        background-position: left center, right center;
+        background-size: 24px 100%, 24px 100%;
+        background-repeat: no-repeat;
+        background-attachment: local, local;
+    }
+
+    /* Flatten three single-item dropdowns on mobile only.
+       The dropdown UX is wasted clicks when the menu contains exactly
+       one item; on mobile we hide the trigger and let the single
+       inner link render as a top-level nav item.
+       Desktop hover behaviour is intentionally untouched. */
+    .app-nav-item:has(> label[for="nav-toggle-policy"]) > label,
+    .app-nav-item:has(> label[for="nav-toggle-ai"]) > label,
+    .app-nav-item:has(> label[for="nav-toggle-reports"]) > label {
+        display: none !important;
+    }
+    .app-nav-item:has(> label[for="nav-toggle-policy"]) > .app-mega-menu,
+    .app-nav-item:has(> label[for="nav-toggle-ai"]) > .app-mega-menu,
+    .app-nav-item:has(> label[for="nav-toggle-reports"]) > .app-mega-menu {
+        position: static !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-width: auto !important;
+        transform: none !important;
+    }
+    /* Style the surviving single inner link to look like a top-level nav-link */
+    .app-nav-item:has(> label[for="nav-toggle-policy"]) > .app-mega-menu .app-menu-item,
+    .app-nav-item:has(> label[for="nav-toggle-ai"]) > .app-mega-menu .app-menu-item,
+    .app-nav-item:has(> label[for="nav-toggle-reports"]) > .app-mega-menu .app-menu-item {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        color: var(--muted, #c5cae9) !important;
+        text-decoration: none !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    /* Hide the icon + sub-label inside the flattened menu — we only
+       want the strong title to render as a clean top-level link. */
+    .app-nav-item:has(> label[for="nav-toggle-policy"]) > .app-mega-menu .app-mi-icon,
+    .app-nav-item:has(> label[for="nav-toggle-ai"]) > .app-mega-menu .app-mi-icon,
+    .app-nav-item:has(> label[for="nav-toggle-reports"]) > .app-mega-menu .app-mi-icon,
+    .app-nav-item:has(> label[for="nav-toggle-policy"]) > .app-mega-menu .app-mi-text span:not(strong),
+    .app-nav-item:has(> label[for="nav-toggle-ai"]) > .app-mega-menu .app-mi-text span:not(strong),
+    .app-nav-item:has(> label[for="nav-toggle-reports"]) > .app-mega-menu .app-mi-text span:not(strong) {
+        display: none !important;
+    }
+}
