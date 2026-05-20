@@ -39,7 +39,7 @@ This platform provides policymakers, researchers, and nonprofit practitioners wi
 ### Key Capabilities
 
 - **Interactive Plotly Charts** with hover tooltips and zoom
-- **Tailwind CSS** styled UI with gradient KPI cards and responsive layout
+- **Custom Editorial Design System** styled UI with gradient KPI cards and responsive layout
 - **State & County Drill-Down** for geographic analysis
 - **Multiple Regression Models** including ensemble methods
 - **K-Means Clustering** with PCA projection and silhouette scoring
