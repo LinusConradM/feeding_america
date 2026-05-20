@@ -22,7 +22,7 @@ testpaths = ["tests"]
 # longer exists after Phase 2/3/4 refactors). Each is a follow-up
 # triage item — either update the assertions to current behavior or
 # delete the test. Not blocking the CI bootstrap. See
-# HOME_REDESIGN_TASK_TRACKER.md row 6.6.
+# Project Documents/HOME_REDESIGN_TASK_TRACKER.md row 6.6.
 #
 #   - test_section_ordering_properties.py
 #       Expects Executive Overview to have Hero / National Trend /
