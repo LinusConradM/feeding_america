@@ -1,0 +1,58 @@
+name: tests
+
+# Phase 5 task T8 — bootstrap CI. Runs the pytest suite on every PR
+# targeting main and every push to main.
+#
+# The trigger that proved this was needed: PR #14 (Phase 1) merged with
+# a broken import because no automated test run gated the merge. The
+# helpers `weighted_rate` and `weighted_rate_by_group` were imported by
+# the new code but never staged into utils/data_loader.py, so the home
+# page raised ImportError on every fresh checkout for ~4 hours until
+# hotfix #18 landed. This workflow blocks that exact failure mode.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel any in-progress run when a new commit lands on the same ref —
+# avoids burning minutes on a stale PR head.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          # Matches the local dev venv version (rebuilt this session).
+          # Bump in lockstep with whatever .venv/bin/python --version reports.
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Project deps include hypothesis (used by property-based tests);
+          # pytest itself is a dev-only dep so we install it explicitly here.
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run pytest
+        env:
+          # Streamlit emits cache-related warnings outside a runtime; harmless
+          # for unit tests. PYTHONUNBUFFERED so log output streams live.
+          PYTHONUNBUFFERED: "1"
+        run: |
+          pytest tests/ -v --tb=short
