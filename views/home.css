@@ -646,11 +646,19 @@ header[data-testid="stHeader"] {
     /* push below fixed nav */
 }
 
+/* Phase 6.2: merged the two duplicate `.hero` rules (this one + the
+   later override at ~line 963) into a single canonical declaration.
+   Effective values reflect what the cascade was producing:
+     - min-height: auto       (the later rule overrode the 100vh here)
+     - align-items: flex-start (the later rule overrode `center`)
+     - padding-top: 62px       (the later rule overrode 110px)
+     - padding-bottom: 2rem    (the later rule overrode 80px)
+   Other properties were unchanged between the two rules. */
 .hero {
-    min-height: 100vh;
+    min-height: auto;
     display: flex;
-    align-items: center;
-    padding: 110px 1.75rem 80px;
+    align-items: flex-start;
+    padding: 62px 1.75rem 2rem;
     max-width: 1280px;
     margin: 0 auto;
 }
@@ -959,14 +967,11 @@ header[data-testid="stHeader"] {
     z-index: -1;
 }
 
-/* Remove hero screenshot preview and expand hero text across the row */
-.hero {
-    align-items: flex-start;
-    padding-top: 62px;
-    padding-bottom: 2rem;
-    min-height: auto;
-}
-
+/* Phase 6.2: duplicate `.hero` override rule was merged into the
+   canonical .hero declaration earlier in this file. The hero-visual
+   `display: none` (which removes the screenshot preview and expands
+   hero text across the row) remains here since it isn't on the
+   duplicated selector. */
 .hero-visual {
     display: none;
 }
