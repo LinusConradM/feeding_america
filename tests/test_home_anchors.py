@@ -65,23 +65,38 @@ def test_no_template_links_to_gallery_anchor():
     )
 
 
-def test_hero_primary_cta_points_to_valid_route():
-    """The hero's primary CTA must point at a real Streamlit page route."""
+def test_hero_audience_ctas_point_to_valid_routes():
+    """Phase 4.1: hero must have 3 audience-routed CTAs (policymaker /
+    nonprofit / researcher) each pointing to a Streamlit page route.
+
+    Replaces the legacy single `hero-btn-primary` button + GitHub link —
+    Q7 says no ranking, equal weight across the three audiences.
+    """
     hero = (TEMPLATE_DIR / "hero.html").read_text()
-    cta_match = re.search(r'<a[^>]+class="hero-btn-primary"[^>]+href="([^"]+)"', hero)
-    if cta_match is None:
-        cta_match = re.search(r'<a[^>]+href="([^"]+)"[^>]+class="hero-btn-primary"', hero)
-    assert cta_match is not None, (
-        "hero.html should contain an <a class='hero-btn-primary' href='...'> element."
+    # All three audience-card classes must be present
+    cards = re.findall(
+        r'<a[^>]*class="audience-card\s+([^"\s]+)"[^>]*href="([^"]+)"',
+        hero,
     )
-    href = cta_match.group(1)
-    assert not href.startswith("#"), (
-        f"hero-btn-primary still points at an internal anchor ({href!r}). "
-        "It should link to a Streamlit page route like /1_Executive_Overview."
-    )
-    assert href.startswith("/") or href.startswith("http"), (
-        f"hero-btn-primary href {href!r} doesn't look like a route or external URL."
-    )
+    audience_to_href = {role: href for role, href in cards}
+    expected = {
+        "audience-policymaker": "/8_Policy_Scenarios",
+        "audience-nonprofit": "/2_Geographic_Intelligence",
+        "audience-researcher": "/1_Executive_Overview",
+    }
+    for role, expected_href in expected.items():
+        assert role in audience_to_href, (
+            f"hero.html is missing the `{role}` CTA. Phase 4.1 requires "
+            f"three audience-routed cards: policymaker / nonprofit / researcher."
+        )
+        href = audience_to_href[role]
+        assert href == expected_href, (
+            f"{role} card links to {href!r}, expected {expected_href!r}."
+        )
+        assert href.startswith("/"), (
+            f"{role} href {href!r} should be a Streamlit page route "
+            "(starts with /), not an internal anchor or external URL."
+        )
 
 
 def _internal_anchors(text: str):
