@@ -567,7 +567,6 @@ def inject_tailwind():
         *:focus-visible {
             outline: 2px solid #2251FF;   /* COLORS["sapphire"] */
             outline-offset: 2px;
-            border-radius: 4px;
         }
 
         /* ── A11y: prefers-reduced-motion (Phase 3.C) ────────────────────── */
