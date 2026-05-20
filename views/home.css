@@ -1029,6 +1029,22 @@ header[data-testid="stHeader"] {
     box-shadow: 0 12px 40px -10px rgba(121, 134, 203, 0.3);
 }
 
+/* Phase 4.5: KPI cards are now anchors linking to relevant analytics pages.
+   Neutralize anchor defaults so the .kpi-glass visual treatment carries
+   through unchanged. The hover state above (translateY + shadow) doubles
+   as the affordance that the card is clickable. */
+.kpi-card-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+.kpi-card-link:hover,
+.kpi-card-link:focus,
+.kpi-card-link:focus-visible {
+    text-decoration: none;
+    color: inherit;
+}
+
 .kpi-val {
     font-family: 'Geist Mono', monospace;
     font-size: clamp(1.8rem, 3.5vw, 2.8rem);
