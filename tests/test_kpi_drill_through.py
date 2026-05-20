@@ -1,16 +1,17 @@
 """
 T-Phase4.5 — KPI drill-through link tests.
 
-Pairs with Phase 4 task 4.5: each home-page KPI card must link to a
-relevant analytics page so the headline numbers aren't dead-ended. The
-audit found all 4 cards were static divs, leaving the user with no
-"what should I do with this?" affordance after reading the strip.
+Pairs with:
+  - Phase 4 task 4.5: each home-page KPI card must link to a relevant
+    analytics page so the headline numbers aren't dead-ended.
+  - Phase 4 task 4.2: 3 of 4 KPIs swapped to insight numbers; routes
+    updated to match what each new metric naturally drills into.
 
 Mapping (in kpi.html row order):
-  k1 Americans Affected   → /1_Executive_Overview
-  k2 Counties Analyzed    → /2_Geographic_Intelligence
-  k3 Longitudinal Span    → /7_Time_Series_Explorer
-  k4 County-Year Obs.     → /0_Data_Explorer
+  k1 Americans Affected   → /1_Executive_Overview      (national overview)
+  k2 National FI Rate     → /5_Equity_Disparities      (rate decomposed by group)
+  k3 Counties >20% FI     → /2_Geographic_Intelligence (see which counties)
+  k4 YoY Change           → /7_Time_Series_Explorer    (full temporal trend)
 """
 import re
 from pathlib import Path
@@ -23,10 +24,10 @@ def _kpi_html() -> str:
 
 
 EXPECTED_LINKS = {
-    "k1": "/1_Executive_Overview",
-    "k2": "/2_Geographic_Intelligence",
-    "k3": "/7_Time_Series_Explorer",
-    "k4": "/0_Data_Explorer",
+    "k1": "/1_Executive_Overview",      # Americans Affected
+    "k2": "/5_Equity_Disparities",      # National FI Rate (Phase 4.2)
+    "k3": "/2_Geographic_Intelligence", # Counties >20% FI (Phase 4.2)
+    "k4": "/7_Time_Series_Explorer",    # YoY Change (Phase 4.2)
 }
 
 

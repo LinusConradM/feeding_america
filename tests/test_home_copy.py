@@ -87,6 +87,56 @@ def test_footer_still_credits_american_university():
 # ── Task 4.8: typo audit ─────────────────────────────────────────────────────
 
 
+def test_marquee_strip_removed():
+    """Phase 4.2: the marquee pill strip and its CSS must be gone."""
+    home_py = _read("views/home.py")
+    home_css = _read("views/home.css")
+    # The Python emission and its data structure must be removed
+    assert "MARQUEE_PILLS" not in home_py, (
+        "views/home.py still defines MARQUEE_PILLS. Phase 4.2 cut the marquee "
+        "strip — the audit flagged it as builder-voice signal noise (method "
+        "names instead of user questions)."
+    )
+    assert 'class="marquee-section"' not in home_py, (
+        "views/home.py still emits the .marquee-section div. Remove the "
+        "st.html() call along with MARQUEE_PILLS / pill_html."
+    )
+    # CSS for the marquee should be gone too (no dead styles left behind)
+    for stale_class in (".marquee-section", ".marquee-track", ".marquee-pill"):
+        assert stale_class + " {" not in home_css, (
+            f"views/home.css still defines `{stale_class}`. Cut the styles "
+            "alongside the markup so no dead CSS lingers."
+        )
+    assert "@keyframes marqueeScroll" not in home_css, (
+        "views/home.css still defines @keyframes marqueeScroll. Cut it."
+    )
+
+
+def test_bento_terminal_mockup_removed():
+    """Phase 4.2: the fake terminal mockup inside the AI bento card must be gone."""
+    src = _read("views/templates/bento.html")
+    for stale in ('class="terminal"', "term-dots", "term-line", "term-user", "term-agent"):
+        assert stale not in src, (
+            f"views/templates/bento.html still contains terminal-mockup markup ('{stale}'). "
+            "Phase 4.2 cut the embedded terminal prop — the card body already "
+            "describes the AI workflow."
+        )
+
+
+def test_bento_latex_did_tile_removed():
+    """Phase 4.2: the DiD LaTeX estimator tile inside the causal card must be gone."""
+    src = _read("views/templates/bento.html")
+    # The mathematical formula was the distinctive marker — drop it
+    assert "DiD Estimator" not in src, (
+        "views/templates/bento.html still shows the 'DiD Estimator' tile. "
+        "Phase 4.2 cut the LaTeX tile — the card body explains the technique."
+    )
+    # The Geist Mono LaTeX rendering was the visual marker
+    assert "β̂" not in src, (
+        "views/templates/bento.html still renders the β̂ formula tile. Cut it."
+    )
+
+
 def test_us_period_consistency_in_templates():
     """All home-page templates must use 'U.S.' with the trailing period."""
     import re
