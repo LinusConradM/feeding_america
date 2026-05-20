@@ -35,7 +35,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 VIEWS_DIR = REPO_ROOT / "views"
 
 # Six-digit hex literal. The `\b` rules out partial matches inside longer
-# tokens; `(?i)` makes it case-insensitive so `#FFFFFF` and `#ffffff` both count.
+# tokens; `[0-9A-Fa-f]` matches both uppercase and lowercase hex digits,
+# so `#FFFFFF` and `#ffffff` both count.
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{6}\b")
 
 
