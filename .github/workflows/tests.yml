@@ -16,6 +16,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 # Cancel any in-progress run when a new commit lands on the same ref —
 # avoids burning minutes on a stale PR head.
 concurrency:
