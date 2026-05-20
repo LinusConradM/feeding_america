@@ -28,7 +28,7 @@
 **Progress:** 78% complete (39 / 50 tasks merged on `main`). 3 deferred per Q3 Option B (home page kept as marketing surface — see Phase 3 below). 2 WIP, 6 TODO remain — all post-ship polish.
 **Critical path:** Phases 0–4 plus Phase 5 task T8 (CI bootstrap) all closed. Remaining substantive work:
   - **T7** — design-system static-analysis test (no hex literals in `home.py` outside `theme.py`; no off-grid spacing in `home.css`).
-  - **Stale-test triage** — 7 test files were `--ignored` in [PR #37](https://github.com/LinusConradM/feeding_america/pull/37)'s pyproject.toml; each is a follow-up task (update assertions or delete).
+  - **Stale-test triage** — 9 test files were `--ignored` in [PR #37](https://github.com/LinusConradM/feeding_america/pull/37)'s pyproject.toml: 2 script-shaped tests (`test_llm.py`, `test_langchain.py`) plus 7 stale property/integration tests; each is a follow-up task (update assertions or delete).
   - **Phase 6 backlog** — 5 small post-ship items.
 **Note on Phase 3:** The Q3-driven scope expansion played out via Option B (recorded in this session): the home page stays as the dark marketing surface; the rest of the app migrated to light/pearl tokens. Tasks 3.1/3.2/3.3 (home-specific palette/component work) are formally **DEFERRED**, not abandoned — they'd reactivate if Option B is ever revisited.
 **Process gap closed 2026-05-19/20:** PR #14 merged with broken imports because no CI ran. Hotfix #18 cleaned it up ~4 hours later. T8 (PR #37) added the GitHub Actions workflow that gates every future PR with the pytest suite.
