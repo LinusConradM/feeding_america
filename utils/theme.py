@@ -605,7 +605,6 @@ def inject_tailwind():
         }
         .skip-link:focus {
             top: 8px;
-            outline: none;
         }
         /* WCAG-recommended visually-hidden helper. Used by the
            #main-content sentinel anchor so screen-reader users hear
