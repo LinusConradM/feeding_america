@@ -180,42 +180,63 @@ st.html(hero_html)
 
 # ── 5. KPI strip ─────────────────────────────────────────────────────────────
 def _compute_home_kpis() -> dict:
-    """Compute all four home-page KPIs from load_data() (task 2.1).
+    """Compute all four home-page KPIs from load_data().
 
-    Returns a dict of placeholder -> formatted string. All four values are
-    derived from the same load_data() call so the page stays internally
-    consistent even if the data file is updated.
+    Phase 4.2 replaced 3 of the 4 KPIs with insight numbers (national rate,
+    counties >20% FI, YoY change). Americans Affected stays as the anchor.
+    The previous metadata-shaped KPIs (Counties Analyzed, Longitudinal Span,
+    County-Year Obs.) were drift-prone scale facts that didn't answer a
+    user question; the new metrics each frame a real question the audience
+    can drill through to (k2 -> Equity Disparities, k3 -> Geographic
+    Intelligence, k4 -> Time Series Explorer).
 
-    Falls back to em-dash + 'Source unavailable' on any exception — never
-    silently returns the historical hardcoded values ('44.2M', '3,100+', etc).
+    All values are derived from a single load_data() call so the strip
+    stays internally consistent. Falls back to em-dash + 'Source unavailable'
+    on any exception — never silently returns the historical hardcoded
+    values ('44.2M', '3,100+', etc).
     """
     try:
-        from utils.data_loader import load_data
+        from utils.data_loader import load_data, weighted_rate
 
         _df = load_data()
         _latest_year = int(_df["year"].max())
-        _earliest_year = int(_df["year"].min())
         _latest = _df[_df["year"] == _latest_year]
 
+        # k1 — anchor: total food-insecure persons in the latest year
         _total_persons = float(_latest["no_of_food_insecure_persons_overall"].sum())
-        _counties = int(_df["fips"].nunique())
-        _span = _latest_year - _earliest_year + 1
-        _obs = len(_df)
+
+        # k2 — National FI Rate (population-weighted, latest year)
+        _rate = weighted_rate(_latest, "overall_food_insecurity_rate")
+
+        # k3 — Counties >20% FI (count of "Very High" tier in the latest year)
+        _crisis_counties = int(
+            (_latest["overall_food_insecurity_rate"] > 0.20).sum()
+        )
+
+        # k4 — YoY change in national FI rate (latest year vs previous year,
+        # in percentage points). NaN if no previous year is available.
+        _prev = _df[_df["year"] == _latest_year - 1]
+        if len(_prev) > 0:
+            _prev_rate = weighted_rate(_prev, "overall_food_insecurity_rate")
+            _yoy_pp = (_rate - _prev_rate) * 100  # convert to percentage points
+            _yoy_str = f"{_yoy_pp:+.1f}pp"
+        else:
+            _yoy_str = "—"
 
         return {
             "americans_val": f"{_total_persons / 1_000_000:.1f}M",
             "americans_note": f"Feeding America MMG · {_latest_year}",
-            "counties_val": f"{_counties:,}",
-            "span_val": f"{_span} yrs",
-            "obs_val": f"{_obs:,}",
+            "rate_val": f"{_rate * 100:.1f}%",
+            "crisis_val": f"{_crisis_counties:,}",
+            "yoy_val": _yoy_str,
         }
     except Exception:
         return {
             "americans_val": "—",
             "americans_note": "Source unavailable",
-            "counties_val": "—",
-            "span_val": "—",
-            "obs_val": "—",
+            "rate_val": "—",
+            "crisis_val": "—",
+            "yoy_val": "—",
         }
 
 
@@ -223,20 +244,19 @@ def _compute_home_kpis() -> dict:
 def _get_kpi_html() -> str:
     """Render the KPI strip with all four values computed live from load_data().
 
-    The historical hardcoded values (44.2M, 3,100+, 15 yrs, 47K+) were either
-    unverifiable (Q2 in HOME_REDESIGN_DECISIONS.md for 44.2M) or drift-prone
-    snapshots that go stale every data refresh. _compute_home_kpis() fills all
-    four placeholders from the latest load_data() so the strip always reflects
-    the data actually being analyzed.
+    KPI #1 ("Americans Affected") anchors the strip. KPIs #2-4 are insight
+    numbers added in Phase 4.2 (national rate, counties >20% FI, YoY change).
+    _compute_home_kpis() returns a dict that fills all five placeholders
+    so the rendered strip always reflects the data actually being analyzed.
     """
     kpis = _compute_home_kpis()
     return (
         _load_template("kpi.html")
         .replace("__KPI_AMERICANS_VAL__", kpis["americans_val"])
         .replace("__KPI_AMERICANS_NOTE__", kpis["americans_note"])
-        .replace("__KPI_COUNTIES_VAL__", kpis["counties_val"])
-        .replace("__KPI_SPAN_VAL__", kpis["span_val"])
-        .replace("__KPI_OBS_VAL__", kpis["obs_val"])
+        .replace("__KPI_RATE_VAL__", kpis["rate_val"])
+        .replace("__KPI_CRISIS_VAL__", kpis["crisis_val"])
+        .replace("__KPI_YOY_VAL__", kpis["yoy_val"])
     )
 
 
@@ -261,27 +281,11 @@ st.html(
 )
 
 
-# ── 6. Marquee ───────────────────────────────────────────────────────────────
-# Generate pills in Python so no JS is needed inside the st.html() iframe
-MARQUEE_PILLS = [
-    ("fa-microchip",       "#a78bfa", "Gemini 2.5 Flash", "/10_AI_Data_Analyst"),
-    ("fa-project-diagram", "#38bdf8", "Difference-in-Differences", "/8_Policy_Scenarios"),
-    ("fa-chart-line",      "#f472b6", "SARIMAX Forecasting", "/7_Time_Series_Explorer"),
-    ("fa-search-location", "#34d399", "Spatial K-Means", "/6_County_Clustering"),
-    ("fa-bullseye",        "#fbbf24", "Isolation Forests", "/11_Anomaly_Detection"),
-    ("fa-map",             "#60a5fa", "Bivariate Mapping", "/2_Geographic_Intelligence"),
-    ("fa-chart-area",      "#c084fc", "Density Joyplots", "/5_Equity_Disparities"),
-    ("fa-wave-square",     "#2AD5FF", "Temporal Analysis", "/7_Time_Series_Explorer"),
-    ("fa-balance-scale",   "#fda4af", "Equity Disparities", "/5_Equity_Disparities"),
-    ("fa-sitemap",         "#86efac", "PCA Projection", "/6_County_Clustering"),
-]
-pill_html = "".join(
-    f'<a class="marquee-pill" href="{href}"><i class="fas {icon}" style="color:{color}"></i> {label}</a>'
-    for icon, color, label, href in MARQUEE_PILLS
-)
-# Triple the pills for the seamless infinite loop animation
-pills_3x = pill_html * 3
-st.html(f'<div class="marquee-section"><div class="marquee-track">{pills_3x}</div></div>')
+# Phase 4.2: the "marquee strip" of method-name pills was cut from the
+# home page. Audit flagged it as builder-voice signal noise — it advertised
+# implementation details (SARIMAX, K-Means, Isolation Forests) instead of
+# user-facing questions. The bento grid below still names every technique
+# inside its question-led card body.
 
 
 # ── 7. Bento grid (Platform Architecture) ────────────────────────────────────
