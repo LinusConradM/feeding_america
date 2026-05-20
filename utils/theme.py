@@ -560,6 +560,29 @@ def inject_tailwind():
             .kpi-label i { margin-right: 0.15rem !important; }
             .kpi-change { font-size: 0.55rem !important; padding: 0.1rem 0.3rem !important; }
         }
+
+        /* ── A11y: focus-visible (Phase 3.C) ─────────────────────────────── */
+        /* Single keyboard-focus ring across the app. Only fires on keyboard
+           focus, not mouse click, so it doesn't pollute pointer interactions. */
+        *:focus-visible {
+            outline: 2px solid #2251FF;   /* COLORS["sapphire"] */
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* ── A11y: prefers-reduced-motion (Phase 3.C) ────────────────────── */
+        /* Disables all animations, transitions, and smooth-scroll for users
+           who have the OS setting enabled (WCAG 2.3.3). Universal selector
+           catches every animation defined in this stylesheet, home.css, and
+           any inline <style> blocks injected after this one. */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
         </style>
     """
     if hasattr(st, "html"):
