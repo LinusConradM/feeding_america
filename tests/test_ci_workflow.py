@@ -20,12 +20,17 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "tests.yml"
 
 
-def test_workflow_file_exists():
-    """The CI workflow file must exist at .github/workflows/tests.yml."""
+def _read_workflow_text() -> str:
     assert WORKFLOW_PATH.exists(), (
         f"{WORKFLOW_PATH.relative_to(REPO_ROOT)} is missing. T8 bootstrap "
         "added it; if it was removed the test suite no longer gates merges."
     )
+    return WORKFLOW_PATH.read_text()
+
+
+def test_workflow_file_exists():
+    """The CI workflow file must exist at .github/workflows/tests.yml."""
+    _read_workflow_text()
 
 
 def test_workflow_is_valid_yaml():
@@ -38,13 +43,13 @@ def test_workflow_is_valid_yaml():
         # by failing to start the workflow at all.
         import pytest
         pytest.skip("PyYAML not available locally — GitHub will validate the YAML at run time.")
-    parsed = yaml.safe_load(WORKFLOW_PATH.read_text())
+    parsed = yaml.safe_load(_read_workflow_text())
     assert isinstance(parsed, dict), "Top-level workflow YAML must be a mapping."
 
 
 def test_workflow_triggers_on_pull_request_and_push_to_main():
     """Both PR-to-main and push-to-main triggers must be present."""
-    src = WORKFLOW_PATH.read_text()
+    src = _read_workflow_text()
     # We do plain-text checks so the test doesn't need PyYAML installed in
     # the venv. The two triggers each need a `branches: [main]` line.
     assert "pull_request:" in src, (
@@ -63,7 +68,7 @@ def test_workflow_triggers_on_pull_request_and_push_to_main():
 
 def test_workflow_runs_pytest():
     """The workflow must invoke pytest against the tests/ directory."""
-    src = WORKFLOW_PATH.read_text()
+    src = _read_workflow_text()
     assert "pytest tests/" in src or "pytest tests " in src, (
         "Workflow must run `pytest tests/` so all home/a11y/KPI/etc. "
         "regression guards execute. Without this the workflow is decorative."
@@ -72,7 +77,7 @@ def test_workflow_runs_pytest():
 
 def test_workflow_pins_python_version():
     """The workflow must pin a Python version so CI doesn't drift from local dev."""
-    src = WORKFLOW_PATH.read_text()
+    src = _read_workflow_text()
     assert "python-version:" in src, (
         "Workflow must set `python-version` in the setup-python step. "
         "Otherwise CI uses whatever default Ubuntu ships, which may "
@@ -82,7 +87,7 @@ def test_workflow_pins_python_version():
 
 def test_workflow_installs_pytest():
     """pytest is a dev dep, not in requirements.txt — workflow must install it."""
-    src = WORKFLOW_PATH.read_text()
+    src = _read_workflow_text()
     assert "pip install pytest" in src or "install pytest" in src, (
         "Workflow must `pip install pytest` (the project's requirements.txt "
         "lists project deps including hypothesis, but not pytest itself)."
