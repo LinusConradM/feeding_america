@@ -211,7 +211,8 @@ Goal: nits and polish. None of these block the redesign.
 |----|--------|------|-------|-----|-------|
 | 6.1 | TODO | Card body line-heights + ticker font-size harmonization (marquee tempo half-moot — marquee was cut in Phase 4.2) | ui-designer | — | |
 | 6.2 | TODO | Remove dead `.hero` rule at `home.css:872` (line 650 is overridden) | ui-designer | — | |
-| 6.3 | DONE (moot) | Trailing newline at EOF; extract marquee triple constant | software-engineer | — | Marquee cut in [PR #36](https://github.com/LinusConradM/feeding_america/pull/36), so the "marquee triple constant" half no longer applies. Trailing-newline cleanup still TODO if relevant. |
+| 6.3 | DONE (moot) | Extract marquee triple constant | software-engineer | — | Marquee cut in [PR #36](https://github.com/LinusConradM/feeding_america/pull/36), so this no longer applies. |
+| 6.3b | TODO | Trailing newline at EOF | software-engineer | — | Low-priority cleanup item if still relevant. |
 | 6.4 | TODO | Copy nits: "Density Joyplots" → "Where is need highest?"; full second-pass copy audit (the "Investigating" instance was already fixed by Phase 4.1 hero rewrite in [PR #35](https://github.com/LinusConradM/feeding_america/pull/35)) | stakeholder-advocate | — | |
 | 6.5 | TODO | Update [README.md](../README.md): page count (9 → 12); directory ref (`pages/` → `views/`); reflect new home design | doc-updater | — | |
 | 6.6 | TODO | Triage 7 stale test files `--ignored` by [PR #37](https://github.com/LinusConradM/feeding_america/pull/37). See "Stale test backlog" section below for the full list. | qa-tester | — | Each: update assertions to current behavior, or delete the test. Not blocking. |
