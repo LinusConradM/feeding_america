@@ -1,6 +1,6 @@
 # U.S. Food Insecurity Analytics Platform
 
-A professional interactive dashboard analyzing county-level food insecurity patterns across 3,100+ U.S. counties from 2009 to 2023. Built with Python Streamlit and styled with Tailwind CSS.
+An interactive dashboard analyzing county-level food insecurity patterns across 3,100+ U.S. counties from 2009 to 2023. Built with Python Streamlit on a custom editorial design system.
 
 ---
 
@@ -18,20 +18,23 @@ This platform provides policymakers, researchers, and nonprofit practitioners wi
 
 ## Features
 
-### 9 Interactive Pages
+### 13 Interactive Pages
 
 | Page | Description |
 |------|-------------|
-| **Home** | Landing page with project overview and key statistics |
-| **Executive Overview** | National KPIs, trend analysis, regional comparisons, state rankings |
-| **Geographic Intelligence** | Interactive choropleth maps, state drill-down, distribution analysis |
+| **Home** | Landing page with audience-routed CTAs (policymaker / nonprofit / researcher) and live KPIs |
+| **Executive Overview** | National KPIs, weighted-rate trends, disparity snapshot, counties-in-crisis callout |
+| **Geographic Intelligence** | Interactive choropleth maps, urban/rural filter, state drill-down |
+| **Data Explorer** | Exploratory data analysis — summary stats, missingness, distributions, box plots, pair plots, rankings |
 | **Correlation Analysis** | Bivariate correlation testing, scatter plots, correlation matrices |
-| **Regression Models** | OLS, Ridge, LASSO, Elastic Net, Random Forest with diagnostics |
+| **Regression Models** | OLS, Ridge, LASSO, Elastic Net, Random Forest with AI-generated interpretation |
 | **Equity & Disparities** | Racial/ethnic gaps, urban-rural divide, income inequality analysis |
-| **County Clustering** | K-Means clustering with PCA visualization, radar charts, geographic mapping |
+| **County Clustering** | K-Means clustering with PCA visualization, spatial-contiguity weighting |
 | **Time Series Explorer** | Temporal trends, state comparison, pre/post COVID analysis |
-| **Policy Scenarios** | Simulate intervention impacts with cost estimation |
+| **Policy Scenarios** | Difference-in-Differences causal inference + predictive scenario simulation |
 | **Data & Downloads** | Browse, filter, and export data in CSV, Excel, or JSON |
+| **AI Data Analyst** | Plain-English questions answered by Gemini 2.5 Flash with a code-execution sandbox |
+| **Anomaly Detection** | Isolation Forests scanning for counties with severe macroeconomic decoupling |
 
 ### Key Capabilities
 
@@ -50,12 +53,13 @@ This platform provides policymakers, researchers, and nonprofit practitioners wi
 | Component | Technology |
 |-----------|------------|
 | Framework | Python Streamlit |
-| Styling | Tailwind CSS (CDN) |
+| Styling | Custom editorial design system (light/pearl tokens, Georgia headlines) |
 | Charts | Plotly |
 | Data | Pandas, NumPy |
 | Statistics | scikit-learn, statsmodels, SciPy |
 | Maps | Plotly Choropleth |
-| Fonts | Inter (Google Fonts) |
+| AI | Gemini 2.5 Flash + Groq (LLM fallback chain), LangChain |
+| Fonts | Inter + Georgia (Google Fonts) |
 | Icons | Font Awesome 6 |
 
 ---
@@ -64,28 +68,42 @@ This platform provides policymakers, researchers, and nonprofit practitioners wi
 
 ```
 gp-food-basket/
-├── app.py                          # Landing page
+├── app.py                          # Streamlit entry point + global nav
 ├── requirements.txt                # Python dependencies
+├── pyproject.toml                  # pytest config
+├── .github/workflows/tests.yml     # CI: pytest on every PR + push to main
 ├── .streamlit/
 │   └── config.toml                 # Streamlit configuration
-├── pages/
-│   ├── 1_Executive_Overview.py     # National KPIs & trends
-│   ├── 2_Geographic_Intelligence.py # Choropleth maps
+├── views/
+│   ├── home.py                     # Landing page (audience-routed CTAs)
+│   ├── 0_Data_Explorer.py          # EDA: summary stats, distributions
+│   ├── 1_Executive_Overview.py     # National KPIs, trends, disparities
+│   ├── 2_Geographic_Intelligence.py # Choropleth maps, urban/rural filter
 │   ├── 3_Correlation_Analysis.py   # Correlation testing
-│   ├── 4_Regression_Models.py      # Model building
+│   ├── 4_Regression_Models.py      # OLS/Ridge/LASSO/RF + AI interpretation
 │   ├── 5_Equity_Disparities.py     # Disparity analysis
-│   ├── 6_County_Clustering.py      # K-Means clustering
-│   ├── 7_Time_Series_Explorer.py   # Temporal analysis
-│   ├── 8_Policy_Scenarios.py       # Policy simulation
-│   └── 9_Data_Downloads.py         # Data export
+│   ├── 6_County_Clustering.py      # K-Means clustering, PCA
+│   ├── 7_Time_Series_Explorer.py   # Temporal analysis, SARIMAX
+│   ├── 8_Policy_Scenarios.py       # DiD causal inference + simulation
+│   ├── 9_Data_Downloads.py         # Data export
+│   ├── 10_AI_Data_Analyst.py       # Gemini-powered Q&A with code sandbox
+│   ├── 11_Anomaly_Detection.py     # Isolation Forests
+│   ├── home.css                    # Home page styles (marketing surface)
+│   └── templates/                  # Home page HTML partials
 ├── utils/
-│   ├── __init__.py
-│   ├── data_loader.py              # Data loading pipeline
-│   ├── theme.py                    # Colors, Tailwind injection
-│   └── components.py               # Reusable UI components
+│   ├── data_loader.py              # Data loading + weighted_rate helpers
+│   ├── theme.py                    # COLORS palette, design tokens
+│   ├── components.py               # Reusable UI components (kpi_row, etc.)
+│   ├── navigation.py               # Global navigation ribbon
+│   ├── ticker.py                   # Shared FI rate ticker
+│   ├── responsive.py               # Viewport-aware chart sizing
+│   ├── llm.py                      # Gemini / Groq fallback chain
+│   └── nav.css                     # Navigation styles (incl. mobile)
+├── tests/                          # pytest suite (run via CI on every PR)
 ├── data/
 │   ├── feeding_america(2009-2018).xlsx
 │   └── feeding_america(2019-2023).xlsx
+├── Project Documents/              # Tracker, decisions memo, onboarding
 └── README.md
 ```
 
@@ -162,7 +180,7 @@ URL: [census.gov/data/developers/data-sets/acs-5year.html](https://www.census.go
 | **Conrad Linus Muhirwe** | Full-Stack Developer & Data Scientist | [@LinusConradM](https://github.com/LinusConradM) |
 
 **Institution:** American University, College of Arts & Sciences
-**Course:** DATA-613: Data Science Practicum (Fall 2025)
+**Origin:** Independent research, developed at American University.
 
 ---
 

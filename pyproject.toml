@@ -15,45 +15,43 @@ pythonpath = ["."]
 # Single discovery root keeps `pytest` (no args) doing the right thing.
 testpaths = ["tests"]
 
-# Files excluded from pytest collection, with rationale for each:
+# Files excluded from pytest collection, with rationale for each.
 #
-#   1. Script-shaped (not real tests):
-#      - test_llm.py        — debug script; hits Gemini API at import.
-#                              Zero `def test_*` functions.
-#      - test_langchain.py  — same shape; imports execute API calls.
+# Pre-existing stale tests (added when the earlier "executive-overview-
+# redesign" spec was active; assertions reference structure that no
+# longer exists after Phase 2/3/4 refactors). Each is a follow-up
+# triage item — either update the assertions to current behavior or
+# delete the test. Not blocking the CI bootstrap. See
+# HOME_REDESIGN_TASK_TRACKER.md row 6.6.
 #
-#   2. Pre-existing stale tests (added when the earlier "executive-
-#      overview-redesign" spec was active; assertions reference
-#      structure that no longer exists after Phase 2/3/4 refactors).
-#      Each is a follow-up triage item — either update the assertions
-#      to current behavior or delete the test. Not blocking the CI
-#      bootstrap.
+#   - test_section_ordering_properties.py
+#       Expects Executive Overview to have Hero / National Trend /
+#       State Lookup sections. Those were restructured in PR #22.
+#   - test_geographic_section_properties.py
+#       Tests utils/components.py:geographic_section() — that helper's
+#       signature and assumptions have drifted from this test's setup.
+#   - test_chart_responsive_sizing_properties.py
+#       Property tests for chart-height ranges; bounds have moved
+#       since these were written.
+#   - test_collapsible_section_properties.py
+#       One assertion about the collapsible-section implementation
+#       shape no longer matches.
+#   - test_statistical_details_integration.py
+#       Asserts Statistical Details uses collapsible_section() in a
+#       specific way; refactored.
+#   - test_tooltip_wrapper_properties.py
+#       One mobile-touch-target assertion drifted from current
+#       inject_touch_target_css() output.
+#   - test_touch_target_sizing_properties.py
+#       Tests that inject_touch_target_css() output ends with
+#       </style>; current implementation emits </script> too
+#       (touch-feedback JS block).
 #
-#      - test_section_ordering_properties.py
-#          Expects Executive Overview to have Hero / National Trend /
-#          State Lookup sections. Those were restructured in PR #22.
-#      - test_geographic_section_properties.py
-#          Tests utils/components.py:geographic_section() — that helper's
-#          signature and assumptions have drifted from this test's setup.
-#      - test_chart_responsive_sizing_properties.py
-#          Property tests for chart-height ranges; bounds have moved
-#          since these were written.
-#      - test_collapsible_section_properties.py
-#          One assertion about the collapsible-section implementation
-#          shape no longer matches.
-#      - test_statistical_details_integration.py
-#          Asserts Statistical Details uses collapsible_section() in a
-#          specific way; refactored.
-#      - test_tooltip_wrapper_properties.py
-#          One mobile-touch-target assertion drifted from current
-#          inject_touch_target_css() output.
-#      - test_touch_target_sizing_properties.py
-#          Tests that inject_touch_target_css() output ends with
-#          </style>; current implementation emits </script> too
-#          (touch-feedback JS block).
+# (Previously this list also included tests/test_llm.py and
+# tests/test_langchain.py. Phase 6.7 renamed both to
+# scripts/check_*.py so pytest no longer collects them at all and the
+# --ignore entries became unnecessary.)
 addopts = """
-    --ignore=tests/test_llm.py
-    --ignore=tests/test_langchain.py
     --ignore=tests/test_section_ordering_properties.py
     --ignore=tests/test_geographic_section_properties.py
     --ignore=tests/test_chart_responsive_sizing_properties.py
