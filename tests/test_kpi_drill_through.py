@@ -91,13 +91,18 @@ def test_each_kpi_anchor_has_aria_label():
 def test_kpi_card_link_class_styled():
     """home.css must define `.kpi-card-link` so anchor defaults don't override the design."""
     home_css = (REPO_ROOT / "views" / "home.css").read_text()
-    assert ".kpi-card-link {" in home_css, (
+    kpi_card_link_block = re.search(
+        r"\.kpi-card-link\s*\{[^}]*\}",
+        home_css,
+        re.DOTALL,
+    )
+    assert kpi_card_link_block, (
         "views/home.css should define `.kpi-card-link` styles to neutralize "
         "the browser's default anchor underline + blue color so the KPI "
         "visual treatment matches the pre-link design."
     )
     # The card must explicitly drop the underline (otherwise text-decoration cascades)
-    assert "text-decoration: none" in home_css, (
+    assert "text-decoration: none" in kpi_card_link_block.group(0), (
         "The .kpi-card-link rule should set text-decoration: none."
     )
 
