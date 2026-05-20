@@ -777,6 +777,97 @@ header[data-testid="stHeader"] {
     transform: translateY(-2px);
 }
 
+/* Phase 4.1: audience-routed CTA grid (replaces .hero-actions on the home
+   page). Three equal-weight cards — Q7 says no ranking, equal weight.
+   .hero-actions and .hero-btn-* above are kept around for any other view
+   that might still use them. */
+.hero-cta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 640px;
+    margin-top: 2rem;
+}
+
+.audience-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.25rem 1.1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    /* WCAG 2.5.5 — these are large primary CTAs; min-height keeps them
+       at least 44px even if the inner copy shrinks. */
+    min-height: 44px;
+}
+
+.audience-card:hover,
+.audience-card:focus-visible {
+    transform: translateY(-3px);
+    border-color: var(--border-hover);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 8px 24px -8px rgba(121, 134, 203, 0.35);
+    text-decoration: none;
+    color: inherit;
+}
+
+.audience-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    background: rgba(121, 134, 203, 0.18);
+    color: var(--indigo-lt);
+}
+
+.audience-card.audience-policymaker .audience-icon {
+    background: rgba(34, 213, 255, 0.16);
+    color: var(--teal);
+}
+.audience-card.audience-nonprofit .audience-icon {
+    background: rgba(52, 211, 153, 0.18);
+    color: var(--green);
+}
+.audience-card.audience-researcher .audience-icon {
+    background: rgba(167, 139, 250, 0.18);
+    color: var(--purple);
+}
+
+.audience-label {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+}
+
+.audience-sub {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+/* Mobile: stack the 3 audience cards vertically */
+@media (max-width: 768px) {
+    .hero-cta-grid {
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
+        max-width: none;
+    }
+    .audience-card {
+        padding: 1rem;
+    }
+}
+
 /* Hero visual */
 .hero-visual {
     position: relative;
