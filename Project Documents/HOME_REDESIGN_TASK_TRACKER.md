@@ -224,13 +224,13 @@ Seven test files were `--ignored` in [`pyproject.toml`](../pyproject.toml) by [P
 
 | File | Why ignored | Suggested fix |
 |------|-------------|---------------|
-| `test_section_ordering_properties.py` | Asserts Executive Overview has Hero / National Trend / State Lookup sections; PR #22 restructured them | Update expected-section list to match the post-PR-#22 layout |
-| `test_geographic_section_properties.py` | Tests `utils/components.py:geographic_section()` against a signature that has drifted | Re-read the helper, rewrite assertions |
-| `test_chart_responsive_sizing_properties.py` | Property tests over chart-height ranges; bounds have moved | Adjust the Hypothesis ranges |
-| `test_collapsible_section_properties.py` | One implementation-shape assertion no longer matches | Quick targeted fix |
-| `test_statistical_details_integration.py` | Asserts Statistical Details uses `collapsible_section()` a specific way | Either accept the new structure or refactor back |
-| `test_tooltip_wrapper_properties.py` | A mobile-touch-target assertion drifted from `inject_touch_target_css()` output | Quick targeted fix |
-| `test_touch_target_sizing_properties.py` | Asserts `inject_touch_target_css()` ends with `</style>`; current implementation emits `</script>` too | Drop the brittle string-tail assertion or update it |
+| `tests/test_section_ordering_properties.py` | Asserts Executive Overview has Hero / National Trend / State Lookup sections; PR #22 restructured them | Update expected-section list to match the post-PR-#22 layout |
+| `tests/test_geographic_section_properties.py` | Tests `utils/components.py:geographic_section()` against a signature that has drifted | Re-read the helper, rewrite assertions |
+| `tests/test_chart_responsive_sizing_properties.py` | Property tests over chart-height ranges; bounds have moved | Adjust the Hypothesis ranges |
+| `tests/test_collapsible_section_properties.py` | One implementation-shape assertion no longer matches | Quick targeted fix |
+| `tests/test_statistical_details_integration.py` | Asserts Statistical Details uses `collapsible_section()` a specific way | Either accept the new structure or refactor back |
+| `tests/test_tooltip_wrapper_properties.py` | A mobile-touch-target assertion drifted from `inject_touch_target_css()` output | Quick targeted fix |
+| `tests/test_touch_target_sizing_properties.py` | Asserts `inject_touch_target_css()` ends with `</style>`; current implementation emits `</script>` too | Drop the brittle string-tail assertion or update it |
 
 ---
 
