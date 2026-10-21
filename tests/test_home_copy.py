@@ -153,3 +153,25 @@ def test_us_period_consistency_in_templates():
         "Phase 4.8 fixed views/templates/hero.html; this test guards against "
         "the typo returning anywhere in the home-page surface."
     )
+
+
+# ── Task 6.4: second-pass copy audit ─────────────────────────────────────────
+
+
+def test_bento_drops_inaccurate_capability_claims():
+    """Bento copy must not overstate what the analytics pages actually do."""
+    src = _read("views/templates/bento.html")
+    inaccurate = [
+        # AI Data Analyst runs generated code with exec(), not in a sandbox
+        "secure Python code execution",
+        # Time Series Explorer forecasts the nation or one state, not counties
+        "county-level food insecurity forecasts",
+        # DiD estimates an effect; it doesn't prove one
+        "proving impact",
+        "Platform Architecture",
+    ]
+    offenders = [s for s in inaccurate if s in src]
+    assert not offenders, (
+        f"views/templates/bento.html still contains claims the 6.4 copy audit "
+        f"removed: {offenders}."
+    )
