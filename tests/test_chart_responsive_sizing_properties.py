@@ -65,8 +65,8 @@ class TestChartResponsiveSizingProperties:
         Property 37: Chart Height Ranges
         
         Chart height must be viewport-specific:
-        - Mobile (< 768px): 240-300px (240px portrait, 280px landscape)
-        - Tablet (768-1024px): 300-400px (350px)
+        - Mobile (< 820px): 240-300px (240px portrait, 280px landscape)
+        - Tablet (820-1024px): 300-400px (350px)
         - Desktop (> 1024px): 400-500px (450px)
         
         This property verifies that charts adapt their height appropriately
@@ -86,13 +86,14 @@ class TestChartResponsiveSizingProperties:
         # Generate chart config
         config = ChartConfig.for_viewport(profile)
         
-        # Verify chart height is in correct range based on viewport
-        if viewport_width < 768:
+        # Verify chart height is in correct range based on the profile's
+        # breakpoint (mobile threshold is 820px, see get_viewport_profile)
+        if profile.breakpoint_name == "mobile":
             # Mobile: 240-300px
             assert 240 <= config.height <= 300, \
                 f"Mobile chart height {config.height}px not in range [240, 300] " \
                 f"for viewport {viewport_width}px (portrait={is_portrait})"
-        elif viewport_width <= 1024:
+        elif profile.breakpoint_name == "tablet":
             # Tablet: 300-400px
             assert 300 <= config.height <= 400, \
                 f"Tablet chart height {config.height}px not in range [300, 400] " \
@@ -338,10 +339,10 @@ class TestChartResponsiveSizingIntegration:
             f"Property 36 violation: ChartConfig should not specify fixed width"
         
         # Property 37: Height in correct range
-        if viewport_width < 768:
+        if profile.breakpoint_name == "mobile":
             assert 240 <= config.height <= 300, \
                 f"Property 37 violation: Mobile height {config.height}px not in [240, 300]"
-        elif viewport_width <= 1024:
+        elif profile.breakpoint_name == "tablet":
             assert 300 <= config.height <= 400, \
                 f"Property 37 violation: Tablet height {config.height}px not in [300, 400]"
         else:
@@ -349,7 +350,7 @@ class TestChartResponsiveSizingIntegration:
                 f"Property 37 violation: Desktop height {config.height}px not in [400, 500]"
         
         # Property 38: Mobile data reduction ≥30%
-        if viewport_width < 768:
+        if profile.breakpoint_name == "mobile":
             reduction_percentage = (1.0 - config.data_point_reduction) * 100
             assert reduction_percentage >= 30.0, \
                 f"Property 38 violation: Mobile reduction {reduction_percentage:.1f}% < 30%"

@@ -51,11 +51,13 @@ def test_statistical_details_uses_collapsible_section():
         # Verify expander was called
         assert mock_expander.called, "st.expander should be called"
         
-        # Verify the title includes the icon
+        # With an icon, the icon + title render as a markdown header above an
+        # untitled expander (avoids showing the title twice)
         call_args = mock_expander.call_args
-        title_arg = call_args[0][0] if call_args[0] else call_args[1].get('title', '')
-        assert "calculator" in title_arg, "Title should include calculator icon"
-        assert "Statistical Details" in title_arg, "Title should include 'Statistical Details'"
+        header_html = [c.args[0] for c in mock_markdown.call_args_list if c.args and 'fa-' in c.args[0]]
+        assert header_html, "Icon header should be rendered via st.markdown"
+        assert "fa-calculator" in header_html[0], "Header should include calculator icon"
+        assert "Statistical Details" in header_html[0], "Header should include 'Statistical Details'"
         
         # Verify expanded parameter
         expanded_arg = call_args[1].get('expanded', False)

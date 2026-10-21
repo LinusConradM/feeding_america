@@ -165,8 +165,8 @@ def test_property_14_collapsible_section_implementation(
         # If icon is provided, title is in markdown; otherwise in expander
         if icon:
             # Check that st.markdown was called with the title
-            markdown_calls = [str(call) for call in mock_markdown.call_args_list]
-            title_displayed = any(title in call for call in markdown_calls)
+            markdown_args = [call.args[0] for call in mock_markdown.call_args_list if call.args]
+            title_displayed = any(title in html for html in markdown_args)
             assert title_displayed, \
                 f"Collapsible section must display title '{title}' when icon is provided"
         else:
