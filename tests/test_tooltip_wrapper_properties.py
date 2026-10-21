@@ -77,16 +77,12 @@ def extract_transition_delay_from_html(html: str) -> int | None:
 def extract_touch_target_dimensions_from_html(html: str) -> tuple[int, int] | None:
     """Extract min-width and min-height from mobile icon touch target."""
     # Look for tooltip-icon-mobile class and its min-width/min-height
-    icon_section = re.search(
+    # Sizing may live in a media-query override, so scan every rule block
+    icon_css = ''.join(re.findall(
         r'\.tooltip-icon-mobile\s*\{[^}]*\}',
         html,
         re.DOTALL
-    )
-    
-    if not icon_section:
-        return None
-    
-    icon_css = icon_section.group(0)
+    ))
     
     # Extract min-width
     width_match = re.search(r'min-width:\s*(\d+)px', icon_css)
@@ -147,16 +143,12 @@ def has_aria_labels(html: str) -> bool:
 def extract_close_button_dimensions(html: str) -> tuple[int, int] | None:
     """Extract min-width and min-height from modal close button."""
     # Look for tooltip-modal-close class and its dimensions
-    close_section = re.search(
+    # Sizing may live in a media-query override, so scan every rule block
+    close_css = ''.join(re.findall(
         r'\.tooltip-modal-close\s*\{[^}]*\}',
         html,
         re.DOTALL
-    )
-    
-    if not close_section:
-        return None
-    
-    close_css = close_section.group(0)
+    ))
     
     # Extract min-width
     width_match = re.search(r'min-width:\s*(\d+)px', close_css)

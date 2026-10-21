@@ -339,8 +339,12 @@ class TestTouchTargetCSSStructure:
         assert touch_target_css.startswith('<style>') or touch_target_css.startswith('\n<style>'), \
             "Touch target CSS should start with <style> tag"
         
-        assert touch_target_css.endswith('</style>') or touch_target_css.endswith('</style>\n'), \
-            "Touch target CSS should end with </style> tag"
+        assert touch_target_css.count('<style>') == 1 and touch_target_css.count('</style>') == 1, \
+            "Touch target CSS should contain exactly one <style> block"
+        
+        # The block also carries a touch-feedback <script>, which closes last
+        assert touch_target_css.rstrip().endswith(('</style>', '</script>')), \
+            "Touch target CSS should end with a closing </style> or </script> tag"
     
     def test_touch_target_css_has_important_flags(self):
         """Test that touch target CSS uses !important flags to override other styles."""

@@ -2,7 +2,7 @@
 
 > **Living document.** Update on every state change. Do not let this drift from reality — a stale tracker is worse than no tracker.
 
-**Last updated:** 2026-05-20 by Claude. Phase 3 closed (3.1-3.3 deferred per Q3 Option B, 3.4 merged in [PR #30](https://github.com/LinusConradM/feeding_america/pull/30); plus six per-view migration PRs #24–#29). Phase 4 fully done across [PR #31](https://github.com/LinusConradM/feeding_america/pull/31) → [PR #36](https://github.com/LinusConradM/feeding_america/pull/36). Phase 5 T8 (CI bootstrap) merged in [PR #37](https://github.com/LinusConradM/feeding_america/pull/37). Real progress now 39/50 (78%). Remaining: T7, stale-test triage, Phase 6 polish.
+**Last updated:** 2026-10-21 by Claude. Phase 6 closed: 6.2/6.5/6.7 landed in [PR #40](https://github.com/LinusConradM/feeding_america/pull/40); 6.1/6.3b/6.4/6.6 in [PR #43](https://github.com/LinusConradM/feeding_america/pull/43). T7 merged in [PR #39](https://github.com/LinusConradM/feeding_america/pull/39). Dashboard recounted: Phase 6 has 8 rows (was miscounted as 5), so the total is 53. Real progress now 48/53 (91%). Remaining: T5/T6 (WIP).
 **Source review:** Home Page Review consolidated report (May 5, 2026)
 **Source plan:** Home Page Remediation Execution Plan (May 5, 2026)
 **Maintainer:** Conrad Linus Muhirwe
@@ -19,17 +19,16 @@
 | 2 — Data backbone | 0 | 0 | 0 | 6 | 0 | 0 | 6 |
 | 3 — Component & tokens | 0 | 0 | 0 | 1 | 3 | 0 | 4 |
 | 4 — Audience redesign | 0 | 0 | 0 | 8 | 0 | 0 | 8 |
-| 5 — Test backfill | 1 | 2 | 0 | 5 | 0 | 0 | 8 |
-| 6 — Backlog | 5 | 0 | 0 | 0 | 0 | 0 | 5 |
+| 5 — Test backfill | 0 | 2 | 0 | 6 | 0 | 0 | 8 |
+| 6 — Backlog | 0 | 0 | 0 | 8 | 0 | 0 | 8 |
 | DS — Insight panels | 0 | 0 | 0 | 6 | 0 | 0 | 6 |
 | Q — Maintainer Q's | 0 | 0 | 0 | 7 | 0 | 0 | 7 |
-| **Total** | **6** | **2** | **0** | **39** | **3** | **0** | **50** |
+| **Total** | **0** | **2** | **0** | **48** | **3** | **0** | **53** |
 
-**Progress:** 78% complete (39 / 50 tasks merged on `main`). 3 deferred per Q3 Option B (home page kept as marketing surface — see Phase 3 below). 2 WIP, 6 TODO remain — all post-ship polish.
-**Critical path:** Phases 0–4 plus Phase 5 task T8 (CI bootstrap) all closed. Remaining substantive work:
-  - **T7** — design-system static-analysis test (no hex literals in `home.py` outside `theme.py`; no off-grid spacing in `home.css`).
-  - **Stale-test triage** — 9 test files were `--ignored` in [PR #37](https://github.com/LinusConradM/feeding_america/pull/37)'s pyproject.toml: 2 script-shaped tests (`test_llm.py`, `test_langchain.py`) plus 7 stale property/integration tests; each is a follow-up task (update assertions or delete).
-  - **Phase 6 backlog** — 5 small post-ship items.
+**Progress:** 91% complete (48 / 53 tasks merged on `main`). 3 deferred per Q3 Option B (home page kept as marketing surface — see Phase 3 below). 2 WIP remain.
+**Critical path:** Phases 0–4, Phase 6, and Phase 5 tasks T1–T4, T7, T8 all closed. Remaining substantive work:
+  - **T5** — Hypothesis responsive property test at 375/768/1024/1440.
+  - **T6** — consolidated `test_home_a11y.py` with img-alt audit.
 **Note on Phase 3:** The Q3-driven scope expansion played out via Option B (recorded in this session): the home page stays as the dark marketing surface; the rest of the app migrated to light/pearl tokens. Tasks 3.1/3.2/3.3 (home-specific palette/component work) are formally **DEFERRED**, not abandoned — they'd reactivate if Option B is ever revisited.
 **Process gap closed 2026-05-19/20:** PR #14 merged with broken imports because no CI ran. Hotfix #18 cleaned it up ~4 hours later. T8 (PR #37) added the GitHub Actions workflow that gates every future PR with the pytest suite.
 
@@ -40,8 +39,8 @@
 - [x] Phase 2 complete → unblocks Phase 3 + Phase 4 (parallel) ✅ (2026-05-19, [PR #22](https://github.com/LinusConradM/feeding_america/pull/22))
 - [x] Phase 3 complete → 3.1/3.2/3.3 DEFERRED (Q3 Option B), 3.4 done ✅ (2026-05-19, [PR #30](https://github.com/LinusConradM/feeding_america/pull/30); plus per-view sub-phases #24–#29)
 - [x] Phase 4 complete → unblocks final ship ✅ (2026-05-20, [PR #31](https://github.com/LinusConradM/feeding_america/pull/31)–[PR #36](https://github.com/LinusConradM/feeding_america/pull/36))
-- [x] Phase 5 T8 (CI bootstrap) ✅ (2026-05-20, [PR #37](https://github.com/LinusConradM/feeding_america/pull/37)) — T7 + partial T5/T6 still open; non-gating
-- [ ] Phase 6 — post-ship polish
+- [x] Phase 5 T8 (CI bootstrap) ✅ (2026-05-20, [PR #37](https://github.com/LinusConradM/feeding_america/pull/37)) — T7 done in [PR #39](https://github.com/LinusConradM/feeding_america/pull/39); T5/T6 still open, non-gating
+- [x] Phase 6 — post-ship polish ✅ (2026-10-21, [PR #40](https://github.com/LinusConradM/feeding_america/pull/40) + [PR #43](https://github.com/LinusConradM/feeding_america/pull/43))
 
 ---
 
@@ -192,7 +191,7 @@ Goal: every home-page concern has a test. **Runs throughout, days 1–end. Each 
 | T4 | DONE | `tests/test_home_caching.py` | Decorator presence on `_load_template`, `_load_css`, `_get_fi_ticker_html`, `_load_and_encode_image` | 1.4 | [#14](https://github.com/LinusConradM/feeding_america/pull/14) `ee3506c` + hotfix [#18](https://github.com/LinusConradM/feeding_america/pull/18) `22eb4a1` | Merged 2026-05-19. Also covers `_get_kpi_html` and lints `# OPTIMIZATION` comment claims. **Hotfix #18** deleted 7 redundant call-site `# OPTIMIZATION: ... is cached` comments that triggered false positives once T4 finally ran (T4 had been blocked by the missing-import bug in 1.1). T2 also had a hard-coded `0.05149` expected value that should have been `0.05075` — fixed in #18. |
 | T5 | WIP | `tests/test_home_responsive.py` | Hypothesis property test: at 375/768/1024/1440 widths, KPI columns and chart heights match `ChartConfig.from_viewport` | 4.3 | partial via [`tests/test_mobile_nav.py`](../tests/test_mobile_nav.py) (PR [#34](https://github.com/LinusConradM/feeding_america/pull/34)) | 44×44px touch targets + horizontal scroll affordance assertions landed alongside Phase 4.3. Hypothesis-based property test at all 4 widths still TODO. |
 | T6 | WIP | `tests/test_home_a11y.py` | `<main>` landmark present; skip-link present; no focusable element without `:focus-visible`; every `<img>` has alt | 3.4, 4.4 | partial via [`tests/test_a11y_focus_and_reduced_motion.py`](../tests/test_a11y_focus_and_reduced_motion.py) + [`tests/test_a11y_skip_link.py`](../tests/test_a11y_skip_link.py) (PRs [#30](https://github.com/LinusConradM/feeding_america/pull/30) + [#31](https://github.com/LinusConradM/feeding_america/pull/31)) | `:focus-visible` + skip-link + `#main-content` anchor coverage landed alongside Phase 3.C + 4.4. Img-alt audit + consolidated `test_home_a11y.py` still TODO. |
-| T7 | DEFERRED | `tests/test_home_design_system.py` | No hex literals in `home.py` outside theme; no spacing values outside 4px grid in `home.css` | 3.1, 3.3 | — | Static analysis of source files is deferred because 3.1/3.3 were deferred under Q3 Option B. If Option B is revisited, implement this test against `home.py` / `home.css` as originally scoped. |
+| T7 | DONE | `tests/test_home_design_system.py` | `utils/theme.py` palette exists; zero inline hex in 7 migrated views; hex-count ratchet on the rest | 3.1, 3.3 | [#39](https://github.com/LinusConradM/feeding_america/pull/39) | Merged 2026-05-20. Scoped to the in-app views (home.py/home.css stay the marketing surface per Q3 Option B). Spacing-grid check is a skipped placeholder pending deferred 3.3. |
 | T8 | DONE | CI bootstrap: GitHub Actions workflow that runs `pytest tests/` on every PR + push to `main` | devops-engineer | — | [#37](https://github.com/LinusConradM/feeding_america/pull/37) | Merged 2026-05-20. `.github/workflows/tests.yml` runs pytest on PR-to-main + push-to-main. Python 3.13 pinned (matches local venv). `pyproject.toml` added with `pythonpath = ["."]` so `utils.*` imports resolve in CI. **7 stale test files were `--ignored`** in the same PR to keep the CI bootstrap green — each is a separate follow-up triage item (see "Stale test backlog" section). |
 
 ### Phase 5 acceptance criteria
@@ -209,16 +208,18 @@ Goal: nits and polish. None of these block the redesign.
 
 | ID | Status | Task | Owner | PR | Notes |
 |----|--------|------|-------|-----|-------|
-| 6.1 | TODO | Card body line-heights + ticker font-size harmonization (marquee tempo half-moot — marquee was cut in Phase 4.2) | ui-designer | — | |
-| 6.2 | TODO | Remove dead `.hero` rule at `home.css:872` (line 650 is overridden) | ui-designer | — | |
+| 6.1 | DONE | Card body line-heights + ticker font-size harmonization (marquee tempo half-moot — marquee was cut in Phase 4.2) | ui-designer | [#43](https://github.com/LinusConradM/feeding_america/pull/43) | Card/section body copy at line-height 1.6 throughout; FI ticker 0.78rem at every width. |
+| 6.2 | DONE | Remove dead `.hero` rule at `home.css:872` (line 650 is overridden) | ui-designer | [#40](https://github.com/LinusConradM/feeding_america/pull/40) `c37bed6` | |
 | 6.3 | DONE (moot) | Extract marquee triple constant | software-engineer | — | Marquee cut in [PR #36](https://github.com/LinusConradM/feeding_america/pull/36), so this no longer applies. |
-| 6.3b | TODO | Trailing newline at EOF | software-engineer | — | Low-priority cleanup item if still relevant. |
-| 6.4 | TODO | Copy nits: "Density Joyplots" → "Where is need highest?"; full second-pass copy audit (the "Investigating" instance was already fixed by Phase 4.1 hero rewrite in [PR #35](https://github.com/LinusConradM/feeding_america/pull/35)) | stakeholder-advocate | — | |
-| 6.5 | TODO | Update [README.md](../README.md): page count (9 → 12); directory ref (`pages/` → `views/`); reflect new home design | doc-updater | — | |
-| 6.6 | TODO | Triage 7 stale test files `--ignored` by [PR #37](https://github.com/LinusConradM/feeding_america/pull/37). See "Stale test backlog" section below for the full list. | qa-tester | — | Each: update assertions to current behavior, or delete the test. Not blocking. |
-| 6.7 | TODO | Rename `tests/test_llm.py` → `scripts/check_llm.py` and `tests/test_langchain.py` → `scripts/check_langchain.py` so they're discoverable as debug tools, not pytest tests. | software-engineer | — | Both files have zero `def test_*` functions and execute API calls at import time. The current `--ignore` workaround keeps CI green but the rename is the honest fix. |
+| 6.3b | DONE | Trailing newline at EOF | software-engineer | [#43](https://github.com/LinusConradM/feeding_america/pull/43) | `home.css` + home templates. Orphaned `marquee.html` deleted. |
+| 6.4 | DONE | Copy nits: "Density Joyplots" → "Where is need highest?"; full second-pass copy audit (the "Investigating" instance was already fixed by Phase 4.1 hero rewrite in [PR #35](https://github.com/LinusConradM/feeding_america/pull/35)) | stakeholder-advocate | [#43](https://github.com/LinusConradM/feeding_america/pull/43) | "Density Joyplots" left with the marquee. Bento card bodies rewritten; inaccurate claims (secure sandbox, county-level forecasts, "proving impact") removed and guarded in `test_home_copy.py`. |
+| 6.5 | DONE | Update [README.md](../README.md): page count (9 → 12); directory ref (`pages/` → `views/`); reflect new home design | doc-updater | [#40](https://github.com/LinusConradM/feeding_america/pull/40) `c37bed6` | |
+| 6.6 | DONE | Triage 7 stale test files `--ignored` by [PR #37](https://github.com/LinusConradM/feeding_america/pull/37). See "Stale test backlog" section below for the full list. | qa-tester | [#43](https://github.com/LinusConradM/feeding_america/pull/43) | All 7 updated to current behavior; `pyproject.toml` ignores nothing. |
+| 6.7 | DONE | Rename `tests/test_llm.py` → `scripts/check_llm.py` and `tests/test_langchain.py` → `scripts/check_langchain.py` so they're discoverable as debug tools, not pytest tests. | software-engineer | [#40](https://github.com/LinusConradM/feeding_america/pull/40) `c37bed6` | |
 
 ### Stale test backlog (T8 follow-up)
+
+**Resolved in [PR #43](https://github.com/LinusConradM/feeding_america/pull/43):** every file below was updated to current behavior and the `--ignore` list is gone.
 
 Seven test files were `--ignored` in [`pyproject.toml`](../pyproject.toml) by [PR #37](https://github.com/LinusConradM/feeding_america/pull/37) to keep the CI bootstrap green. Each is a real piece of code that was relevant when written but drifted after Phase 2/3/4 refactors. Triage = update assertions to current behavior, or delete the file.
 
@@ -289,7 +290,7 @@ The home page redesign ships when **all** of the following are true:
 - [ ] `stakeholder-advocate` audience-fit test returns "serves" for all three audiences
 - [ ] Page load (cold cache) <2s on desktop, <4s on mobile
 - [ ] All P0 + P1 tasks `DONE`
-- [ ] Phase 6 backlog reviewed; either resolved or formally `DEFERRED` with reason
+- [x] Phase 6 backlog reviewed; either resolved or formally `DEFERRED` with reason
 
 ---
 

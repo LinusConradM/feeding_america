@@ -288,7 +288,7 @@ st.html(
 # inside its question-led card body.
 
 
-# ── 7. Bento grid (Platform Architecture) ────────────────────────────────────
+# ── 7. Bento grid (What you can explore) ─────────────────────────────────────
 st.html(_load_template("bento.html"))
 
 

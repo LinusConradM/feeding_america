@@ -96,7 +96,7 @@ class TestGeographicSectionProperties:
         # Track plotly_chart calls to count visualizations
         plotly_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             plotly_calls.append(fig)
         
         # Mock Streamlit components
@@ -211,7 +211,7 @@ class TestGeographicSectionProperties:
         # Track plotly figures to verify color scales
         plotly_figures = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             plotly_figures.append(fig)
         
         # Mock Streamlit components
@@ -297,7 +297,7 @@ class TestGeographicSectionProperties:
         chart_order = []
         markdown_order = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_order.append(fig)
         
         def mock_markdown(content, unsafe_allow_html=False):
@@ -389,7 +389,7 @@ class TestGeographicSectionBoundaryConditions:
         
         chart_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_calls.append(fig)
         
         with patch.object(streamlit, 'plotly_chart', side_effect=mock_plotly_chart):
@@ -415,7 +415,7 @@ class TestGeographicSectionBoundaryConditions:
         
         chart_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_calls.append(fig)
         
         with patch.object(streamlit, 'plotly_chart', side_effect=mock_plotly_chart):
@@ -461,7 +461,7 @@ class TestGeographicSectionDataHandling:
         
         chart_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_calls.append(fig)
         
         # Should not raise any exceptions
@@ -487,7 +487,7 @@ class TestGeographicSectionDataHandling:
         
         chart_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_calls.append(fig)
         
         # Should not raise any exceptions
@@ -513,7 +513,7 @@ class TestGeographicSectionDataHandling:
         
         chart_calls = []
         
-        def mock_plotly_chart(fig, use_container_width=False):
+        def mock_plotly_chart(fig, use_container_width=False, **kwargs):
             chart_calls.append(fig)
         
         # Should not raise any exceptions

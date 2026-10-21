@@ -1,6 +1,6 @@
 <div class="section-wrap" id="bento">
-    <h2 class="section-title">Platform Architecture</h2>
-    <p class="section-sub">From raw data to causal inference — a fully integrated analytics engine</p>
+    <h2 class="section-title">What you can explore</h2>
+    <p class="section-sub">Five questions the platform helps you answer, and the method behind each one</p>
 
     <div class="bento-grid">
 
@@ -10,10 +10,9 @@
             <div class="card-icon-lg text-purple"><i class="fas fa-robot"></i></div>
             <div class="card-title">Ask in plain English</div>
             <p class="card-desc" style="font-size:1rem;max-width:90%;">
-                The platform is augmented by <strong>Gemini 2.5 Flash</strong> with a secure Python code execution
-                sandbox.
-                It doesn't guess — it writes, tests, and executes Pandas queries directly against the live longitudinal
-                dataframe to mathematically solve plain-English inquiries.
+                Type a question and the AI Data Analyst, powered by <strong>Gemini 2.5 Flash</strong>, writes and
+                runs a Pandas query against the full county dataset, then explains the result. Answers come from
+                the data, not from the model's memory.
             </p>
             <!-- Phase 4.2: terminal mockup cut. Card body above already
                  describes the AI workflow without needing the prop. -->
@@ -23,10 +22,10 @@
         <div class="aurora-card bento-causal">
             <div class="card-icon-lg text-teal"><i class="fas fa-chart-line"></i></div>
             <div class="card-title" style="color:#7dd3fc;">Did this policy actually work?</div>
-            <p class="card-desc" style="font-size:1rem;line-height:1.7;">
-                Pivots from descriptive to prescriptive analytics. Uses
-                <strong>Difference-in-Differences</strong> modeling to isolate the true causal effect of
-                hypothetical policy shocks against controlled baseline groups — proving impact rather than correlation.
+            <p class="card-desc" style="font-size:1rem;">
+                Pick a state and the year a policy took effect. <strong>Difference-in-Differences</strong> compares
+                its food insecurity trend with a control group, so you can estimate the policy's effect rather than
+                just a correlation.
             </p>
             <!-- Phase 4.2: DiD LaTeX estimator tile cut. Card body above
                  explains the technique without showing the equation. -->
@@ -37,8 +36,9 @@
             <div class="card-icon-lg text-teal"><i class="fas fa-map-marked-alt"></i></div>
             <div class="card-title">Which counties cluster together?</div>
             <p class="card-desc">
-                K-Means augmented with GPS coordinates to force geographic contiguity.
-                Tracks regional flow shifts using <strong>Sankey matrices</strong>.
+                K-Means clustering groups counties with similar profiles, using location so clusters stay
+                geographically connected. A <strong>Sankey diagram</strong> shows which counties moved between
+                groups from one year to another.
             </p>
         </div>
 
@@ -47,8 +47,8 @@
             <div class="card-icon-lg text-amber"><i class="fas fa-stream"></i></div>
             <div class="card-title">What's the trend over time?</div>
             <p class="card-desc">
-                SARIMAX modeling for temporal trend analysis, pre/post COVID impact assessment,
-                and county-level food insecurity forecasts.
+                Follow food insecurity from 2009 to 2023, compare before and during COVID-19, and see
+                <strong>SARIMAX</strong> forecasts for the nation or a single state.
             </p>
         </div>
 
@@ -57,8 +57,8 @@
             <div class="card-icon-lg text-pink"><i class="fas fa-bullseye"></i></div>
             <div class="card-title">Which counties don't fit the pattern?</div>
             <p class="card-desc">
-                <strong>Isolation Forests</strong> autonomously scan all 3,142 counties to flag
-                severe multivariate anomalies hidden within the economic matrix.
+                An <strong>Isolation Forest</strong> scans every county to flag the ones whose combination of
+                food insecurity, poverty, and other indicators is unusual compared with the rest.
             </p>
         </div>
 
