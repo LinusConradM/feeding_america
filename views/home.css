@@ -252,7 +252,7 @@ header[data-testid="stHeader"] {
     white-space: nowrap;
     margin-left: 0.6rem;
     font-family: 'Geist Mono', monospace;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: #c5cae9;
     max-width: 200px;
     vertical-align: middle;
@@ -287,7 +287,6 @@ header[data-testid="stHeader"] {
     .fi-ticker {
         display: inline-block;
         max-width: 160px;
-        font-size: 0.76rem;
         margin-left: 0.3rem;
         overflow-x: auto;
         white-space: nowrap;
@@ -860,7 +859,7 @@ header[data-testid="stHeader"] {
 
 .audience-sub {
     font-size: 0.82rem;
-    line-height: 1.45;
+    line-height: 1.6;
     color: var(--muted);
 }
 
@@ -1190,6 +1189,7 @@ header[data-testid="stHeader"] {
 .section-sub {
     color: var(--muted);
     font-size: 0.95rem;
+    line-height: 1.6;
     margin-bottom: 2rem;
 }
 
@@ -1478,7 +1478,7 @@ header[data-testid="stHeader"] {
 .method-desc {
     font-size: 0.8rem;
     color: var(--muted);
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .method-badge {
