@@ -148,7 +148,7 @@ Three uncommitted local changes on the current branch (`executive_overview`):
 | **No CI/CD pipeline.** `.github/` exists but is empty; tests run only locally | High. Every PR is unverified until manually tested | `devops-engineer` |
 | **No deployment configuration.** No Dockerfile, no Streamlit Cloud / Render / Railway config committed | High. No documented prod target | `devops-engineer` |
 | **Dependencies pinned with `>=` only.** `requirements.txt` allows version drift | Medium. Non-reproducible builds | `devops-engineer` |
-| **Legacy R-Shiny artifacts still in repo.** `index.html`, `old_scenarios.py`, `rsconnect/` directory | Low. Confusing for newcomers, ~70KB dead weight | `refactor-cleaner` agent |
+| **Legacy R-Shiny artifacts still in repo.** `index.html`, `rsconnect/` directory | Low. Confusing for newcomers, ~70KB dead weight | `refactor-cleaner` agent |
 | **README is partly out of date.** Claims 9 pages (there are 12), shows `pages/` directory (actually `views/`), states DATA-613 Fall 2025 (active dev continued into 2026) | Low. Onboarding friction | `doc-updater` agent |
 | **`team-assembler` and `team-workflow` skills don't list 3 newest roles.** `data-analyst`, `ui-designer`, `stakeholder-advocate` were added today and the orchestrator skills haven't been updated | Medium. Orchestrators won't route work to new lanes | One-time edit |
 | **No data refresh story.** Excel files are static; no plan for 2024 data | Medium (when 2024 data publishes) | `data-scientist` + `devops-engineer` |
