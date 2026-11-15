@@ -1,5 +1,21 @@
 {
   "sources": {
+    "acs-county": {
+      "url": "https://api.census.gov/data/2024/acs/acs5?get=NAME,B22003_001E,B22003_001M,B22003_002E,B22003_002M,B17001_001E,B17001_001M,B17001_002E,B17001_002M&for=county:*",
+      "versions": [
+        {
+          "api_modified": "2025-09-02 17:33:50.0",
+          "api_title": "ACS 5-Year Detailed Tables",
+          "bytes": 303181,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-county/2026-11-15/acs5_2024_county.json",
+          "retrieved_at": "2026-11-15T02:31:24+00:00",
+          "sha256": "5ce68190c8f9e4bb2ec015326000a780ef3a4594727f3d875ecac6588ab56fdb",
+          "vintage": 2024
+        }
+      ]
+    },
     "acs-meta": {
       "url": "https://api.census.gov/data/2024/acs/acs5",
       "versions": [
@@ -12,6 +28,38 @@
           "path": "data/raw/acs-meta/2026-11-15/acs5_2024_meta.json",
           "retrieved_at": "2026-11-15T01:58:49+00:00",
           "sha256": "0687c5483e27c50d890d3bc39946cfb8312cb8b4f42de9c630edeaf3a4ef3645",
+          "vintage": 2024
+        }
+      ]
+    },
+    "acs-state": {
+      "url": "https://api.census.gov/data/2024/acs/acs5?get=NAME,B22003_001E,B22003_001M,B22003_002E,B22003_002M,B17001_001E,B17001_001M,B17001_002E,B17001_002M&for=state:*",
+      "versions": [
+        {
+          "api_modified": "2025-09-02 17:33:50.0",
+          "api_title": "ACS 5-Year Detailed Tables",
+          "bytes": 4581,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-state/2026-11-15/acs5_2024_state.json",
+          "retrieved_at": "2026-11-15T02:31:23+00:00",
+          "sha256": "200ed6d8519ca70a3f769aaee7b45440a24db443f2434f8d876ccbd2dbd5cd21",
+          "vintage": 2024
+        }
+      ]
+    },
+    "acs-us": {
+      "url": "https://api.census.gov/data/2024/acs/acs5?get=NAME,B22003_001E,B22003_001M,B22003_002E,B22003_002M,B17001_001E,B17001_001M,B17001_002E,B17001_002M&for=us:1",
+      "versions": [
+        {
+          "api_modified": "2025-09-02 17:33:50.0",
+          "api_title": "ACS 5-Year Detailed Tables",
+          "bytes": 230,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-us/2026-11-15/acs5_2024_us.json",
+          "retrieved_at": "2026-11-15T02:31:23+00:00",
+          "sha256": "294da05ecdc9c2c50f21de7f9668acf131a03b537865850a7056b7978d6faa65",
           "vintage": 2024
         }
       ]
