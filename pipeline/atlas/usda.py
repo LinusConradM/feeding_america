@@ -91,3 +91,48 @@ def change_vs_prior_year(path):
     years = [int(y) for y in re.findall(r"in (20\d\d)", " ".join(df.columns[2:4]))]
     sig = str(row.iloc[5]).strip().lower() == "yes"
     return {"from": years[0], "to": years[1], "change_pts": float(row.iloc[4]), "significant": sig}
+
+
+def change_table(path):
+    """Every row of an ERS 2023-to-2024 change file (insecurity.xlsx, verylow.xlsx): the
+    group, both years' shares of households, the change and ERS's own significance test."""
+    df = pd.read_excel(path, header=1)
+    df.columns = [re.sub(r"\s+", " ", str(c)).strip() for c in df.columns]
+    years = [int(y) for y in re.findall(r"in (20\d\d)", " ".join(df.columns[2:4]))]
+    df = df[pd.to_numeric(df.iloc[:, 2], errors="coerce").notna()]
+    return years, pd.DataFrame({
+        "category": df.iloc[:, 0].astype(str).str.strip().str.replace("referece", "reference"),
+        "group": df.iloc[:, 1].astype(str).str.strip(),
+        "y0": df.iloc[:, 2].astype(float),
+        "y1": df.iloc[:, 3].astype(float),
+        "change": df.iloc[:, 4].astype(float),
+        "sig": df.iloc[:, 5].astype(str).str.strip().str.lower() == "yes",
+    }).reset_index(drop=True)
+
+
+def subgroup_series(path):
+    """Yearly share of households food insecure and very low food secure for each group
+    in the ERS chart data file, 2001 onward."""
+    df = pd.read_excel(path, "Food security all households", header=1)
+    leaf = df["Sub-subcategory"].where(df["Sub-subcategory"] != "Not applicable", df.Subcategory)
+    leaf = leaf.where(df.Category != "All households", "All households")
+    return pd.DataFrame({
+        "year": df.Year.astype(int),
+        "category": df.Category.astype(str).str.strip(),
+        "parent": df.Subcategory.astype(str).str.strip(),
+        "group": leaf.astype(str).str.strip(),
+        "fi_pct": df["Food insecure-percent"].astype(float),
+        "vl_pct": df["Very low food security-percent"].astype(float),
+    })
+
+
+# The chart data file and the change files name a few groups differently.
+SERIES_NAME = {
+    "With adults age 65 and older": "With elderly",
+    "Adults > 65 living alone": "Elderly living alone",
+    "Other, non-Hispanic": "Other",
+}
+
+
+def series_name(group):
+    return SERIES_NAME.get(group, group.replace(", non-Hispanic", " non-Hispanic"))

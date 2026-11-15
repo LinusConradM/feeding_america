@@ -9,6 +9,7 @@ Live site: https://linusconradm.github.io/feeding_america/ (GitHub Pages, deploy
 | Page | What it shows | Source |
 |---|---|---|
 | National | Food insecurity 2001 to 2024: share and number of households, people in those households, and children | USDA ERS, ERR-358 |
+| Who is affected | Food insecurity and very low food security by household type, income-to-poverty ratio, race and ethnicity of the household reference person, metro/nonmetro and region, 2023 and 2024 with USDA's significance tests, plus each group's 2001 to 2024 series. Map the Meal Gap state rates by race and ethnicity, listed alphabetically, never ranked | USDA ERS change files and chart data file; Map the Meal Gap, newest edition |
 | States | Each state's 2022 to 2024 household rate with 90% margin of error and USDA's significance test; Map the Meal Gap rates of people by year | USDA ERS state data file; Map the Meal Gap |
 | Counties | Map and table of county rates of people, child rates, cost per meal, annual meal gap, rural-urban code | Map the Meal Gap, newest edition |
 | SNAP reach | County food insecurity against the share of households receiving SNAP, a measure that is not an input to the Map the Meal Gap model | Census ACS 5-year B22003 and B17001; Map the Meal Gap |
@@ -18,7 +19,7 @@ Live site: https://linusconradm.github.io/feeding_america/ (GitHub Pages, deploy
 
 | Source | Publisher's cadence | How the pipeline gets it | Checked |
 |---|---|---|---|
-| USDA ERS, Household Food Security in the United States in 2024 (ERR-358): chart data file, state data file (`mapdata.xlsx`), year-over-year file, report PDF (Table 1A) | Was annual. 2024 is the final year: USDA ended the Current Population Survey Food Security Supplement (announced September 20, 2025) | Direct download from ers.usda.gov | Daily |
+| USDA ERS, Household Food Security in the United States in 2024 (ERR-358): chart data file, state data file (`mapdata.xlsx`), year-over-year change files for food insecurity and very low food security, report PDF (Table 1A) | Was annual. 2024 is the final year: USDA ended the Current Population Survey Food Security Supplement (announced September 20, 2025) | Direct download from ers.usda.gov | Daily |
 | Feeding America, Map the Meal Gap (2011 to 2026 editions, 2009 to 2024 data) | Annual. County files only by request form | Pulled from a private data repo. The pipeline watches Feeding America's site and opens an issue when a newer edition appears | Daily |
 | Census ACS 5-year, tables B22003 (SNAP receipt) and B17001 (poverty), with margins of error | Annual, usually December | Census API, newest vintage it serves | Daily |
 | Census cartographic boundary files, counties and states, 1:20,000,000 | Annual | Direct download from www2.census.gov, matched to the newest Map the Meal Gap data year | Daily |
@@ -31,7 +32,7 @@ Release dates the files do not carry themselves are recorded with a citation in 
 
 1. **Fetch.** `python -m atlas fetch` downloads every public source. A file is stored only when its bytes change, unchanged, at `data/raw/<source>/<retrieved date>/<file>`, and `data/manifest.json` records its URL, retrieval time, size, SHA-256 and server headers. New raw files are committed back to the repo.
 2. **Pull Map the Meal Gap.** The private data repo is checked out to `data/private/mmg/`, which is git-ignored here.
-3. **Build and validate.** `python -m atlas build --strict` parses the raw files and runs about 40 checks: complete state and county coverage, unique FIPS codes, value ranges, USDA Table 1A matching the ERS data file, county totals within 6% of state totals (Map the Meal Gap builds states from congressional districts), every county having a boundary. Results are published on the Methods page.
+3. **Build and validate.** `python -m atlas build --strict` parses the raw files and runs about 50 checks: complete state and county coverage, USDA group change files matching the ERS chart data file for both years, unique FIPS codes, value ranges, USDA Table 1A matching the ERS data file, county totals within 6% of state totals (Map the Meal Gap builds states from congressional districts), every county having a boundary. Results are published on the Methods page.
 4. **Publish.** The Astro site is built from the generated JSON and deployed to GitHub Pages, but only if every required check passed. A failure on `main` opens an issue and the site keeps its last good version.
 
 ## Setup (one time)
@@ -57,6 +58,8 @@ cd site && npm ci && npm run dev  # http://localhost:4321/feeding_america/
 
 - Map the Meal Gap figures are modeled, not counted, and the 2026 county and state files include no confidence intervals. The site says so and does not rank counties.
 - Each Map the Meal Gap data year comes from a different edition. Feeding America advises against comparing across editions, so the state chart shows unconnected points.
+- USDA's household-group files publish significance tests but not margins of error, so the group chart shows the test result and no interval.
+- Map the Meal Gap's rates by race and ethnicity are rounded to whole percentages by Feeding America, have no published intervals, and leave some states blank. The Black and Hispanic groups overlap. The site shows them as published and does not rank states.
 - USDA's household rate and Map the Meal Gap's people rate measure different things and are never compared directly.
 - ACS SNAP receipt is self-reported and undercounts administrative SNAP totals; the SNAP page says so and labels counties only when a gap exceeds the ACS margin of error.
 

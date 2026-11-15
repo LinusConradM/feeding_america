@@ -1,0 +1,210 @@
+---
+import Base from "../../layouts/Base.astro";
+import Source from "../../components/Source.astro";
+import { groups, usdaSrc, mmgYearSource } from "../../lib/data";
+const G = groups as any;
+const U = G.usda, R = G.race;
+const names: Record<string, string> = G.names;
+const [y0, y1] = U.years;
+const CAT: Record<string, string> = {
+  "All households": "All households",
+  "Household composition": "Household type",
+  "Race/ethnicity of household reference persons": "Race and ethnicity",
+  "Household income-to-poverty ratio": "Household income",
+  "Area of residence": "Metro and nonmetro areas",
+  "Census geographic region": "Census region",
+};
+const rows = U.categories.flatMap((c: any) => c.rows.map((r: any) => ({ ...r, cat: c.name })));
+const find = (l: string) => rows.find((r: any) => r.label === l);
+const poor = find("Below the poverty line"), notPoor = find("185% of poverty or more");
+const phrase = (r: any) => r.cat.startsWith("Race") ? `households with a ${r.label} reference person`
+  : r.cat === "Household income-to-poverty ratio" ? `households ${/^\d/.test(r.label) ? "at " + r.label : r.label.charAt(0).toLowerCase() + r.label.slice(1)}`
+  : r.cat === "Household composition" ? `households ${r.label.toLowerCase()}` : `households in ${r.label}`;
+const sigFi = rows.filter((r: any) => r.fi[3]), sigVl = rows.filter((r: any) => r.vl[3]);
+const sigList = (xs: any[], k: string) => xs.map((r: any) => `${phrase(r)} (${r[k][2] > 0 ? "+" : ""}${r[k][2].toFixed(1)} points)`).join(" and ");
+const src = usdaSrc(`ERS files insecurity.xlsx and verylow.xlsx (${y0} and ${y1} with USDA's significance test at 90% confidence) and the ERS chart data file (2001 to ${y1}). Share of households.`);
+const fmt = (v: number) => v.toFixed(1) + "%";
+const chg = (v: number) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + " pts";
+const sigText = (s: boolean) => (s ? "Significant change" : "Not significant");
+const rsrc = R ? { ...mmgYearSource(R.year), note: "Modeled estimates, rounded by Feeding America to whole percentages. No confidence intervals are published. Blank where Feeding America does not release an estimate." } : null;
+const abbrs = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b]));
+const both = R ? abbrs.filter((a) => R.rows[a][0] != null) : [];
+const blackHigher = both.filter((a) => R.rows[a][0] > R.rows[a][2]).length;
+const hispHigher = R ? abbrs.filter((a) => R.rows[a][1] != null && R.rows[a][1] > R.rows[a][2]).length : 0;
+const nHisp = R ? abbrs.filter((a) => R.rows[a][1] != null).length : 0;
+const rp = (v: number | null) => (v == null ? "Not published" : Math.round(v * 100) + "%");
+---
+<Base title="Who is affected" page="groups" description={`Food insecurity by household type, income, race and ethnicity, and place: USDA ${y1} survey estimates with USDA's significance tests, and Map the Meal Gap state rates by race and ethnicity.`}>
+  <div class="lede">
+    <span class="eyebrow">Who is affected · USDA survey estimates · share of households</span>
+    <h1>{fmt(poor.fi[1])} of households below the poverty line were food insecure in {y1}</h1>
+    <p>Against {fmt(notPoor.fi[1])} of households with income at 185% of the poverty line or more. USDA breaks its national estimate down by household type, income, the race and ethnicity of the household reference person, and where the household lives. {sigFi.length === 0 ? `None of the ${y0} to ${y1} changes in food insecurity was statistically significant by USDA's test.` : `USDA found significant ${y0} to ${y1} changes in food insecurity for ${sigList(sigFi, "fi")}.`} {sigVl.length ? `For very low food security, the most severe level, it found significant increases for ${sigList(sigVl, "vl")}.` : ""}</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="t"><h2 id="g-title">Food insecurity by group, {y0} and {y1}</h2><span class="note">Share of households in each group</span></div>
+      <div class="seg" role="group" aria-label="Measure"><button data-k="fi" aria-pressed="true">Food insecure</button><button data-k="vl" aria-pressed="false">Very low food security</button></div>
+    </div>
+    <div id="g-chart" class="chart tall" role="img" aria-label={`For each household group, the share of households food insecure in ${y0} and ${y1}. Groups with a statistically significant change are labeled. The same values are in the table below.`}></div>
+    <div class="legend"><span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="none" stroke="var(--old)" stroke-width="1.5"/></svg>{y0}</span><span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="var(--accent)"/></svg>{y1}</span><span class="key">Text label (wide screens) or table: change USDA found statistically significant</span></div>
+    <p class="note">USDA tests each change at 90% confidence. These files publish the test result but not the margins of error, so no interval is drawn. Small groups, such as men raising children alone, have wider margins than large ones. Income is the household's income as a share of the federal poverty line, and the groups nest: a household below the poverty line is also below 130% and 185% of it. Race and ethnicity are those of the household reference person, usually the person in whose name the home is owned or rented.</p>
+    <Source s={src} />
+    <details class="alt"><summary>Show the groups as a table</summary><div class="tablewrap"><table>
+      <caption class="sr">Share of households food insecure and very low food secure by group, {y0} and {y1}, USDA</caption>
+      <thead><tr><th scope="col">Group</th><th scope="col">Food insecure {y0}</th><th scope="col">{y1}</th><th scope="col">Change</th><th scope="col">USDA test</th><th scope="col">Very low food security {y0}</th><th scope="col">{y1}</th><th scope="col">Change</th><th scope="col">USDA test</th></tr></thead>
+      {U.categories.map((c: any) => <tbody>
+        <tr><th scope="rowgroup" colspan="9" class="grp">{CAT[c.name] ?? c.name}</th></tr>
+        {c.rows.map((r: any) => <tr><th scope="row">{r.label}</th><td>{fmt(r.fi[0])}</td><td>{fmt(r.fi[1])}</td><td>{chg(r.fi[2])}</td><td>{sigText(r.fi[3])}</td><td>{fmt(r.vl[0])}</td><td>{fmt(r.vl[1])}</td><td>{chg(r.vl[2])}</td><td>{sigText(r.vl[3])}</td></tr>)}
+      </tbody>)}
+    </table></div></details>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="t"><h2 id="t-title">One group over time</h2><span class="note">Share of households, 2001 to {y1}. Other groups in the same breakdown in gray; all households dashed.</span></div>
+    </div>
+    <div class="pickers"><label class="fl" for="t-pick">Group<select id="t-pick">{U.categories.filter((c: any) => c.name !== "All households").map((c: any) => <optgroup label={CAT[c.name] ?? c.name}>{c.rows.map((r: any) => <option value={r.label} selected={r.label === "Below the poverty line"}>{r.label}</option>)}</optgroup>)}</select></label></div>
+    <div id="t-chart" class="chart" role="img" aria-label="Line chart of the selected group's share of households food insecure by year. The values are in the table below."></div>
+    <p class="note">USDA publishes no standard errors for these yearly series, so no interval is drawn, and year-to-year moves in small groups are often within sampling error. USDA's 2024 report is the last: it ended the survey in 2025.</p>
+    <Source s={src} />
+    <details class="alt"><summary>Show the selected group as a table</summary><div class="tablewrap" id="t-table"></div></details>
+  </div>
+
+  {R && rsrc && <>
+  <div class="lede" style="margin-top:32px">
+    <span class="eyebrow">Race and ethnicity by state · Map the Meal Gap {R.edition}, {R.year} data · share of people</span>
+    <h2 class="h1like">State food insecurity rates by race and ethnicity</h2>
+    <p>Feeding America models food insecurity for Black, Hispanic and white non-Hispanic people in each state. In {blackHigher} of the {both.length} states with a published estimate for Black residents, that estimate is higher than the white non-Hispanic estimate. For Hispanic residents it is higher in {hispHigher} of {nHisp}. These are modeled point estimates with no published intervals, so a gap of a few points in one state may not be meaningful. States are listed alphabetically and are not ranked.</p>
+  </div>
+  <div class="card">
+    <div id="r-chart" class="chart tall" role="img" aria-label={`Each state's ${R.year} Map the Meal Gap food insecurity rate for Black, Hispanic and white non-Hispanic people, and for all people, listed alphabetically. The same values are in the table below.`}></div>
+    <div class="legend">
+      <span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="var(--accent)"/></svg>Black (any ethnicity)</span>
+      <span class="key"><svg width="12" height="12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" fill="var(--child)"/></svg>Hispanic (any race)</span>
+      <span class="key"><svg width="12" height="12" aria-hidden="true"><path d="M6 1.5 11 10.5H1Z" fill="var(--warn)"/></svg>White, non-Hispanic</span>
+      <span class="key"><svg width="12" height="12" aria-hidden="true"><path d="M6 1v10" stroke="var(--fg-2)" stroke-width="2"/></svg>All people</span>
+    </div>
+    <p class="note">The groups overlap: a Black Hispanic person is counted in both the Black and Hispanic rates. Feeding America rounds these rates to whole percentages and says many have wider confidence intervals than the overall rate because they rest on smaller samples. It leaves a rate blank where it does not release one ({R.blank.black} states for Black residents, {R.blank.hispanic} for Hispanic residents). Values are shown as published, including Hawaii's 3% for Black residents and the District of Columbia's 4% for white non-Hispanic residents. These rates are shares of people and are not comparable with USDA's rates above, which are shares of households grouped by the race of one household member.</p>
+    <Source s={rsrc} />
+    <details class="alt"><summary>Show all states as a table</summary><div class="tablewrap" style="max-height:420px"><table>
+      <caption class="sr">Map the Meal Gap {R.year} food insecurity rate by race and ethnicity, share of people, by state</caption>
+      <thead><tr><th scope="col">State</th><th scope="col">All people</th><th scope="col">Black</th><th scope="col">Hispanic</th><th scope="col">White, non-Hispanic</th></tr></thead>
+      <tbody>{abbrs.map((a) => <tr><th scope="row">{names[a]}</th><td>{R.overall?.[a] != null ? (R.overall[a] * 100).toFixed(1) + "%" : "–"}</td><td>{rp(R.rows[a][0])}</td><td>{rp(R.rows[a][1])}</td><td>{rp(R.rows[a][2])}</td></tr>)}</tbody>
+    </table></div></details>
+  </div>
+  </>}
+
+  <script type="application/json" id="d-g" set:html={JSON.stringify({ cats: U.categories, CAT, years: U.years, race: R, names, abbrs })}></script>
+</Base>
+
+<script>
+  import { chart, base, axis, css, onTheme, readJSON } from "../../lib/charts";
+  import { esc } from "../../lib/format";
+  const { cats, CAT, years, race, names, abbrs } = readJSON<any>("d-g");
+  const [y0, y1] = years;
+  let k = "fi";
+  const KL: Record<string, string> = { fi: "food insecure", vl: "with very low food security" };
+  const p1 = (v: number) => v.toFixed(1) + "%";
+  type Row = { label: string; head: boolean; r?: any };
+  const list: Row[] = cats.flatMap((c: any) => c.name === "All households" ? c.rows.map((r: any) => ({ label: r.label, head: false, r }))
+    : [{ label: CAT[c.name] ?? c.name, head: true }, ...c.rows.map((r: any) => ({ label: r.label, head: false, r }))]);
+  const ROW_H = 24;
+  const gEl = document.getElementById("g-chart")!;
+  gEl.style.height = list.length * (gEl.clientWidth < 600 ? 32 : ROW_H) + 50 + "px";
+
+  function renderGroups() {
+    document.getElementById("g-title")!.textContent = `Share of households ${KL[k]}, ${y0} and ${y1}`;
+    const acc = css("--accent"), old = css("--old"), fg = css("--fg"), mut = css("--muted");
+    const max = k === "fi" ? 45 : 20;
+    const narrow = gEl.clientWidth < 600;
+    chart("g-chart").setOption({
+      ...base(), grid: { left: narrow ? 128 : 190, right: narrow ? 16 : 120, top: 8, bottom: 30 },
+      tooltip: { ...base().tooltip, trigger: "item", formatter: (p: any) => {
+        const row = list[p.value[1]]; if (!row?.r) return "";
+        const v = row.r[k];
+        return `<b>${esc(row.label)}</b><br>${y0}: ${p1(v[0])} of households<br>${y1}: ${p1(v[1])}<br>Change ${v[2] > 0 ? "+" : ""}${v[2].toFixed(1)} pts, ${v[3] ? "statistically significant" : "not significant"} (USDA, 90%)`; } },
+      xAxis: { type: "value", min: 0, max, ...axis(), axisLabel: { color: mut, fontSize: 12, formatter: (v: number) => v + "%" } },
+      yAxis: { type: "category", inverse: true, data: list.map((l) => l.label), ...axis(), splitLine: { show: false },
+        axisLabel: { color: mut, fontSize: narrow ? 11 : 12, lineHeight: 13, width: narrow ? 120 : 178, overflow: narrow ? "break" : "truncate", formatter: (v: string, i: number) => (list[i].head ? `{h|${v}}` : v),
+          rich: { h: { color: fg, fontWeight: 600, fontSize: 12 } } } },
+      series: [
+        { type: "custom", silent: true, renderItem: (params: any, api: any) => {
+            const row = list[params.dataIndex]; if (!row.r) return null;
+            const a = api.coord([row.r[k][0], params.dataIndex]), b = api.coord([row.r[k][1], params.dataIndex]);
+            return { type: "line", shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: css("--border"), lineWidth: 3 } }; },
+          data: list.map((_, i) => [0, i]) },
+        { type: "scatter", name: String(y0), symbolSize: 9, itemStyle: { color: css("--surface"), borderColor: old, borderWidth: 1.5 },
+          data: list.flatMap((l, i) => (l.r ? [[l.r[k][0], i]] : [])) },
+        { type: "scatter", name: String(y1), symbolSize: 10, itemStyle: { color: acc },
+          data: list.flatMap((l, i) => (l.r ? [[l.r[k][1], i]] : [])),
+          label: { show: !narrow, position: "right", distance: 8, color: fg, fontSize: 11, fontWeight: 600,
+            formatter: (p: any) => { const v = list[p.value[1]].r[k]; return v[3] ? `${v[2] > 0 ? "+" : "−"}${Math.abs(v[2]).toFixed(1)} pts, significant` : ""; } } },
+      ],
+    });
+  }
+
+  const pick = document.getElementById("t-pick") as HTMLSelectElement;
+  const allRow = cats.find((c: any) => c.name === "All households").rows[0];
+  function renderTrend() {
+    const cat = cats.find((c: any) => c.rows.some((r: any) => r.label === pick.value));
+    const sel = cat.rows.find((r: any) => r.label === pick.value);
+    const idx = k === "fi" ? 1 : 2;
+    document.getElementById("t-title")!.textContent = `${sel.label}: share of households ${KL[k]}, 2001 to ${y1}`;
+    const mut = css("--muted"), gray = css("--nodata"), acc = css("--accent");
+    const line = (r: any, o: any) => ({ type: "line", name: r.label, symbol: "none", data: r.series.map((s: any) => [s[0], s[idx]]), ...o });
+    chart("t-chart").setOption({
+      ...base(), grid: { left: 44, right: 64, top: 20, bottom: 28 },
+      tooltip: { ...base().tooltip, valueFormatter: (v: number) => p1(v) + " of households" },
+      xAxis: { type: "value", min: 2001, max: y1, interval: 4, ...axis(), splitLine: { show: false }, axisLabel: { color: mut, fontSize: 12, formatter: (v: number) => String(v) } },
+      yAxis: { type: "value", min: 0, ...axis(), axisLabel: { color: mut, fontSize: 12, formatter: (v: number) => v + "%" } },
+      series: [
+        ...cat.rows.filter((r: any) => r !== sel).map((r: any) => line(r, { lineStyle: { width: 1.5, color: gray }, itemStyle: { color: gray }, z: 1 })),
+        line(allRow, { lineStyle: { width: 1.5, color: mut, type: "dashed" }, itemStyle: { color: mut }, z: 2,
+          endLabel: { show: true, color: mut, fontSize: 11, formatter: () => "All" } }),
+        line(sel, { symbol: "circle", symbolSize: 5, lineStyle: { width: 2.5, color: acc }, itemStyle: { color: acc }, z: 3,
+          endLabel: { show: true, color: css("--fg"), fontWeight: 600, formatter: (p: any) => p1(p.value[1]) } }),
+      ],
+    });
+    document.getElementById("t-table")!.innerHTML = `<table><caption class="sr">${esc(sel.label)}, share of households by year, USDA</caption><thead><tr><th scope="col">Year</th><th scope="col">Food insecure</th><th scope="col">Very low food security</th><th scope="col">All households, food insecure</th></tr></thead><tbody>${[...sel.series].reverse().map((s: any) => `<tr><th scope="row">${s[0]}</th><td>${p1(s[1])}</td><td>${p1(s[2])}</td><td>${p1(allRow.series.find((x: any) => x[0] === s[0])[1])}</td></tr>`).join("")}</tbody></table>`;
+  }
+
+  function renderRace() {
+    if (!race) return;
+    const el = document.getElementById("r-chart")!;
+    const narrow = el.clientWidth < 600;
+    el.style.height = abbrs.length * 22 + 50 + "px";
+    const mut = css("--muted");
+    const S = [
+      { i: 0, name: "Black (any ethnicity)", symbol: "circle", color: css("--accent"), size: 9 },
+      { i: 1, name: "Hispanic (any race)", symbol: "rect", color: css("--child"), size: 8 },
+      { i: 2, name: "White, non-Hispanic", symbol: "triangle", color: css("--warn"), size: 9 },
+    ];
+    chart("r-chart").setOption({
+      ...base(), grid: { left: narrow ? 104 : 140, right: 12, top: 8, bottom: 30 },
+      tooltip: { ...base().tooltip, trigger: "axis", axisPointer: { type: "shadow" }, formatter: (ps: any[]) => {
+        const a = abbrs[ps[0].dataIndex], r = race.rows[a], all = race.overall?.[a];
+        const f = (v: number | null) => (v == null ? "Not published" : Math.round(v * 100) + "%");
+        return `<b>${esc(names[a])}, ${race.year}</b><br>All people: ${all == null ? "–" : (all * 100).toFixed(1) + "%"}<br>Black: ${f(r[0])}<br>Hispanic: ${f(r[1])}<br>White, non-Hispanic: ${f(r[2])}`; } },
+      xAxis: { type: "value", min: 0, max: 0.45, interval: 0.1, ...axis(), axisLabel: { color: mut, fontSize: 12, formatter: (v: number) => Math.round(v * 100) + "%" } },
+      yAxis: { type: "category", inverse: true, data: abbrs.map((a: string) => names[a]), ...axis(), splitLine: { show: true, lineStyle: { color: css("--border-soft") } }, axisLabel: { color: mut, fontSize: 11 } },
+      series: [
+        { type: "scatter", name: "All people", symbol: "path://M0,0H1V10H0Z", symbolSize: [2, 14], itemStyle: { color: css("--fg-2") },
+          data: abbrs.map((a: string, i: number) => [race.overall?.[a] ?? null, i]) },
+        ...S.map((s) => ({ type: "scatter", name: s.name, symbol: s.symbol, symbolSize: s.size, itemStyle: { color: s.color, borderColor: css("--surface"), borderWidth: 1 },
+          data: abbrs.map((a: string, i: number) => [race.rows[a][s.i], i]).filter((d: any) => d[0] != null) })),
+      ],
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>(".seg button[data-k]").forEach((b) =>
+    b.addEventListener("click", () => {
+      k = b.dataset.k!;
+      b.parentElement!.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      renderGroups(); renderTrend();
+    }));
+  pick.addEventListener("change", renderTrend);
+  const all = () => { renderGroups(); renderTrend(); renderRace(); };
+  onTheme(all);
+  all();
+</script>

@@ -128,3 +128,5 @@ footer .wrap{display:grid;gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 tbody th{background:transparent;font-weight:550;color:var(--fg);position:static}
 .ledger td,.ledger th{vertical-align:top}
+th.grp{background:var(--surface-2);color:var(--fg);font-weight:600;text-align:left;white-space:normal}
+.h1like{font:600 clamp(24px,3.4vw,34px)/1.15 var(--serif);letter-spacing:-.01em;text-wrap:balance;margin:6px 0 10px}

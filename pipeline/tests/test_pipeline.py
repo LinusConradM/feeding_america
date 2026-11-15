@@ -46,3 +46,20 @@ def test_mmg_watch_ignores_bare_mentions_of_future_editions():
     mentions, released = released_editions(page)
     assert set(mentions) == {2026, 2027}
     assert released == {2026}
+
+
+@pytest.mark.skipif(latest(M, "usda-verylow") is None, reason="USDA files not fetched")
+def test_change_tables_read_ers_significance_flags():
+    years, fi = usda.change_table(latest(M, "usda-insecurity")["abs"])
+    _, vl = usda.change_table(latest(M, "usda-verylow")["abs"])
+    assert years == [2023, 2024] and len(fi) == len(vl) == 28
+    black = vl[vl.group == "Black, non-Hispanic"].iloc[0]
+    assert (black.y0, black.y1, black.sig) == (8.7, 10.5, True)
+    assert not fi.sig.any()
+
+
+@pytest.mark.skipif(latest(M, "usda-interactive") is None, reason="USDA files not fetched")
+def test_every_change_file_group_has_a_series():
+    _, fi = usda.change_table(latest(M, "usda-insecurity")["abs"])
+    ser = usda.subgroup_series(latest(M, "usda-interactive")["abs"])
+    assert set(fi.group.map(usda.series_name)) <= set(ser.group)
