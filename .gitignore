@@ -1,48 +1,29 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.egg-info/
-dist/
-build/
-.eggs/
-*.egg
-.env
-
-# Virtual environments
-venv/
-env/
 .venv/
+.pytest_cache/
 
-# IDE
+# Node / Astro
+node_modules/
+site/dist/
+site/.astro/
+
+# Map the Meal Gap raw files: licensed by request from Feeding America.
+# They live in the private data repo and are pulled at build time. Never commit them here.
+data/raw/mmg/
+data/private/
+MMG*.xlsx
+MMG*.zip
+*Data_To_Share*
+*Data_ToShare*
+
+# OS / editors
+.DS_Store
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Streamlit
-.streamlit/secrets.toml
-
-# Data artifacts
-*.pkl
-*.parquet
-
-# Misc
-README.html
-README_files/
 .env
-.env
-tests/testthat/_snaps/
 
-# Test caches (locally generated, not source of truth)
-.hypothesis/
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Claude Code local-only settings (per-user permissions, paths)
+# Claude Code local-only settings
 .claude/settings.local.json
