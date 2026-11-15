@@ -129,7 +129,10 @@ def fetch_acs(store):
             status, headers, body = http_get(url)
             if status != 200:
                 raise RuntimeError(f"HTTP {status} for {url}")
-            rows = json.loads(body)
+            try:
+                rows = json.loads(body)
+            except ValueError:
+                raise RuntimeError(f"non-JSON reply for {geo}: {body[:300]!r}")
             if len(rows) < 2:
                 raise RuntimeError(f"empty ACS response for {geo}")
             store.record(f"acs-{geo}", url, body, headers, filename=f"acs5_{vintage}_{geo}.json", meta=info)

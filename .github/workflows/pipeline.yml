@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Pull Map the Meal Gap files from the private data repo
         if: env.MMG_TOKEN != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ env.MMG_DATA_REPO }}
           token: ${{ secrets.MMG_DATA_TOKEN }}
@@ -67,7 +67,7 @@ jobs:
             gh issue create --title "$t" --body "Feeding America's site mentions Map the Meal Gap ${{ steps.fetch.outputs.edition }}, newer than the newest file in the private data repo. Request the county file through Feeding America's form, then add it to the data repo. The pipeline will validate and publish it on the next run."
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: hashFiles('site/package-lock.json') != ''
         with:
           node-version: "22"
