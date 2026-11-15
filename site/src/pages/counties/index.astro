@@ -1,0 +1,135 @@
+---
+import Base from "../../layouts/Base.astro";
+import Source from "../../components/Source.astro";
+import { counties, mmgStates, mmgYearSource } from "../../lib/data";
+const C = counties as any, M = mmgStates as any;
+const year = C.county_year;
+const src = mmgYearSource(year);
+const names: Record<string, string> = M.names;
+const abbrs = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b]));
+const stateRates = Object.fromEntries(Object.entries<any>(M.series).map(([a, s]) => [a, s.find((r: any) => r.y === year)?.fi ?? null]));
+const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ");
+---
+<Base title="Counties" page="counties" description={`Map the Meal Gap county food insecurity, ${year} data, with cost per meal and annual meal gap.`}>
+  <div class="lede">
+    <span class="eyebrow">Counties · Map the Meal Gap {year + 2}, {year} data · share of people</span>
+    <h1>Food insecurity by county</h1>
+    <p>Tap a county or search for one. These are modeled estimates of the share of people who were food insecure. Small counties are especially uncertain, and Feeding America's county file publishes no confidence intervals, so neighbors with similar shades are often not meaningfully different.</p>
+  </div>
+  <div class="pickers">
+    <label class="fl" for="ct-search">Find a county<input type="search" id="ct-search" list="ct-list" placeholder="Type a county name" autocomplete="off" /></label>
+    <label class="fl" for="ct-state">Zoom to state<select id="ct-state"><option value="">Whole country</option>{abbrs.map((a) => <option value={a}>{names[a]}</option>)}</select></label>
+  </div>
+  <datalist id="ct-list"></datalist>
+  <div class="grid2">
+    <div class="card map">
+      <div id="map" role="img" aria-label={`County map shaded by share of people food insecure, ${year}. The table below lists every county in the selected state.`}></div>
+      <div class="legend" id="map-legend"></div>
+      <p class="note">No data for {missing}: Feeding America did not publish an estimate. Connecticut figures use its planning regions, which replaced counties in Census data from 2022.</p>
+      <Source s={src} />
+    </div>
+    <div class="card panel" id="ct-panel" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <h2 id="ct-tbl-title">Counties in this state</h2>
+    <p class="note">The text alternative to the map: every county in the state, sorted by food insecurity rate. Select a row to show it on the map.</p>
+    <div class="tablewrap" style="max-height:420px" id="ct-table"><noscript>This table needs JavaScript. The county data are listed on the Methods page with their source.</noscript></div>
+  </div>
+  <script type="application/json" id="d-ct" set:html={JSON.stringify({ C: C.counties, names, stateRates, year, src, base: import.meta.env.BASE_URL })}></script>
+</Base>
+
+<script>
+  import { geoPath, geoIdentity } from "d3-geo";
+  import { feature, mesh } from "topojson-client";
+  import { css, readJSON, onTheme } from "../../lib/charts";
+  import { pct, num, usd, bigUsd, esc } from "../../lib/format";
+  const { C, names, stateRates, year, src, base } = readJSON<any>("d-ct");
+  const RUCC: Record<number, string> = { 1: "Metro, 1 million or more", 2: "Metro, 250,000 to 1 million", 3: "Metro, under 250,000", 4: "Nonmetro, urban pop. 20,000+, next to metro", 5: "Nonmetro, urban pop. 20,000+, not next to metro", 6: "Nonmetro, urban pop. 5,000 to 19,999, next to metro", 7: "Nonmetro, urban pop. 5,000 to 19,999, not next to metro", 8: "Nonmetro, urban pop. under 5,000, next to metro", 9: "Nonmetro, urban pop. under 5,000, not next to metro" };
+  const BREAKS = [0.1, 0.125, 0.15, 0.175, 0.2];
+  const LABELS = ["Under 10%", "10 to 12.4%", "12.5 to 14.9%", "15 to 17.4%", "17.5 to 19.9%", "20% or more"];
+  const binOf = (v: number | null) => (v == null ? -1 : BREAKS.filter((b) => v >= b).length);
+  const NS = "http://www.w3.org/2000/svg";
+  let cur = "28049", W = 975, H = 610;
+  const svg = document.createElementNS(NS, "svg");
+  document.getElementById("map")!.append(svg);
+  let paths: SVGPathElement[] = [], pathFn: any, stateFeat: any[] = [];
+
+  fetch(base + "geo/us.json").then((r) => r.json()).then((topo) => {
+    const cf = (feature(topo, topo.objects.counties) as any).features;
+    stateFeat = (feature(topo, topo.objects.states) as any).features;
+    const proj = geoIdentity().reflectY(true).fitSize([W, H], feature(topo, topo.objects.states) as any);
+    pathFn = geoPath(proj);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const gC = document.createElementNS(NS, "g"), gS = document.createElementNS(NS, "path");
+    for (const f of cf) {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", pathFn(f)); p.setAttribute("class", "c"); p.dataset.f = f.properties.id;
+      const r = C[f.properties.id];
+      const t = document.createElementNS(NS, "title");
+      t.textContent = r ? `${r[0]}, ${r[1]}: ${pct(r[2])} of people` : "No estimate published";
+      p.append(t);
+      p.addEventListener("click", () => select(f.properties.id));
+      gC.append(p); paths.push(p);
+    }
+    gS.setAttribute("class", "s");
+    gS.setAttribute("d", pathFn(mesh(topo, topo.objects.states, (a: any, b: any) => a !== b)));
+    svg.append(gC, gS);
+    paint(); select(cur);
+  });
+
+  function paint() {
+    const cols = ["--q1", "--q2", "--q3", "--q4", "--q5", "--q6"].map(css), nd = css("--nodata");
+    for (const p of paths) {
+      const r = C[p.dataset.f!]; const b = r ? binOf(r[2]) : -1;
+      p.setAttribute("fill", b < 0 ? nd : cols[b]);
+      p.classList.toggle("sel", p.dataset.f === cur);
+      if (p.dataset.f === cur) p.parentNode!.append(p);
+    }
+    document.getElementById("map-legend")!.innerHTML = LABELS.map((l, i) => `<span class="key"><span class="sw" style="background:${cols[i]}"></span>${l}</span>`).join("") + `<span class="key"><span class="sw" style="background:${nd}"></span>No estimate</span>`;
+  }
+  function zoomTo(abbr: string) {
+    if (!abbr || !pathFn) { svg.setAttribute("viewBox", `0 0 ${W} ${H}`); return; }
+    const fips = Object.entries<any>(C).find(([, r]) => r[1] === abbr)?.[0].slice(0, 2);
+    const sf = stateFeat.find((f) => f.properties.id === fips); if (!sf) return;
+    const [[x0, y0], [x1, y1]] = pathFn.bounds(sf); const pad = Math.max(x1 - x0, y1 - y0) * 0.06;
+    svg.setAttribute("viewBox", `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`);
+  }
+  function fig(k: string, v: string, unit: string, ci: string) {
+    return `<div class="fig"><span class="k">${k}</span><span class="v">${v}</span>${unit ? `<span class="unit">${unit}</span>` : ""}<span class="ci">${ci}</span></div>`;
+  }
+  function select(f: string) {
+    if (!C[f]) return;
+    cur = f; const r = C[f], st = r[1];
+    if (pathFn) paint();
+    const sr = stateRates[st], diff = r[2] == null || sr == null ? null : r[2] - sr;
+    const cmp = diff == null ? "" : `${Math.abs(diff) < 0.005 ? "About the same as" : (diff > 0 ? (diff * 100).toFixed(1) + " points above" : (-diff * 100).toFixed(1) + " points below")} the ${esc(names[st])} rate of ${pct(sr)} of people. Both are point estimates with no published interval, so a gap of a few points may not be meaningful.`;
+    document.getElementById("ct-panel")!.innerHTML = `
+      <div class="t" style="display:grid;gap:6px"><h3>County, ${year}</h3><h2>${esc(r[0])}, ${esc(names[st] || st)}</h2>${r[8] ? `<span class="rucc">RUCC ${r[8]}: ${RUCC[r[8]]}</span>` : ""}</div>
+      <div class="figs">
+        ${fig("Food insecurity rate", r[2] == null ? "Not published" : pct(r[2]), "of people", r[3] == null ? "" : num(r[3]) + " people")}
+        ${fig("Child food insecurity rate", r[4] == null ? "Not published" : pct(r[4]), "of children", r[5] == null ? "" : num(r[5]) + " children")}
+        ${fig("Average cost per meal", usd(r[6]), "", "What food-secure people spend per meal, local prices")}
+        ${fig("Annual meal gap", bigUsd(r[7]), "", "Extra food budget food-insecure people would need in a year")}
+      </div>
+      <p class="note">No confidence interval: the county file does not include one.</p>
+      <div class="cmp">${cmp}</div>
+      <details class="src"><summary>${esc(src.short)}</summary><div class="more"><span><b>${esc(src.title)}</b></span><span>${esc(src.when)}</span><span>${esc(src.note)}</span><a href="${src.url}" target="_blank" rel="noopener">Open source (opens in a new tab)</a></div></details>`;
+    table(st);
+  }
+  function table(st: string) {
+    const rows = Object.entries<any>(C).filter(([, r]) => r[1] === st).sort((a, b) => (b[1][2] ?? -1) - (a[1][2] ?? -1));
+    document.getElementById("ct-tbl-title")!.textContent = `Counties in ${names[st]}, ${year}`;
+    document.getElementById("ct-table")!.innerHTML = `<table><caption class="sr">Counties in ${esc(names[st])}, Map the Meal Gap ${year}</caption><thead><tr><th scope="col">County</th><th scope="col">% of people</th><th scope="col">People</th><th scope="col">% of children</th><th scope="col">Cost per meal</th><th scope="col">Annual meal gap</th></tr></thead><tbody>${rows.map(([f, r]) => `<tr class="${f === cur ? "sel" : ""}"><th scope="row"><button type="button" class="linkish" data-f="${f}">${esc(r[0])}</button></th><td>${pct(r[2])}</td><td>${num(r[3])}</td><td>${pct(r[4])}</td><td>${usd(r[6])}</td><td>${r[7] == null ? "–" : "$" + num(r[7])}</td></tr>`).join("")}</tbody></table>`;
+    document.querySelectorAll<HTMLButtonElement>("#ct-table button[data-f]").forEach((b) => b.addEventListener("click", () => { zoomTo(st); select(b.dataset.f!); }));
+  }
+  const idx: Record<string, string> = {};
+  document.getElementById("ct-list")!.innerHTML = Object.entries<any>(C).map(([f, r]) => { const k = `${r[0]}, ${r[1]}`; idx[k.toLowerCase()] = f; return `<option value="${esc(k)}">`; }).join("");
+  const sel = document.getElementById("ct-state") as HTMLSelectElement;
+  document.getElementById("ct-search")!.addEventListener("change", (e) => {
+    const f = idx[(e.target as HTMLInputElement).value.trim().toLowerCase()];
+    if (f) { zoomTo(C[f][1]); sel.value = C[f][1]; select(f); }
+  });
+  sel.addEventListener("change", () => { zoomTo(sel.value); if (sel.value) table(sel.value); });
+  onTheme(paint);
+  select(cur);
+</script>

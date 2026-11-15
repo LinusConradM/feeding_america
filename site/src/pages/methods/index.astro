@@ -1,0 +1,103 @@
+---
+import Base from "../../layouts/Base.astro";
+import { meta, snap, counties, national } from "../../lib/data";
+import { date } from "../../lib/format";
+const nl = (national as any).rows.at(-1);
+const m = meta as any, S = snap as any, C = counties as any;
+const REPO = "https://github.com/LinusConradM/feeding_america";
+const f = m.files;
+const short = (sha?: string) => (sha ? sha.slice(0, 12) : "–");
+const checkOf = (id: string) => m.checks?.[id];
+const checked = (id: string) => { const c = checkOf(id); return c ? `${date(c.checked_at)}${c.status === "ok" ? "" : " (check failed)"}` : "Not yet checked"; };
+const usda = m.sources.usda;
+const eds = [...m.mmg_editions].reverse();
+const v2 = m.mmg_editions.find((e: any) => e.data_years.length > 1);
+const ledger = [
+  { name: usda.title, used: "National trend; state comparison with margins of error", type: "Survey, with 90% margins of error for states", cadence: "Was annual. Final year is 2024: USDA ended the survey in 2025.", release: `2024 data, report dated ${date(usda.release_date)}`, files: [["ERS chart data file", f["usda-interactive"]], ["ERS state data file", f["usda-mapdata"]], ["Change 2023 to 2024", f["usda-insecurity"]], ["Report PDF (Table 1A)", f["usda-pdf"]]], check: "usda-interactive" },
+  { name: "Feeding America, Map the Meal Gap", used: "State and county rates of people, cost per meal, meal gap", type: "Modeled; no intervals in the data files", cadence: "Annual. Data by request form; this site watches for new editions daily.", release: `MMG ${C.county_edition} (${C.county_year} data)` + (m.mmg_editions.at(-1)?.release_date ? `, file dated ${date(m.mmg_editions.at(-1).release_date)}` : ", release date not published"), files: [], check: "mmg-watch" },
+  { name: m.sources.acs.title, used: "SNAP participation and poverty rate for the SNAP comparison", type: "Survey, with 90% margins of error", cadence: "Annual, usually December", release: S.status === "ok" ? `${S.period}` + (S.release_date ? `, released ${date(S.release_date)}` : ", release date not recorded") : "Not yet fetched", files: S.status === "ok" ? [["County table", S.file]] : [], check: "acs-county" },
+  { name: m.sources.geo.title, used: "County map", type: "Geography", cadence: "Annual", release: m.files.geo_year ? `${m.files.geo_year} boundaries` : "Not yet fetched", files: [["Counties", f["geo-county"]], ["States", f["geo-state"]]], check: "geo-county" },
+];
+const val = m.validation as any[];
+const nFail = val.filter((c) => !c.ok && c.level === "error").length;
+---
+<Base title="Methods & sources" page="methods" description="Where every number on the US Food Insecurity Atlas comes from, how often it updates, and what it cannot tell you.">
+  <div class="lede">
+    <span class="eyebrow">Methods &amp; sources</span>
+    <h1>Where every number comes from</h1>
+    <p>Each figure on this site links to the dataset and release behind it. This page explains the sources, how often they change, which files were used in this build, and what the data cannot tell you.</p>
+  </div>
+
+  <div class="card method">
+    <h2>Two kinds of numbers, two kinds of rates</h2>
+    <p><b>Survey estimates</b> come from asking a sample of households and scaling up. USDA's national and state food security figures and the Census Bureau's SNAP figures work this way, and carry a margin of error because a different sample would give a slightly different answer.</p>
+    <p><b>Modeled estimates</b> fill in places too small to survey. Map the Meal Gap takes the relationship between food insecurity and local conditions (unemployment, poverty, median income, homeownership, disability, and race and ethnicity) measured in the survey, then applies it to each county's data. A county's rate is a prediction, not a count.</p>
+    <p><b>Households or people.</b> USDA's headline measures households: {nl.hh_pct.toFixed(1)}% of US households were food insecure in {nl.year}. Its people figure counts everyone living in those households ({nl.ppl_pct.toFixed(1)}% of people). Map the Meal Gap reports people. Every rate on this site says which one it is, and the two are never compared as if they measured the same thing.</p>
+    <p>Because Map the Meal Gap is built from poverty and unemployment, this site does not present analyses that "explain" county food insecurity with those same inputs. It compares food insecurity with data the model does not use: SNAP participation.</p>
+  </div>
+
+  <div class="card method">
+    <h2>Uncertainty shown on this site</h2>
+    <p><b>USDA states:</b> 90% margins of error for each state's 2022 to 2024 average, and USDA's own test of whether each state differs from the US.</p>
+    <p><b>USDA national:</b> USDA publishes no standard errors for the national yearly table, so the national chart has no interval. The 2023 to 2024 change is described with USDA's own significance test.</p>
+    <p><b>Map the Meal Gap counties and states:</b> the {C.county_year} county file (MMG {C.county_edition}) does <b>not</b> include confidence intervals, and neither does the state sheet. Feeding America's technical materials describe the uncertainty only in summary form, so this site cannot show an interval for any single county or state, and it does not rank counties by rate.</p>
+    <p><b>ACS SNAP:</b> each county's 90% margin of error, from the Census Bureau, carried into the share with the Census formula for a proportion.</p>
+  </div>
+
+  <div class="card">
+    <h2>Sources and update schedule</h2>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th scope="col">Dataset</th><th scope="col">Used for</th><th scope="col">Type</th><th scope="col">Updates</th><th scope="col">Release in use</th><th scope="col">Last checked</th></tr></thead>
+      <tbody>{ledger.map((l) => <tr><th scope="row" style="white-space:normal;min-width:200px">{l.name}</th><td>{l.used}</td><td>{l.type}</td><td>{l.cadence}</td><td>{l.release}</td><td>{checked(l.check)}</td></tr>)}</tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Map the Meal Gap editions</h2>
+    <p class="note">Each data year comes from a different edition. Feeding America's older data files do not state a release date, and this site does not estimate one. The 2019 to 2023 values come from Feeding America's combined file for those years{v2 && `, ${v2.label}, dated ${date(v2.release_date)}`}. Each of those years was first published in its own edition (MMG 2021 to MMG 2025), so they are separate estimates, not one consistent series. That file corrects the 2023 county estimates first released in May 2025, which had used 2022 unemployment rates.</p>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th scope="col">File</th><th scope="col">Data years</th><th scope="col">Release date</th><th scope="col">SHA-256 (first 12)</th></tr></thead>
+      <tbody>{eds.map((e: any) => <tr><th scope="row">{e.label}</th><td>{e.data_years.length > 1 ? `${e.data_years[0]} to ${e.data_years.at(-1)}` : e.data_years[0]}</td><td>{e.release_date ? date(e.release_date) : "Release date not published"}</td><td><code>{short(e.sha256)}</code></td></tr>)}</tbody>
+    </table></div>
+    <p class="note">{m.sources.mmg.license_note}</p>
+  </div>
+
+  <div class="card">
+    <h2>Raw files behind this build</h2>
+    <p class="note">The pipeline stores every public source file unchanged before transforming it, and records where and when it was downloaded. Map the Meal Gap files are kept in a private repository.</p>
+    <div class="tablewrap"><table class="ledger">
+      <thead><tr><th scope="col">File</th><th scope="col">Retrieved</th><th scope="col">Server date</th><th scope="col">SHA-256 (first 12)</th></tr></thead>
+      <tbody>{ledger.flatMap((l) => l.files.filter(([, x]: any) => x).map(([label, x]: any) => <tr><th scope="row"><a href={`${REPO}/blob/main/${x.path}`}>{label}</a></th><td>{date(x.retrieved_at)}</td><td>{x.last_modified ?? "Not sent"}</td><td><code>{short(x.sha256)}</code></td></tr>))}</tbody>
+    </table></div>
+  </div>
+
+  <div class="card method" id="derived">
+    <h2>Figures calculated on this site</h2>
+    <p><b>SNAP share and its margin of error.</b> Households receiving SNAP divided by all households (ACS B22003). Margin: √(MOE<sub>num</sub>² − p²·MOE<sub>den</sub>²) ÷ den, using the ratio formula when the term under the root is negative (ACS General Handbook, chapter 8).</p>
+    <p><b>Food insecurity groups.</b> Counties with both a Map the Meal Gap rate and ACS data are split into ten equal-sized groups by food insecurity rate. Each group's median SNAP share is its "expected" value.</p>
+    <p><b>Lower or higher SNAP use than expected.</b> A county's gap is its SNAP share minus its group median. It is labeled only when the gap is larger than the county's own 90% margin of error. This ignores the uncertainty in the modeled food insecurity rate, which Feeding America does not publish.</p>
+    <p><b>Correlations.</b> Pearson correlation between county food insecurity rate and SNAP share, and the partial correlation holding the ACS poverty rate (B17001) constant.</p>
+  </div>
+
+  <div class="card">
+    <h2>Validation in this build</h2>
+    <p class="note">{val.length} checks ran on {date(m.built_at)}; {nFail === 0 ? "all required checks passed." : `${nFail} failed.`} The site is only published when every required check passes.</p>
+    <details class="alt"><summary>Show every check</summary><div class="tablewrap"><table class="ledger">
+      <thead><tr><th scope="col">Area</th><th scope="col">Check</th><th scope="col">Result</th><th scope="col">Detail</th></tr></thead>
+      <tbody>{val.map((c) => <tr><th scope="row">{c.area}</th><td>{c.check}</td><td class={c.ok ? "pass" : c.level === "warn" ? "warnc" : "fail"}>{c.ok ? "Pass" : c.level === "warn" ? "Warning" : "Fail"}</td><td>{c.detail}</td></tr>)}</tbody>
+    </table></div></details>
+  </div>
+
+  <div class="card method">
+    <h2>What the data cannot tell you</h2>
+    <p><b>Change over time is fragile.</b> Each Map the Meal Gap year comes from a different edition, and Feeding America advises against comparing across editions. Its cost per meal and meal gap figures are not comparable before 2023.</p>
+    <p><b>Small counties are uncertain.</b> With no published intervals, county rankings are not meaningful, so the site does not rank counties by rate.</p>
+    <p><b>The national survey has ended.</b> USDA stopped the Current Population Survey Food Security Supplement in 2025. Map the Meal Gap is calibrated to that survey, so its future method, and comparability with past editions, may change.</p>
+    <p><b>Geography changes.</b> Connecticut replaced its counties with planning regions in Census data from 2022, so its county figures cannot be compared before and after.</p>
+  </div>
+
+  <div class="card method">
+    <h2>How the data stays current</h2>
+    <p>A GitHub Actions job runs every day. It downloads each public source, stores any file whose contents changed, rebuilds the tables, and runs the checks above. The site is rebuilt only when every required check passes; otherwise it keeps the last good version and opens an issue. Map the Meal Gap data must be requested from Feeding America through a form, so when the job sees a newer edition on Feeding America's site it opens an issue and a person requests the file. Code: <a href={REPO}>{REPO.replace("https://", "")}</a>.</p>
+  </div>
+</Base>

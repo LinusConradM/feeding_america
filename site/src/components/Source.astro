@@ -1,0 +1,15 @@
+---
+import type { Src } from "../lib/data";
+interface Props { s: Src }
+const { s } = Astro.props;
+const external = !s.url.startsWith("/");
+---
+<details class="src">
+  <summary>{s.short}</summary>
+  <div class="more">
+    <span><b>{s.title}</b></span>
+    <span>{s.when}</span>
+    <span>{s.note}</span>
+    <a href={s.url} {...(external ? { target: "_blank", rel: "noopener" } : {})}>Open source{external ? " (opens in a new tab)" : ""}</a>
+  </div>
+</details>

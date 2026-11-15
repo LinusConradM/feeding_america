@@ -1,0 +1,95 @@
+---
+import Base from "../layouts/Base.astro";
+import Fig from "../components/Fig.astro";
+import Source from "../components/Source.astro";
+import { national, usdaSrc, mmgYearSource, counties } from "../lib/data";
+import { millions, num, pts } from "../lib/format";
+const n = national as any;
+const rows = n.rows as any[];
+const last = rows[rows.length - 1];
+const ch = n.change;
+const t1a = usdaSrc("Table 1A and the ERS chart data file. Households: share of all US households. People: everyone living in a food-insecure household, as a share of all people.");
+const tch = usdaSrc("ERS chart data file, children by food security status of household.");
+const changeText = ch.significant
+  ? `a statistically significant change of ${ch.change_pts > 0 ? "+" : ""}${ch.change_pts} points from ${ch.from}`
+  : `not statistically different from ${ch.from} (${ch.change_pts > 0 ? "+" : ""}${ch.change_pts} points; USDA test at 90% confidence)`;
+---
+<Base title="National" page="national" description="US household food insecurity, 2001 to 2024, from USDA's final Household Food Security report.">
+  <div class="lede">
+    <span class="eyebrow">National picture · USDA survey estimates</span>
+    <h1>{pts(last.hh_pct)} of US households were food insecure in {last.year}</h1>
+    <p>That is {millions(last.hh_k)} million households. {millions(last.ppl_k)} million people lived in those households, {pts(last.ppl_pct)} of all people, including {millions(last.ch_k)} million children ({pts(last.ch_pct)} of children). The household rate was {changeText}. {last.year} is the last year USDA will report: it ended the survey behind these figures in 2025.</p>
+  </div>
+  <div class="figs">
+    <Fig k={`Households food insecure, ${last.year}`} v={last.hh_pct.toFixed(1)} small="%" unit="of households" ci={`${millions(last.hh_k)} million of ${millions(last.hh_total_k)} million households`} src={t1a} />
+    <Fig k={`People in food-insecure households, ${last.year}`} v={millions(last.ppl_k)} small=" million" unit="people" ci={`${pts(last.ppl_pct)} of people`} src={t1a} />
+    <Fig k={`Children in food-insecure households, ${last.year}`} v={millions(last.ch_k)} small=" million" unit="children" ci={`${pts(last.ch_pct)} of children`} src={tch} />
+    <Fig k="2025 and later" v="None" unit="no estimate" ci="USDA ended the Food Security Supplement, so no 2025 figure will be published." />
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="t"><h2 id="nat-title">Share of households that were food insecure</h2><span class="note">2001 to {last.year}, one value per year</span></div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Who is counted"><button data-g="hh" aria-pressed="true">Households</button><button data-g="ppl" aria-pressed="false">People</button><button data-g="ch" aria-pressed="false">Children</button></div>
+        <div class="seg" role="group" aria-label="Measure"><button data-m="pct" aria-pressed="true">Share</button><button data-m="k" aria-pressed="false">Number</button></div>
+      </div>
+    </div>
+    <div id="nat-chart" class="chart" role="img" aria-label="Line chart of the national food insecurity series. The same values are in the table below."></div>
+    <p class="note">Households and people are two views of the same survey: a person is counted when the household they live in is food insecure. USDA publishes no standard errors for this national table, so no interval is drawn. People and children are counts of everyone living in a food-insecure household, not of people who were each individually food insecure.</p>
+    <Source s={t1a} />
+    <details class="alt"><summary>Show the data as a table</summary>
+      <div class="tablewrap"><table>
+        <caption class="sr">National food insecurity by year, USDA ERR-358</caption>
+        <thead><tr><th scope="col">Year</th><th scope="col">% of households</th><th scope="col">Households (000s)</th><th scope="col">% of people</th><th scope="col">People (000s)</th><th scope="col">% of children</th><th scope="col">Children (000s)</th></tr></thead>
+        <tbody>{[...rows].reverse().map((r) => <tr><th scope="row">{r.year}</th><td>{pts(r.hh_pct)}</td><td>{num(r.hh_k)}</td><td>{pts(r.ppl_pct)}</td><td>{num(r.ppl_k)}</td><td>{pts(r.ch_pct)}</td><td>{num(r.ch_k)}</td></tr>)}</tbody>
+      </table></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Why the national figure comes from USDA</h2>
+    <p class="note">USDA's figures are direct survey estimates. Map the Meal Gap, which this site uses for states and counties, is a model calibrated to the same survey. It reports people, not households, and its state figures are built up from congressional districts, so its totals differ from USDA's {millions(last.ppl_k)} million. This site does not add Map the Meal Gap figures up to a national total, and it labels every rate as a share of households or a share of people.</p>
+    <Source s={mmgYearSource((counties as any).county_year)} />
+  </div>
+  <script type="application/json" id="d-nat" set:html={JSON.stringify(rows)}></script>
+</Base>
+
+<script>
+  import { chart, base, axis, css, onTheme, readJSON } from "../lib/charts";
+  const rows = readJSON<any[]>("d-nat");
+  let g = "hh", m = "pct";
+  const LABEL: Record<string, string> = { hh: "households", ppl: "people", ch: "children" };
+  function render() {
+    const isPct = m === "pct";
+    const key = `${g}_${m}`;
+    document.getElementById("nat-title")!.textContent =
+      (isPct ? "Share of " : "Number of ") + (g === "hh" ? "households that were food insecure" : `${LABEL[g]} living in food-insecure households`);
+    const col = g === "ch" ? css("--child") : css("--accent");
+    const data = rows.filter((r) => r.year >= 2001 && r[key] != null).map((r) => [r.year, isPct ? r[key] : r[key] / 1000]);
+    const fmt = (v: number) => (isPct ? v.toFixed(1) + "% of " + LABEL[g] : v.toFixed(1) + " million " + LABEL[g]);
+    chart("nat-chart").setOption({
+      ...base(),
+      grid: { left: 44, right: 56, top: 24, bottom: 28 },
+      xAxis: { type: "value", min: 2001, max: rows[rows.length - 1].year, interval: 4, ...axis(), splitLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => String(v) } },
+      yAxis: { type: "value", min: 0, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => (isPct ? v + "%" : v + "M") } },
+      tooltip: { ...base().tooltip, valueFormatter: fmt },
+      series: [{
+        type: "line", data, symbol: "circle", symbolSize: 5, lineStyle: { width: 2.5, color: col }, itemStyle: { color: col }, areaStyle: { color: col, opacity: 0.07 },
+        markLine: { symbol: "none", silent: true, label: { color: css("--muted"), fontSize: 11, formatter: (p: any) => p.name, position: "insideEndTop" }, lineStyle: { color: css("--border"), type: "dashed" },
+          data: [{ xAxis: 2008, name: "2008 recession" }] },
+        endLabel: { show: true, color: css("--fg"), fontWeight: 600, formatter: (p: any) => (isPct ? p.value[1].toFixed(1) + "%" : p.value[1].toFixed(1) + "M") },
+      }],
+    });
+  }
+  document.querySelectorAll<HTMLButtonElement>(".seg button").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.dataset.g) g = b.dataset.g;
+      if (b.dataset.m) m = b.dataset.m;
+      b.parentElement!.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    }),
+  );
+  onTheme(render);
+  render();
+</script>

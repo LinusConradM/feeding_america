@@ -1,0 +1,114 @@
+---
+import Base from "../../layouts/Base.astro";
+import Source from "../../components/Source.astro";
+import Fig from "../../components/Fig.astro";
+import { snap, mmgStates, mmgYearSource, derivedSrc, meta, counties } from "../../lib/data";
+import { pct, date } from "../../lib/format";
+const S = snap as any, M = mmgStates as any;
+const m = meta as any;
+const names: Record<string, string> = M.names;
+const abbrs = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b]));
+const ok = S.status === "ok";
+const acsSrc = ok ? {
+  short: `Census ACS ${S.period} 5-year, B22003` + (S.release_date ? ` · ${date(S.release_date)}` : ""),
+  title: `US Census Bureau, American Community Survey ${S.period} 5-year estimates, table B22003`,
+  when: S.release_date ? `Released ${date(S.release_date)}` : "Release date not recorded by this site",
+  note: "Households that reported receiving SNAP in the past 12 months, divided by all households. 90% margins of error from the Census Bureau; the margin for each share uses the Census formula for a proportion.",
+  url: m.sources.acs.url.replace("{vintage}", S.vintage),
+} : null;
+const mmgSrc = mmgYearSource(ok ? S.mmg_year : (M.series.AL.at(-1).y));
+const der = ok ? derivedSrc(`Map the Meal Gap ${S.mmg_year + 2} county rates and ACS ${S.period}`) : null;
+const ur = m.sources.snap_underreporting;
+const cmini = Object.fromEntries(Object.entries<any>((counties as any).counties).map(([f, r]) => [f, [r[0], r[1], r[2]]]));
+---
+<Base title="SNAP reach" page="snap" description="County food insecurity compared with SNAP participation, a measure that is not an input to the Map the Meal Gap model.">
+  <div class="lede">
+    <span class="eyebrow">Analysis · food insecurity against SNAP participation</span>
+    <h1>Where SNAP use is lower than expected</h1>
+    <p>SNAP participation is not an input to the Map the Meal Gap model, so comparing the two says something the model does not already contain. Counties are grouped into tenths by their modeled food insecurity rate. Within each group, the share of households receiving SNAP varies widely. A county is described as having lower SNAP use than expected only when it sits below its group's median by more than its own survey margin of error.</p>
+  </div>
+
+  {!ok && <p class="notice" role="status"><b>Not available yet.</b> {S.reason} Every other page is unaffected.</p>}
+
+  {ok && <>
+    <div class="figs">
+      <Fig k="Correlation, county food insecurity vs SNAP share" v={S.r.toFixed(2)} ci={`Pearson r, ${S.n.toLocaleString("en-US")} counties`} src={der} />
+      <Fig k="Same, holding poverty constant" v={S.partial_r.toFixed(2)} ci="Partial r after removing the ACS poverty rate from both" src={der} />
+      {S.us && <Fig k="US households receiving SNAP" v={pct(S.us.share)} unit="of households" ci={`90% margin of error ±${(S.us.moe * 100).toFixed(1)} points`} src={acsSrc} />}
+    </div>
+    <p class="finding">Most of the link between SNAP use and food insecurity runs through poverty: holding poverty constant, the correlation falls from {S.r.toFixed(2)} to {S.partial_r.toFixed(2)}. The useful signal is the spread within each group.</p>
+
+    <div class="card">
+      <div class="card-head"><div class="t"><h2>SNAP participation within each food insecurity group</h2><span class="note">Dot: median county. Bar: middle half of counties (25th to 75th percentile). Share of households.</span></div></div>
+      <div id="snap-chart" class="chart tall" style="height:400px" role="img" aria-label="For each tenth of counties by food insecurity rate, the median and middle half of SNAP household shares. Values are in the table below."></div>
+      <div class="legend"><span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="var(--fg-2)"/></svg>Median county</span><span class="key"><svg width="14" height="12" aria-hidden="true"><path d="M7 1 13 6 7 11 1 6Z" fill="var(--accent)"/></svg><span id="snap-sel-key">Selected county</span></span></div>
+      <Source s={der} />
+      <details class="alt"><summary>Show the groups as a table</summary><div class="tablewrap"><table>
+        <thead><tr><th scope="col">Food insecurity (% of people)</th><th scope="col">Counties</th><th scope="col">SNAP median</th><th scope="col">25th percentile</th><th scope="col">75th percentile</th></tr></thead>
+        <tbody>{S.deciles.map((d: any) => <tr><th scope="row">{pct(d.lo)} to {pct(d.hi)}</th><td>{d.n}</td><td>{pct(d.med)}</td><td>{pct(d.q1)}</td><td>{pct(d.q3)}</td></tr>)}</tbody>
+      </table></div></details>
+    </div>
+
+    <div class="pickers"><label class="fl" for="snap-state">State<select id="snap-state">{abbrs.map((a) => <option value={a} selected={a === "MS"}>{names[a]}</option>)}</select></label></div>
+    <div class="card">
+      <h2 id="snap-tbl-title">Counties by SNAP use relative to similar counties</h2>
+      <p class="note">Gap = county SNAP share minus the median of counties in the same food insecurity group. "Lower than expected" or "higher than expected" appears only where the gap is larger than the county's ACS margin of error. Nationally, {S.counts.lower} counties have lower SNAP use than expected and {S.counts.higher} have higher.</p>
+      <div class="tablewrap" style="max-height:420px" id="snap-table"></div>
+      <Source s={acsSrc} />
+    </div>
+  </>}
+
+  <div class="card method">
+    <h2>About the SNAP data and its limits</h2>
+    <p><b>Source.</b> Census Bureau American Community Survey 5-year estimates, table B22003: households that received SNAP benefits at any time in the past 12 months.{ok && ` This page uses the ${S.period} release, paired with Map the Meal Gap's ${S.mmg_year} county estimates. The ACS figure is a five-year average, so it is not measured over the same single year.`}</p>
+    <p><b>Margins of error.</b> Every ACS estimate is from a sample. The table shows each county's 90% margin of error, and small counties often have margins of several points.</p>
+    <p><b>Survey underreporting.</b> People underreport SNAP receipt in household surveys, including the ACS, so survey counts run below administrative records and the gap can differ from place to place. Part of a county's lower SNAP use may be reporting, not participation. <a href={ur.url} target="_blank" rel="noopener">{ur.cite}</a></p>
+    <p><b>What "expected" means.</b> It is the median of counties with a similar modeled food insecurity rate, not a measure of how many people are eligible. SNAP income limits differ by state, and the food insecurity rate is itself a model estimate with no published interval, which this comparison does not account for. The labels describe lower or higher use, not underserved places or their causes.</p>
+    <Source s={mmgSrc} />
+  </div>
+  {ok && <script type="application/json" id="d-snap" set:html={JSON.stringify({ deciles: S.deciles, rows: S.rows, names })}></script>}
+  {ok && <script type="application/json" id="d-snap-c" set:html={JSON.stringify(cmini)}></script>}
+</Base>
+
+<script>
+  import { chart, base, axis, css, onTheme, readJSON } from "../../lib/charts";
+  import { pct, esc } from "../../lib/format";
+  if (document.getElementById("d-snap")) {
+    const { deciles, rows, names } = readJSON<any>("d-snap");
+    const C = readJSON<any>("d-snap-c");
+    const pick = document.getElementById("snap-state") as HTMLSelectElement;
+    let st = pick.value, sel: string | null = null;
+    const label = (d: any) => `${(d.lo * 100).toFixed(1)} to ${(d.hi * 100).toFixed(1)}%`;
+    const flagText = (f: string) => (f === "lower" ? "Lower SNAP use than expected" : f === "higher" ? "Higher SNAP use than expected" : "Within margin of error");
+    function render() {
+      const list = Object.entries<any>(rows).filter(([f]) => C[f]?.[1] === st)
+        .map(([f, r]) => ({ f, name: C[f][0], fi: C[f][2], share: r[0], moe: r[1], dec: r[2], gap: r[3], flag: r[4] }))
+        .sort((a, b) => a.gap - b.gap);
+      if (!sel || !list.find((r) => r.f === sel)) sel = list[0]?.f ?? null;
+      const s = list.find((r) => r.f === sel);
+      document.getElementById("snap-sel-key")!.textContent = s ? `${s.name}, ${st}` : "Selected county";
+      const acc = css("--accent"), mut = css("--fg-2");
+      chart("snap-chart").setOption({
+        ...base(), grid: { left: 96, right: 16, top: 10, bottom: 40 },
+        tooltip: { ...base().tooltip, trigger: "item", formatter: (p: any) => {
+          if (p.seriesIndex === 1 && s) return `${esc(s.name)}: ${pct(s.share)} of households receive SNAP (±${(s.moe * 100).toFixed(1)})`;
+          const d = deciles[p.dataIndex]; return `Food insecurity ${label(d)} of people (${d.n} counties)<br>SNAP median ${pct(d.med)} of households<br>Middle half ${pct(d.q1)} to ${pct(d.q3)}`; } },
+        xAxis: { type: "value", min: 0, max: 0.4, interval: 0.1, name: "Households receiving SNAP", nameLocation: "middle", nameGap: 26, nameTextStyle: { color: css("--muted"), fontSize: 12 }, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => Math.round(v * 100) + "%" } },
+        yAxis: { type: "category", inverse: true, data: deciles.map(label), ...axis(), splitLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 11 } },
+        series: [
+          { type: "custom", renderItem: (params: any, api: any) => { const d = deciles[params.dataIndex]; const a = api.coord([d.q1, params.dataIndex]), b = api.coord([d.q3, params.dataIndex]), m = api.coord([d.med, params.dataIndex]);
+              return { type: "group", children: [{ type: "rect", shape: { x: a[0], y: a[1] - 5, width: b[0] - a[0], height: 10, r: 5 }, style: { fill: css("--q2") } }, { type: "circle", shape: { cx: m[0], cy: m[1], r: 5 }, style: { fill: mut } }] }; },
+            data: deciles.map((d: any, i: number) => [d.med, i]), encode: { x: 0, y: 1 } },
+          { type: "scatter", data: s ? [[s.share, s.dec]] : [], symbol: "diamond", symbolSize: 14, itemStyle: { color: acc, borderColor: css("--surface"), borderWidth: 1.5 },
+            label: { show: true, position: "top", formatter: () => (s ? s.name : ""), color: acc, fontSize: 11, fontWeight: 600 } },
+        ],
+      });
+      document.getElementById("snap-tbl-title")!.textContent = `${names[st]} counties by SNAP use relative to similar counties`;
+      document.getElementById("snap-table")!.innerHTML = `<table><caption class="sr">${esc(names[st])} counties, SNAP share compared with similar counties</caption><thead><tr><th scope="col">County</th><th scope="col">Food insecurity (% of people)</th><th scope="col">SNAP (% of households)</th><th scope="col">90% MOE</th><th scope="col">Similar-county median</th><th scope="col">Gap</th><th scope="col">Reading</th></tr></thead><tbody>${list.map((r) => `<tr class="${r.f === sel ? "sel" : ""}"><th scope="row"><button type="button" class="linkish" data-f="${r.f}">${esc(r.name)}</button></th><td>${pct(r.fi)}</td><td>${pct(r.share)}</td><td>±${(r.moe * 100).toFixed(1)} pts</td><td>${pct(deciles[r.dec].med)}</td><td>${(r.gap >= 0 ? "+" : "−") + Math.abs(r.gap * 100).toFixed(1)} pts</td><td>${flagText(r.flag)}</td></tr>`).join("")}</tbody></table>`;
+      document.querySelectorAll<HTMLButtonElement>("#snap-table button[data-f]").forEach((b) => b.addEventListener("click", () => { sel = b.dataset.f!; render(); }));
+    }
+    pick.addEventListener("change", () => { st = pick.value; sel = null; render(); });
+    onTheme(render);
+    render();
+  }
+</script>
