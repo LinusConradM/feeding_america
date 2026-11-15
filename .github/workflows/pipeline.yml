@@ -20,6 +20,7 @@ concurrency:
 env:
   MMG_DATA_REPO: ${{ vars.MMG_DATA_REPO || 'LinusConradM/feeding_america_data' }}
   MMG_TOKEN: ${{ secrets.MMG_DATA_TOKEN }}
+  CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
   ATLAS_MMG_DIR: data/private/mmg
 
 jobs:
@@ -34,7 +35,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install pipeline
-        run: pip install -e ".[test]"
+        run: |
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          pip install -e ".[test]"
 
       - name: Unit tests
         run: pytest -q

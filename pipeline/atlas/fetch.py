@@ -6,6 +6,7 @@ retrieval time, size, SHA-256 and the server's Last-Modified/ETag headers.
 """
 import hashlib
 import json
+import os
 import re
 import time
 import urllib.error
@@ -126,7 +127,10 @@ def fetch_acs(store):
         store.record("acs-meta", base, meta_body, {}, filename=f"acs5_{vintage}_meta.json", meta=info)
         for geo, q in [("us", "us:1"), ("state", "state:*"), ("county", "county:*")]:
             url = f"{base}?get={get}&for={q}"
-            status, headers, body = http_get(url)
+            key = os.environ.get("CENSUS_API_KEY")
+            if not key:
+                raise RuntimeError("CENSUS_API_KEY is not set; the Census API now requires a key")
+            status, headers, body = http_get(f"{url}&key={key}")
             if status != 200:
                 raise RuntimeError(f"HTTP {status} for {url}")
             try:
