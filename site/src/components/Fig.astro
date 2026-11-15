@@ -1,0 +1,13 @@
+---
+import Source from "./Source.astro";
+import type { Src } from "../lib/data";
+interface Props { k: string; v: string; small?: string; ci?: string; unit?: string; src?: Src }
+const { k, v, small, ci, unit, src } = Astro.props;
+---
+<div class="fig">
+  <span class="k">{k}</span>
+  <span class="v">{v}{small && <small>{small}</small>}</span>
+  {unit && <span class="unit">{unit}</span>}
+  {ci && <span class="ci">{ci}</span>}
+  {src && <Source s={src} />}
+</div>

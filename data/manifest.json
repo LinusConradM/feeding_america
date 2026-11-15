@@ -1,0 +1,152 @@
+{
+  "sources": {
+    "acs-meta": {
+      "url": "https://api.census.gov/data/2024/acs/acs5",
+      "versions": [
+        {
+          "api_modified": "2025-09-02 17:33:50.0",
+          "api_title": "ACS 5-Year Detailed Tables",
+          "bytes": 18948,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-meta/2026-11-15/acs5_2024_meta.json",
+          "retrieved_at": "2026-11-15T01:58:49+00:00",
+          "sha256": "0687c5483e27c50d890d3bc39946cfb8312cb8b4f42de9c630edeaf3a4ef3645",
+          "vintage": 2024
+        }
+      ]
+    },
+    "geo-county": {
+      "url": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_county_20m.zip",
+      "versions": [
+        {
+          "boundary_year": 2024,
+          "bytes": 900230,
+          "etag": null,
+          "last_modified": "Thu, 10 Apr 2025 16:25:55 GMT",
+          "path": "data/raw/geo-county/2026-11-15/cb_2024_us_county_20m.zip",
+          "retrieved_at": "2026-11-15T01:58:50+00:00",
+          "sha256": "c9a54fd95422436b8822e0b070a45a9bc3de08eb13f943cdba66e7a9c2a135ff"
+        }
+      ]
+    },
+    "geo-state": {
+      "url": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_20m.zip",
+      "versions": [
+        {
+          "boundary_year": 2024,
+          "bytes": 187671,
+          "etag": null,
+          "last_modified": "Thu, 10 Apr 2025 16:25:56 GMT",
+          "path": "data/raw/geo-state/2026-11-15/cb_2024_us_state_20m.zip",
+          "retrieved_at": "2026-11-15T01:58:50+00:00",
+          "sha256": "7bc773d83c01b6df69b8aada9c2b5983d97f22f4551947cc5c00b87c663223ef"
+        }
+      ]
+    },
+    "usda-err358-pdf": {
+      "url": "https://www.ers.usda.gov/media/9161/err-358.pdf",
+      "versions": [
+        {
+          "bytes": 1017042,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/usda-err358-pdf/2026-11-15/err-358.pdf",
+          "retrieved_at": "2026-11-15T01:58:49+00:00",
+          "sha256": "dfe19c73cd5fbaa08a2dec52768690c968892150153806fec83038d3dac0adf7"
+        }
+      ]
+    },
+    "usda-foodsecurepie": {
+      "url": "https://www.ers.usda.gov/media/6985/foodsecurepie.xlsx",
+      "versions": [
+        {
+          "bytes": 11564,
+          "etag": null,
+          "last_modified": "Wed, 18 Feb 2026 13:24:29 GMT",
+          "path": "data/raw/usda-foodsecurepie/2026-11-15/foodsecurepie.xlsx",
+          "retrieved_at": "2026-11-15T01:58:47+00:00",
+          "sha256": "fd80c758d9fcc7f54f75a0c5235a1645c07fe76b34ee9353a99b892c5529d704"
+        }
+      ]
+    },
+    "usda-householdpie": {
+      "url": "https://www.ers.usda.gov/media/6986/householdpie.xlsx",
+      "versions": [
+        {
+          "bytes": 11532,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:53:46 GMT",
+          "path": "data/raw/usda-householdpie/2026-11-15/householdpie.xlsx",
+          "retrieved_at": "2026-11-15T01:58:47+00:00",
+          "sha256": "ab0674133eaea60e2be52f8eadd29f505e14ba7c78cae2f3ae75d9aa9f7e2d7c"
+        }
+      ]
+    },
+    "usda-insecurity": {
+      "url": "https://www.ers.usda.gov/media/6987/insecurity.xlsx",
+      "versions": [
+        {
+          "bytes": 13667,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:54:15 GMT",
+          "path": "data/raw/usda-insecurity/2026-11-15/insecurity.xlsx",
+          "retrieved_at": "2026-11-15T01:58:46+00:00",
+          "sha256": "de6cd0150196754973228151ebfc4bc31e1bf1146f9e37156f7a9fd7ef0f7e9d"
+        }
+      ]
+    },
+    "usda-interactive": {
+      "url": "https://www.ers.usda.gov/media/649/data-file-for-interactive-charts.xlsx",
+      "versions": [
+        {
+          "bytes": 177982,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:29:27 GMT",
+          "path": "data/raw/usda-interactive/2026-11-15/data-file-for-interactive-charts.xlsx",
+          "retrieved_at": "2026-11-15T01:58:48+00:00",
+          "sha256": "64b7299119935493a26958553dcfb03a142dedfd3a7869d3a7adf9206280e950"
+        }
+      ]
+    },
+    "usda-mapdata": {
+      "url": "https://www.ers.usda.gov/media/6988/mapdata.xlsx",
+      "versions": [
+        {
+          "bytes": 18679,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:54:52 GMT",
+          "path": "data/raw/usda-mapdata/2026-11-15/mapdata.xlsx",
+          "retrieved_at": "2026-11-15T01:58:45+00:00",
+          "sha256": "4a19cbbe6719152a0b1556395cb1c749d622a1b84fe10080d3199bb81cf4299d"
+        }
+      ]
+    },
+    "usda-trends": {
+      "url": "https://www.ers.usda.gov/media/6990/trends.xlsx",
+      "versions": [
+        {
+          "bytes": 12147,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:55:53 GMT",
+          "path": "data/raw/usda-trends/2026-11-15/trends.xlsx",
+          "retrieved_at": "2026-11-15T01:58:44+00:00",
+          "sha256": "5e788237e48359204ab48a8c6688653b24d447b4f867593c4d37bb79ed39a555"
+        }
+      ]
+    },
+    "usda-verylow": {
+      "url": "https://www.ers.usda.gov/media/6991/verylow.xlsx",
+      "versions": [
+        {
+          "bytes": 15433,
+          "etag": null,
+          "last_modified": "Wed, 28 Jan 2026 19:56:21 GMT",
+          "path": "data/raw/usda-verylow/2026-11-15/verylow.xlsx",
+          "retrieved_at": "2026-11-15T01:58:46+00:00",
+          "sha256": "4513fc488e4c113fffc9825e55bd00e795e8c521137ad70f10b726e1b8ea2981"
+        }
+      ]
+    }
+  }
+}

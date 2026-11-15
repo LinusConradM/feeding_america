@@ -1,0 +1,129 @@
+name: Data pipeline and site
+
+on:
+  schedule:
+    - cron: "23 11 * * *" # daily, 11:23 UTC
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  MMG_DATA_REPO: ${{ vars.MMG_DATA_REPO || 'LinusConradM/feeding_america_data' }}
+  MMG_TOKEN: ${{ secrets.MMG_DATA_TOKEN }}
+  CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+  ATLAS_MMG_DIR: data/private/mmg
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      site_built: ${{ steps.site.outcome == 'success' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install pipeline
+        run: |
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          pip install -e ".[test]"
+
+      - name: Unit tests
+        run: pytest -q
+
+      - name: Pull Map the Meal Gap files from the private data repo
+        if: env.MMG_TOKEN != ''
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ env.MMG_DATA_REPO }}
+          token: ${{ secrets.MMG_DATA_TOKEN }}
+          path: data/private/mmg
+
+      - name: Note missing MMG access
+        if: env.MMG_TOKEN == ''
+        run: echo "::warning::MMG_DATA_TOKEN is not set, so Map the Meal Gap files cannot be pulled and the site will not be built."
+
+      - name: Check and fetch public sources
+        id: fetch
+        run: |
+          python -m atlas fetch | tee fetch.log
+          grep -o 'NEW_MMG_EDITION=[0-9]*' fetch.log | sed 's/NEW_MMG_EDITION=/edition=/' >> "$GITHUB_OUTPUT" || true
+
+      - name: Open an issue for a new Map the Meal Gap edition
+        if: steps.fetch.outputs.edition != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          t="New Map the Meal Gap edition: ${{ steps.fetch.outputs.edition }}"
+          if [ -z "$(gh issue list --state open --search "in:title \"$t\"" --json number -q '.[].number')" ]; then
+            gh issue create --title "$t" --body "Feeding America's site mentions Map the Meal Gap ${{ steps.fetch.outputs.edition }}, newer than the newest file in the private data repo. Request the county file through Feeding America's form, then add it to the data repo. The pipeline will validate and publish it on the next run."
+          fi
+
+      - uses: actions/setup-node@v5
+        if: hashFiles('site/package-lock.json') != ''
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install site dependencies
+        if: hashFiles('site/package-lock.json') != ''
+        run: npm ci --prefix site
+
+      - name: Build and validate site data
+        if: env.MMG_TOKEN != '' && hashFiles('site/package-lock.json') != ''
+        run: python -m atlas build --strict
+
+      - name: Commit new raw public data
+        run: |
+          git add data/raw data/manifest.json
+          if git diff --cached --quiet; then echo "No source changed."; exit 0; fi
+          git config user.name "atlas-pipeline[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: store new public source versions" -m "$(git diff --cached --name-only | head -40)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Build site
+        id: site
+        if: env.MMG_TOKEN != '' && hashFiles('site/package-lock.json') != ''
+        run: npm run build --prefix site
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && env.MMG_TOKEN != '' && hashFiles('site/package-lock.json') != ''
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+      - name: Open an issue when the pipeline fails
+        if: failure() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          t="Data pipeline failed"
+          body="Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. The site keeps its last good version until this is fixed."
+          n="$(gh issue list --state open --search "in:title \"$t\"" --json number -q '.[0].number')"
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "$t" --body "$body"; fi
+
+  deploy:
+    needs: refresh
+    if: github.ref == 'refs/heads/main' && needs.refresh.outputs.site_built == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

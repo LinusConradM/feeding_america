@@ -1,0 +1,136 @@
+---
+import Base from "../../layouts/Base.astro";
+import Source from "../../components/Source.astro";
+import { usdaStates, mmgStates, mmgYearSource, usdaSrc, meta } from "../../lib/data";
+import { pct, num, date } from "../../lib/format";
+const U = usdaStates as any, M = mmgStates as any;
+const names: Record<string, string> = M.names;
+const abbrs = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b]));
+const [p0, p1] = U.period;
+const latestYear = Math.max(...M.series.AL.map((r: any) => r.y));
+const st4 = usdaSrc(`ERS state data file (mapdata.xlsx), ${p0}–${p1} averages. 90% margins of error. "Higher" or "lower" means USDA found the state significantly different from the US average at 90% confidence.`);
+const editions = (meta as any).mmg_editions;
+const sigText = (s: string) => (s === "higher" ? "Higher than US" : s === "lower" ? "Lower than US" : "Not significantly different");
+const years = M.series.AL.map((r: any) => r.y);
+const yearSrc = Object.fromEntries(years.map((y: number) => [y, mmgYearSource(y)]));
+const latestSrc = yearSrc[latestYear];
+---
+<Base title="States" page="states" description="State food insecurity: USDA survey estimates with margins of error, and Map the Meal Gap modeled estimates by year.">
+  <div class="lede">
+    <span class="eyebrow">States</span>
+    <h1 id="st-h1">Food insecurity by state</h1>
+    <p id="st-lede">Two sources, measuring two different things. USDA reports the share of households that were food insecure, averaged over {p0} to {p1}, with a margin of error. Map the Meal Gap models the share of people who were food insecure for each year.</p>
+  </div>
+  <div class="pickers"><label class="fl" for="st-pick">State<select id="st-pick">{abbrs.map((a) => <option value={a} selected={a === "MS"}>{names[a]}</option>)}</select></label></div>
+
+  <div class="card">
+    <div class="card-head"><div class="t"><h3>Survey estimate · share of households · {p0} to {p1} average</h3><h2 id="st-cmp-title">Compared with the US</h2></div></div>
+    <div id="st-cmp-figs" class="figs"></div>
+    <div id="st-cmp-chart" class="chart tall" role="img" aria-label="Each state's share of households that were food insecure, with 90% margins of error. The same values are in the table below."></div>
+    <div class="legend"><span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="var(--fg-2)"/></svg>Significantly different from US</span><span class="key"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="none" stroke="var(--fg-2)" stroke-width="1.5"/></svg>Not significantly different</span><span class="key"><svg width="16" height="6" aria-hidden="true"><path d="M1 3h14" stroke="var(--accent)" stroke-width="3"/></svg>Selected state</span></div>
+    <Source s={st4} />
+    <details class="alt"><summary>Show all states as a table</summary>
+      <div class="tablewrap" style="max-height:420px"><table>
+        <caption class="sr">Share of households food insecure by state, {p0} to {p1} average, USDA</caption>
+        <thead><tr><th scope="col">State</th><th scope="col">% of households</th><th scope="col">90% margin of error</th><th scope="col">Compared with US ({U.us.pct.toFixed(1)}%)</th><th scope="col">Households interviewed</th></tr></thead>
+        <tbody>{abbrs.map((a) => { const s = U.rows[a]; return <tr><th scope="row">{names[a]}</th><td>{s.pct.toFixed(1)}%</td><td>±{s.moe.toFixed(1)} pts</td><td>{sigText(s.sig)}</td><td>{num(s.interviewed)}</td></tr>; })}</tbody>
+      </table></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="t"><h3>Modeled estimate · share of people · Map the Meal Gap</h3><h2 id="st-mmg-title">{latestYear}</h2></div></div>
+    <div id="st-mmg-figs" class="figs"></div>
+    <p class="note">Map the Meal Gap's state figures are sums of its congressional district estimates. Feeding America does not publish a confidence interval for them, so none is shown.</p>
+    <Source s={latestSrc} />
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="t"><h2>Map the Meal Gap estimates by year</h2><span class="note">Share of people, {years[0]} to {latestYear}. Each year comes from a different edition.</span></div>
+      <div class="seg" role="group" aria-label="Who is counted"><button data-sg="fi" aria-pressed="true">All people</button><button data-sg="ch" aria-pressed="false">Children</button></div>
+    </div>
+    <div id="st-trend" class="chart" role="img" aria-label="Map the Meal Gap rate for the selected state by year, one unconnected point per edition. The same values are in the table below."></div>
+    <p class="note">The points are not joined because each year was estimated in a different Map the Meal Gap edition, and the method changed between editions. Feeding America says the 2020 edition (2018 data) is not directly comparable with any earlier one, marked by the dashed line, and advises caution in comparing any two years. Read the points as separate snapshots, not a trend.</p>
+    <details class="alt"><summary>Show the data and editions as a table</summary><div class="tablewrap" id="st-table"></div></details>
+    <details class="alt"><summary>Which edition each year comes from</summary>
+      <div class="tablewrap"><table>
+        <thead><tr><th scope="col">Data year</th><th scope="col">Edition</th><th scope="col">Release date</th></tr></thead>
+        <tbody>{years.map((y: number) => <tr><th scope="row">{y}</th><td>Map the Meal Gap {y + 2}</td><td style="white-space:normal">{yearSrc[y].when}</td></tr>)}</tbody>
+      </table></div>
+    </details>
+  </div>
+  <script type="application/json" id="d-st" set:html={JSON.stringify({ U, series: M.series, names, latestYear, yearSrc })}></script>
+</Base>
+
+<script>
+  import { chart, base, axis, css, onTheme, readJSON } from "../../lib/charts";
+  import { pct, num, esc } from "../../lib/format";
+  const { U, series, names, latestYear, yearSrc } = readJSON<any>("d-st");
+  const pick = document.getElementById("st-pick") as HTMLSelectElement;
+  let cur = pick.value, g = "fi";
+  const fig = (k: string, v: string, unit: string, ci: string) =>
+    `<div class="fig"><span class="k">${esc(k)}</span><span class="v">${v}</span><span class="unit">${unit}</span><span class="ci">${ci}</span></div>`;
+
+  function render() {
+    const a = cur, name = names[a], u = U.rows[a], ser = series[a], last = ser[ser.length - 1];
+    document.getElementById("st-h1")!.textContent = name;
+    const dir = u.sig === "higher" ? "significantly higher than" : u.sig === "lower" ? "significantly lower than" : "not significantly different from";
+    document.getElementById("st-lede")!.textContent =
+      `In ${U.period[0]} to ${U.period[1]}, ${u.pct.toFixed(1)}% of ${name} households were food insecure (±${u.moe.toFixed(1)} points), ${dir} the US average of ${U.us.pct.toFixed(1)}% of households. Map the Meal Gap models ${pct(last.fi)} of ${name} residents as food insecure in ${last.y}; that is a share of people from a model, so it is not directly comparable with the USDA household figure.`;
+    document.getElementById("st-cmp-title")!.textContent = `${name} compared with the US`;
+    document.getElementById("st-cmp-figs")!.innerHTML =
+      fig(`${name}, households food insecure`, `${u.pct.toFixed(1)}<small>%</small>`, "of households", `90% margin of error ±${u.moe.toFixed(1)} points`) +
+      fig("US average", `${U.us.pct.toFixed(1)}<small>%</small>`, "of households", `90% margin of error ±${U.us.moe.toFixed(2)} points`) +
+      fig("Difference", u.sig === "higher" ? "Higher" : u.sig === "lower" ? "Lower" : "No clear difference", "USDA test", "At 90% confidence");
+
+    const rows = Object.entries<any>(U.rows).sort((x, y) => x[1].pct - y[1].pct);
+    const el = document.getElementById("st-cmp-chart")!;
+    el.style.height = rows.length * 17 + 40 + "px";
+    const acc = css("--accent"), mut = css("--fg-2"), fg = css("--fg");
+    chart("st-cmp-chart").setOption({
+      ...base(), grid: { left: 36, right: 14, top: 10, bottom: 26 },
+      tooltip: { ...base().tooltip, trigger: "item", formatter: (p: any) => { const r = rows[p.dataIndex]; return `${esc(names[r[0]])}: ${r[1].pct.toFixed(1)}% of households ± ${r[1].moe.toFixed(1)}`; } },
+      xAxis: { type: "value", min: 4, max: 24, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => v + "%" } },
+      yAxis: { type: "category", data: rows.map((r) => r[0]), ...axis(), splitLine: { show: false }, axisLabel: { fontSize: 10.5, color: (v: string) => (v === a ? acc : css("--muted")), fontWeight: 600 } },
+      series: [{
+        type: "custom",
+        renderItem: (params: any, api: any) => {
+          const i = params.dataIndex, r = rows[i][1], sel = rows[i][0] === a, sig = r.sig !== "ns";
+          const p0 = api.coord([r.pct - r.moe, i]), p1 = api.coord([r.pct + r.moe, i]), pc = api.coord([r.pct, i]);
+          const col = sel ? acc : mut;
+          return { type: "group", children: [
+            { type: "line", shape: { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1] }, style: { stroke: col, lineWidth: sel ? 3 : 1.5, opacity: sel ? 1 : 0.55 } },
+            { type: "circle", shape: { cx: pc[0], cy: pc[1], r: sel ? 5 : 3.6 }, style: { fill: sig ? col : css("--surface"), stroke: col, lineWidth: 1.5 } },
+          ] };
+        },
+        data: rows.map((r, i) => [r[1].pct, i]), encode: { x: 0, y: 1 },
+        markLine: { symbol: "none", silent: true, data: [{ xAxis: U.us.pct }], lineStyle: { color: fg, type: "dashed", width: 1 }, label: { formatter: "US " + U.us.pct.toFixed(1) + "%", color: fg, fontSize: 11, position: "insideEndTop" } },
+      }],
+    });
+
+    document.getElementById("st-mmg-title")!.textContent = `${name}, ${last.y}`;
+    document.getElementById("st-mmg-figs")!.innerHTML =
+      fig("Food insecurity rate", pct(last.fi), "of people", `${num(last.fn)} people`) +
+      fig("Child food insecurity rate", pct(last.ch), "of children", `${num(last.cn)} children`);
+
+    const key = g, col = g === "fi" ? acc : css("--child");
+    chart("st-trend").setOption({
+      ...base(), grid: { left: 44, right: 18, top: 20, bottom: 28 },
+      tooltip: { ...base().tooltip, trigger: "item", formatter: (p: any) => `${p.value[0]}: ${(p.value[1] * 100).toFixed(1)}% of ${g === "fi" ? "people" : "children"}<br><span style="color:${css("--muted")}">${esc(yearSrc[p.value[0]].when)}</span>` },
+      xAxis: { type: "value", min: ser[0].y - 0.5, max: latestYear + 0.5, interval: 3, ...axis(), splitLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => (Number.isInteger(v) ? String(v) : "") } },
+      yAxis: { type: "value", min: 0, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => Math.round(v * 100) + "%" } },
+      series: [{
+        type: "scatter", data: ser.map((r: any) => [r.y, r[key]]), symbolSize: 9, itemStyle: { color: col },
+        markLine: { symbol: "none", silent: true, lineStyle: { color: css("--border"), type: "dashed" }, label: { color: css("--muted"), fontSize: 11, formatter: "Method change (MMG 2020)", position: "insideEndTop" }, data: [{ xAxis: 2017.5 }] },
+      }],
+    });
+    document.getElementById("st-table")!.innerHTML = `<table><caption class="sr">${esc(name)}, Map the Meal Gap by year</caption><thead><tr><th scope="col">Year</th><th scope="col">% of people</th><th scope="col">People</th><th scope="col">% of children</th><th scope="col">Children</th><th scope="col">Edition</th></tr></thead><tbody>${[...ser].reverse().map((r: any) => `<tr><th scope="row">${r.y}</th><td>${pct(r.fi)}</td><td>${num(r.fn)}</td><td>${pct(r.ch)}</td><td>${num(r.cn)}</td><td>MMG ${r.orig}</td></tr>`).join("")}</tbody></table>`;
+  }
+  pick.addEventListener("change", () => { cur = pick.value; render(); });
+  document.querySelectorAll<HTMLButtonElement>("[data-sg]").forEach((b) => b.addEventListener("click", () => {
+    g = b.dataset.sg!; b.parentElement!.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); render();
+  }));
+  onTheme(render);
+  render();
+</script>

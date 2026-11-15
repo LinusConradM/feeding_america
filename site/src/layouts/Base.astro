@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+import { meta } from "../lib/data";
+import { date } from "../lib/format";
+interface Props { title: string; description: string; page: "national" | "states" | "counties" | "snap" | "methods" }
+const { title, description, page } = Astro.props;
+const B = import.meta.env.BASE_URL;
+const tabs = [
+  ["national", "", "National"],
+  ["states", "states/", "States"],
+  ["counties", "counties/", "Counties"],
+  ["snap", "snap/", "SNAP reach"],
+  ["methods", "methods/", "Methods & sources"],
+];
+const m = meta as any;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{title} · US Food Insecurity Atlas</title>
+  <meta name="description" content={description} />
+  <link rel="icon" href={`${B}favicon.svg`} type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="wrap">
+      <div class="bar">
+        <a class="brand" href={B}>
+          <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="1" width="24" height="24" rx="7" fill="var(--accent)"/><path d="M7 17h12M7 13h8M7 9h10" stroke="var(--accent-fg)" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>US Food Insecurity Atlas</span>
+        </a>
+        <div class="updated">Data last updated<br /><b><time datetime={m.data_updated}>{date(m.data_updated)}</time></b></div>
+      </div>
+      <nav class="tabs" aria-label="Pages">
+        {tabs.map(([id, href, label]) => <a href={B + href} aria-current={id === page ? "page" : undefined}>{label}</a>)}
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="wrap"><section class="view"><slot /></section></main>
+  <footer><div class="wrap">
+    <span>Data last updated {date(m.data_updated)}: the newest release date among the sources used. Sources last checked {m.checked_at ? date(m.checked_at) : "not yet recorded"}; site built {date(m.built_at)}.</span>
+    <span>Independent project by Conrad Linus Muhirwe. Not affiliated with or endorsed by Feeding America, USDA or the Census Bureau.</span>
+    <span>Map the Meal Gap data © Feeding America, used with attribution. USDA and Census data are public domain.</span>
+  </div></footer>
+</body>
+</html>
