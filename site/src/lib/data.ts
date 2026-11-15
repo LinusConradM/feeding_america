@@ -4,9 +4,10 @@ import usdaStates from "../data/usda_states.json";
 import mmgStates from "../data/mmg_states.json";
 import counties from "../data/counties.json";
 import snap from "../data/snap.json";
+import groups from "../data/groups.json";
 import { date } from "./format";
 
-export { meta, national, usdaStates, mmgStates, counties, snap };
+export { meta, national, usdaStates, mmgStates, counties, snap, groups };
 
 export type Src = { short: string; title: string; when: string; note: string; url: string };
 

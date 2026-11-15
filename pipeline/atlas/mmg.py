@@ -184,3 +184,25 @@ def state_series(editions):
         df = read_states(ed)
         frames.append(df[df.year == year])
     return pd.concat(frames, ignore_index=True)
+
+
+RACE_COLUMNS = {
+    "black": r"food insecurity rate among black persons",
+    "hispanic": r"food insecurity rate among hispanic persons",
+    "white_nh": r"food insecurity rate among white, non-hispanic persons",
+}
+
+
+def read_state_race(ed, year):
+    """State rates by race and ethnicity, as Feeding America publishes them (rounded,
+    blank where it does not release an estimate). Returns None for files without them."""
+    xl = pd.ExcelFile(ed.path)
+    df = read_sheet(xl, find_sheet(xl, "state"))
+    try:
+        cols = {k: pick(df.columns, v, None) for k, v in RACE_COLUMNS.items()}
+    except ValueError:
+        return None
+    out = pd.DataFrame({"state": df[state_column(df)].astype(str).str.strip(), "year": year_column(df, ed)})
+    for k, c in cols.items():
+        out[k] = pd.to_numeric(df[c], errors="coerce")
+    return out[out.state.isin(STATES) & (out.year == year)].drop(columns="year").reset_index(drop=True)

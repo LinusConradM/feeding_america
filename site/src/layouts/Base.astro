@@ -2,11 +2,12 @@
 import "../styles/global.css";
 import { meta } from "../lib/data";
 import { date } from "../lib/format";
-interface Props { title: string; description: string; page: "national" | "states" | "counties" | "snap" | "methods" }
+interface Props { title: string; description: string; page: "national" | "groups" | "states" | "counties" | "snap" | "methods" }
 const { title, description, page } = Astro.props;
 const B = import.meta.env.BASE_URL;
 const tabs = [
   ["national", "", "National"],
+  ["groups", "groups/", "Who is affected"],
   ["states", "states/", "States"],
   ["counties", "counties/", "Counties"],
   ["snap", "snap/", "SNAP reach"],

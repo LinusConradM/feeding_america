@@ -102,6 +102,58 @@ def build_usda(manifest, ck):
     }
 
 
+INCOME = {"Under 1.00": "Below the poverty line", "Under 1.30": "Below 130% of poverty",
+          "Under 1.85": "Below 185% of poverty", "1.85 and over": "185% of poverty or more"}
+
+
+def label(group):
+    return INCOME.get(group, group.replace("< ", "under ").replace("> ", "over "))
+
+
+def build_groups(manifest, ck):
+    """USDA's 2023-to-2024 tables by household group, with its significance tests,
+    and each group's 2001-2024 series from the chart data file."""
+    inter, ins, vl = (latest(manifest, s) for s in ("usda-interactive", "usda-insecurity", "usda-verylow"))
+    if not (inter and ins and vl):
+        ck.add("USDA groups", "files present", False, "ERS change files have not been fetched")
+        return None
+    years, fi = usda.change_table(ins["abs"])
+    years_vl, vlt = usda.change_table(vl["abs"])
+    ck.add("USDA groups", "both change files cover the same years and groups",
+           years == years_vl and len(fi) == len(vlt) and (fi.group == vlt.group).all(), f"{years}, {len(fi)} groups")
+    ck.add("USDA groups", "change = later year minus earlier year (±0.1 pt)",
+           (abs(fi.y1 - fi.y0 - fi.change) <= 0.11).all() and (abs(vlt.y1 - vlt.y0 - vlt.change) <= 0.11).all())
+    ck.add("USDA groups", "very low food security never exceeds food insecurity",
+           (vlt.y1 <= fi.y1).all() and (vlt.y0 <= fi.y0).all())
+    ser = usda.subgroup_series(inter["abs"])
+    fi["sname"] = fi.group.map(usda.series_name)
+    unmatched = sorted(set(fi.sname) - set(ser.group))
+    ck.add("USDA groups", "every group is in the ERS chart data file", not unmatched, ", ".join(unmatched))
+    both = fi.merge(vlt[["group", "y0", "y1"]], on="group", suffixes=("", "_vl"))
+    cmp = []
+    for x in both.itertuples():
+        for y, a, b in ((years[0], x.y0, x.y0_vl), (years[1], x.y1, x.y1_vl)):
+            row = ser[(ser.group == x.sname) & (ser.year == y)]
+            cmp.append(len(row) == 1 and row.fi_pct.iloc[0] == a and row.vl_pct.iloc[0] == b)
+    ck.add("USDA groups", "change files match the chart data file for both years", all(cmp), f"{sum(cmp)} of {len(cmp)} values")
+    first = sorted(ser.year.unique())
+    ck.add("USDA groups", "each group has every year from 2001", all(
+        sorted(ser[ser.group == g].year) == first for g in fi.sname) and first[0] == 2001, f"{first[0]}-{first[-1]}")
+
+    cats = []
+    for cat, g in both.groupby("category", sort=False):
+        cats.append({"name": cat, "rows": [{
+            "label": label(x.group),
+            "fi": [x.y0, x.y1, x.change, bool(x.sig)],
+            "vl": [x.y0_vl, x.y1_vl, float(vlt.loc[vlt.group == x.group, "change"].iloc[0]),
+                   bool(vlt.loc[vlt.group == x.group, "sig"].iloc[0])],
+            "series": [[int(r.year), float(r.fi_pct), float(r.vl_pct)]
+                       for r in ser[ser.group == x.sname].sort_values("year").itertuples()],
+        } for x in g.itertuples()]})
+    return {"years": years, "categories": cats,
+            "files": {"insecurity": ledger_entry(ins), "verylow": ledger_entry(vl)}}
+
+
 # ---------------------------------------------------------------- MMG
 
 def build_mmg(ck):
@@ -159,7 +211,21 @@ def build_mmg(ck):
     } for e in eds]
     counties = {x.fips: [x.name, x.state, r(x.fi_rate, 3), i(x.fi_n), r(x.child_rate, 3), i(x.child_n),
                          r(x.cost_per_meal, 2), i(x.shortfall), i(x.rucc2023)] for x in c.itertuples()}
-    return {"editions": editions, "states": states, "county_year": year, "county_edition": newest.edition,
+    race = mmg.read_state_race(newest, year)
+    if race is not None:
+        ck.add("MMG", f"{year} state rates by race: one row per state", len(race) == 51 and race.state.is_unique, f"{len(race)} rows")
+        vals = race[["black", "hispanic", "white_nh"]].stack().dropna()
+        ck.add("MMG", "state rates by race within 0-60%", vals.between(0, 0.6).all(), f"{vals.min():.2f}-{vals.max():.2f}")
+        low = [f"{x.state} {k} {getattr(x, k):.2f}" for x in race.itertuples() for k in ("black", "hispanic", "white_nh")
+               if getattr(x, k) < 0.05]
+        ck.add("MMG", "state rates by race of 5% or more", not low, "; ".join(low) + " (shown as published)", level="warn")
+        race = {"year": year, "edition": newest.edition,
+                "blank": {k: int(race[k].isna().sum()) for k in ("black", "hispanic", "white_nh")},
+                "rows": {x.state: [r(x.black, 2), r(x.hispanic, 2), r(x.white_nh, 2)] for x in race.itertuples()},
+                "overall": {x.state: r(x.fi_rate, 4) for x in s[s.year == year].itertuples()}}
+    else:
+        ck.add("MMG", f"{year} state rates by race present", False, "newest file has no race columns", level="warn")
+    return {"editions": editions, "states": states, "county_year": year, "county_edition": newest.edition, "race": race,
             "counties": counties, "missing": [[n, st] for n, st in zip(miss.name, miss.state)],
             "county_df": c}
 
@@ -220,6 +286,7 @@ def main(strict=False):
     out = {}
 
     u = build_usda(manifest, ck)
+    grp = build_groups(manifest, ck)
     m = build_mmg(ck)
     snap = build_snap(manifest, m, ck) if m else {"status": "blocked", "reason": "Map the Meal Gap files are not available."}
 
@@ -249,6 +316,7 @@ def main(strict=False):
                     "snap_underreporting": sources.SNAP_UNDERREPORTING},
         "files": {
             **({} if not u else {f"usda-{k}": v for k, v in u["files"].items()}),
+            **({} if not grp else {f"usda-{k}": v for k, v in grp["files"].items()}),
             "geo-county": ledger_entry(gc), "geo-state": ledger_entry(gs),
             "geo_year": gc.get("boundary_year") if gc else None,
         },
@@ -262,6 +330,8 @@ def main(strict=False):
         "mmg_states.json": {"names": mmg.STATES, "series": m["states"]} if m else None,
         "counties.json": {k: m[k] for k in ("county_year", "county_edition", "counties", "missing")} if m else None,
         "snap.json": snap,
+        "groups.json": {"usda": grp and {k: grp[k] for k in ("years", "categories")},
+                        "race": m and m["race"], "names": mmg.STATES},
     }
     for name, obj in out.items():
         (SITE_DATA / name).write_text(json.dumps(obj, separators=(",", ":"), default=str))
