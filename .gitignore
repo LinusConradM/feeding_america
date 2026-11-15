@@ -27,3 +27,8 @@ MMG*.zip
 
 # Claude Code local-only settings
 .claude/settings.local.json
+
+# Pipeline outputs rebuilt on every run
+data/checks.json
+site/src/data/
+site/public/geo/
