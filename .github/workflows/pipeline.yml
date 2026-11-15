@@ -69,7 +69,8 @@ jobs:
         run: |
           t="New Map the Meal Gap edition: ${{ steps.fetch.outputs.edition }}"
           if [ -z "$(gh issue list --state open --search "in:title \"$t\"" --json number -q '.[].number')" ]; then
-            gh issue create --title "$t" --body "Feeding America's site mentions Map the Meal Gap ${{ steps.fetch.outputs.edition }}, newer than the newest file in the private data repo. Request the county file through Feeding America's form, then add it to the data repo. The pipeline will validate and publish it on the next run."
+            printf "Feeding America's site appears to present Map the Meal Gap %s (mentioned with its data year), newer than the newest file in the private data repo.\n\nWhat the page says:\n\n%s\n\nIf this is a real release, request the county file through Feeding America's form and add it to the data repo; the pipeline will validate and publish it on the next run. If it is not, close this issue.\n" "${{ steps.fetch.outputs.edition }}" "$(cat mmg_watch.txt 2>/dev/null)" > body.md
+            gh issue create --title "$t" --body-file body.md
           fi
 
       - uses: actions/setup-node@v5

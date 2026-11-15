@@ -32,3 +32,5 @@ MMG*.zip
 data/checks.json
 site/src/data/
 site/public/geo/
+mmg_watch.txt
+body.md
