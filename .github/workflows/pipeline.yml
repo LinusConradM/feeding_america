@@ -27,6 +27,8 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      site_built: ${{ steps.site.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -95,6 +97,7 @@ jobs:
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Build site
+        id: site
         if: env.MMG_TOKEN != '' && hashFiles('site/package-lock.json') != ''
         run: npm run build --prefix site
 
@@ -116,7 +119,7 @@ jobs:
 
   deploy:
     needs: refresh
-    if: github.ref == 'refs/heads/main' && vars.PAGES_ENABLED != 'false'
+    if: github.ref == 'refs/heads/main' && needs.refresh.outputs.site_built == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

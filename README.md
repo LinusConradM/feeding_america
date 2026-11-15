@@ -1,225 +1,63 @@
-# U.S. Food Insecurity Analytics Platform
+# US Food Insecurity Atlas
 
-An interactive dashboard analyzing county-level food insecurity patterns across 3,100+ U.S. counties from 2009 to 2023. Built with Python Streamlit on a custom editorial design system.
+A static site on food insecurity in the United States, rebuilt from a Streamlit app. Every figure links to its source and release date, shows a margin of error where the source publishes one, and says whether it is a share of **households** or a share of **people**.
 
----
+Live site: https://linusconradm.github.io/feeding_america/ (GitHub Pages, deployed from `main`).
 
-## Overview
+## Pages
 
-This platform provides policymakers, researchers, and nonprofit practitioners with evidence-based insights into food insecurity disparities, socioeconomic drivers, and intervention impacts. The dashboard integrates data from Feeding America's Map the Meal Gap and the U.S. Census Bureau's American Community Survey.
+| Page | What it shows | Source |
+|---|---|---|
+| National | Food insecurity 2001 to 2024: share and number of households, people in those households, and children | USDA ERS, ERR-358 |
+| States | Each state's 2022 to 2024 household rate with 90% margin of error and USDA's significance test; Map the Meal Gap rates of people by year | USDA ERS state data file; Map the Meal Gap |
+| Counties | Map and table of county rates of people, child rates, cost per meal, annual meal gap, rural-urban code | Map the Meal Gap, newest edition |
+| SNAP reach | County food insecurity against the share of households receiving SNAP, a measure that is not an input to the Map the Meal Gap model | Census ACS 5-year B22003 and B17001; Map the Meal Gap |
+| Methods & sources | Source ledger, edition release dates, raw file hashes, validation report, derived-figure formulas, limits | All of the above |
 
-**Key Numbers:**
-- **Tens of millions** of Americans affected by food insecurity each year — the current national figure is computed live from Feeding America's MMG data on the dashboard's home page (year-stamped + source-cited)
-- **3,100+** counties analyzed
-- **15 years** of longitudinal data (2009-2023)
-- **47,000+** county-year observations
+## Sources and refresh cadence
 
----
+| Source | Publisher's cadence | How the pipeline gets it | Checked |
+|---|---|---|---|
+| USDA ERS, Household Food Security in the United States in 2024 (ERR-358): chart data file, state data file (`mapdata.xlsx`), year-over-year file, report PDF (Table 1A) | Was annual. 2024 is the final year: USDA ended the Current Population Survey Food Security Supplement (announced September 20, 2025) | Direct download from ers.usda.gov | Daily |
+| Feeding America, Map the Meal Gap (2011 to 2026 editions, 2009 to 2024 data) | Annual. County files only by request form | Pulled from a private data repo. The pipeline watches Feeding America's site and opens an issue when a newer edition appears | Daily |
+| Census ACS 5-year, tables B22003 (SNAP receipt) and B17001 (poverty), with margins of error | Annual, usually December | Census API, newest vintage it serves | Daily |
+| Census cartographic boundary files, counties and states, 1:20,000,000 | Annual | Direct download from www2.census.gov, matched to the newest Map the Meal Gap data year | Daily |
 
-## Features
+Release dates the files do not carry themselves are recorded with a citation in `pipeline/atlas/sources.py`. Map the Meal Gap files from 2020 and earlier state no release date, and the site says "Release date not published" rather than estimating one.
 
-### 13 Interactive Pages
+## How the pipeline works
 
-| Page | Description |
-|------|-------------|
-| **Home** | Landing page with audience-routed CTAs (policymaker / nonprofit / researcher) and live KPIs |
-| **Executive Overview** | National KPIs, weighted-rate trends, disparity snapshot, counties-in-crisis callout |
-| **Geographic Intelligence** | Interactive choropleth maps, urban/rural filter, state drill-down |
-| **Data Explorer** | Exploratory data analysis — summary stats, missingness, distributions, box plots, pair plots, rankings |
-| **Correlation Analysis** | Bivariate correlation testing, scatter plots, correlation matrices |
-| **Regression Models** | OLS, Ridge, LASSO, Elastic Net, Random Forest with AI-generated interpretation |
-| **Equity & Disparities** | Racial/ethnic gaps, urban-rural divide, income inequality analysis |
-| **County Clustering** | K-Means clustering with PCA visualization, spatial-contiguity weighting |
-| **Time Series Explorer** | Temporal trends, state comparison, pre/post COVID analysis |
-| **Policy Scenarios** | Difference-in-Differences causal inference + predictive scenario simulation |
-| **Data & Downloads** | Browse, filter, and export data in CSV, Excel, or JSON |
-| **AI Data Analyst** | Plain-English questions answered by Gemini 2.5 Flash with a code-execution sandbox |
-| **Anomaly Detection** | Isolation Forests scanning for counties with severe macroeconomic decoupling |
+`.github/workflows/pipeline.yml` runs daily at 11:23 UTC, on every push, and on demand.
 
-### Key Capabilities
+1. **Fetch.** `python -m atlas fetch` downloads every public source. A file is stored only when its bytes change, unchanged, at `data/raw/<source>/<retrieved date>/<file>`, and `data/manifest.json` records its URL, retrieval time, size, SHA-256 and server headers. New raw files are committed back to the repo.
+2. **Pull Map the Meal Gap.** The private data repo is checked out to `data/private/mmg/`, which is git-ignored here.
+3. **Build and validate.** `python -m atlas build --strict` parses the raw files and runs about 40 checks: complete state and county coverage, unique FIPS codes, value ranges, USDA Table 1A matching the ERS data file, county totals within 6% of state totals (Map the Meal Gap builds states from congressional districts), every county having a boundary. Results are published on the Methods page.
+4. **Publish.** The Astro site is built from the generated JSON and deployed to GitHub Pages, but only if every required check passed. A failure on `main` opens an issue and the site keeps its last good version.
 
-- **Interactive Plotly Charts** with hover tooltips and zoom
-- **Custom Editorial Design System** styled UI with gradient KPI cards and responsive layout
-- **State & County Drill-Down** for geographic analysis
-- **Multiple Regression Models** including ensemble methods
-- **K-Means Clustering** with PCA projection and silhouette scoring
-- **Policy Simulation** with scenario comparison and cost estimation
-- **Data Export** in CSV, Excel, and JSON formats
+## Setup (one time)
 
----
+1. **Private data repo.** Create a private repo (default name `LinusConradM/feeding_america_data`, or set the repo variable `MMG_DATA_REPO`) and put the Map the Meal Gap `.xlsx` files at its root, with Feeding America's original file names.
+2. **Secrets** (Settings → Secrets and variables → Actions):
+   - `MMG_DATA_TOKEN`: a fine-grained personal access token with read-only Contents access to the private data repo only.
+   - `CENSUS_API_KEY`: a free key from https://api.census.gov/data/key_signup.html. The Census API now rejects requests without one.
+3. **Pages.** Settings → Pages → Source: GitHub Actions.
 
-## Tech Stack
+Without the token the workflow still fetches public sources but does not build the site. Without the Census key, the SNAP page says the data is not available yet and every other page builds normally.
 
-| Component | Technology |
-|-----------|------------|
-| Framework | Python Streamlit |
-| Styling | Custom editorial design system (light/pearl tokens, Georgia headlines) |
-| Charts | Plotly |
-| Data | Pandas, NumPy |
-| Statistics | scikit-learn, statsmodels, SciPy |
-| Maps | Plotly Choropleth |
-| AI | Gemini 2.5 Flash + Groq (LLM fallback chain), LangChain |
-| Fonts | Inter + Georgia (Google Fonts) |
-| Icons | Font Awesome 6 |
-
----
-
-## Project Structure
-
-```
-feeding_america/
-├── app.py                          # Streamlit entry point + global nav
-├── requirements.txt                # Python dependencies
-├── pyproject.toml                  # pytest config
-├── .github/workflows/tests.yml     # CI: pytest on every PR + push to main
-├── .streamlit/
-│   └── config.toml                 # Streamlit configuration
-├── views/
-│   ├── home.py                     # Landing page (audience-routed CTAs)
-│   ├── 0_Data_Explorer.py          # EDA: summary stats, distributions
-│   ├── 1_Executive_Overview.py     # National KPIs, trends, disparities
-│   ├── 2_Geographic_Intelligence.py # Choropleth maps, urban/rural filter
-│   ├── 3_Correlation_Analysis.py   # Correlation testing
-│   ├── 4_Regression_Models.py      # OLS/Ridge/LASSO/RF + AI interpretation
-│   ├── 5_Equity_Disparities.py     # Disparity analysis
-│   ├── 6_County_Clustering.py      # K-Means clustering, PCA
-│   ├── 7_Time_Series_Explorer.py   # Temporal analysis, SARIMAX
-│   ├── 8_Policy_Scenarios.py       # DiD causal inference + simulation
-│   ├── 9_Data_Downloads.py         # Data export
-│   ├── 10_AI_Data_Analyst.py       # Gemini-powered Q&A with code sandbox
-│   ├── 11_Anomaly_Detection.py     # Isolation Forests
-│   ├── home.css                    # Home page styles (marketing surface)
-│   └── templates/                  # Home page HTML partials
-├── utils/
-│   ├── data_loader.py              # Data loading + weighted_rate helpers
-│   ├── theme.py                    # COLORS palette, design tokens
-│   ├── components.py               # Reusable UI components (kpi_row, etc.)
-│   ├── navigation.py               # Global navigation ribbon
-│   ├── ticker.py                   # Shared FI rate ticker
-│   ├── responsive.py               # Viewport-aware chart sizing
-│   ├── llm.py                      # Gemini / Groq fallback chain
-│   └── nav.css                     # Navigation styles (incl. mobile)
-├── tests/                          # pytest suite (run via CI on every PR)
-├── data/
-│   ├── feeding_america(2009-2018).xlsx
-│   └── feeding_america(2019-2023).xlsx
-├── Project Documents/              # Tracker, decisions memo, onboarding
-└── README.md
-```
-
----
-
-## Installation
-
-### Prerequisites
-
-- Python 3.9 or higher
-- pip package manager
-
-### Setup
+## Local development
 
 ```bash
-# Clone the repository
-git clone https://github.com/LinusConradM/feeding_america.git
-cd feeding_america
-
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
-streamlit run app.py
+pip install -e ".[test]"          # Python 3.11+, needs pdftotext (poppler-utils)
+pytest -q
+ATLAS_MMG_DIR=/path/to/mmg/files python -m atlas build
+cd site && npm ci && npm run dev  # http://localhost:4321/feeding_america/
 ```
 
-The app will open at `http://localhost:8501`.
+## Data limits
 
----
+- Map the Meal Gap figures are modeled, not counted, and the 2026 county and state files include no confidence intervals. The site says so and does not rank counties.
+- Each Map the Meal Gap data year comes from a different edition. Feeding America advises against comparing across editions, so the state chart shows unconnected points.
+- USDA's household rate and Map the Meal Gap's people rate measure different things and are never compared directly.
+- ACS SNAP receipt is self-reported and undercounts administrative SNAP totals; the SNAP page says so and labels counties only when a gap exceeds the ACS margin of error.
 
-## Data Sources
-
-### Feeding America (Primary)
-
-**Map the Meal Gap (2009-2023)**
-- County-level food insecurity estimates
-- Cost per meal and budget shortfall data
-- Child food insecurity rates
-- SNAP participation rates
-
-URL: [feedingamerica.org/research/map-the-meal-gap](https://www.feedingamerica.org/research/map-the-meal-gap/by-county)
-
-### U.S. Census Bureau (Secondary)
-
-**American Community Survey 5-Year Estimates**
-- Demographic characteristics
-- Socioeconomic indicators
-- Educational attainment
-- Income distribution
-
-URL: [census.gov/data/developers/data-sets/acs-5year.html](https://www.census.gov/data/developers/data-sets/acs-5year.html)
-
----
-
-## Statistical Methods
-
-| Method | Library | Use Case |
-|--------|---------|----------|
-| Pearson/Spearman/Kendall Correlation | SciPy | Identify variable relationships |
-| Linear Regression (OLS) | statsmodels | Predict continuous outcomes |
-| Ridge / LASSO / Elastic Net | scikit-learn | Regularized regression |
-| Random Forest | scikit-learn | Non-linear prediction |
-| K-Means Clustering | scikit-learn | County segmentation |
-| PCA | scikit-learn | Dimensionality reduction |
-
----
-
-## Author
-
-| Name | Role | GitHub |
-|------|------|--------|
-| **Conrad Linus Muhirwe** | Full-Stack Developer & Data Scientist | [@LinusConradM](https://github.com/LinusConradM) |
-
-**Institution:** American University, College of Arts & Sciences
-**Origin:** Independent research, developed at American University.
-
----
-
-## Ethics & Data Privacy
-
-- All data are public, de-identified, and aggregated at county level
-- No individual-level data is used or stored
-- Tool designed for policy analysis and research
-- Adheres to ASA Ethical Guidelines for Statistical Practice
-
----
-
-## License
-
-This work is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
-
----
-
-## Citation
-
-```
-Muhirwe, C. L. (2025). U.S. Food Insecurity Analytics Platform.
-American University. https://github.com/LinusConradM/feeding_america
-
-Data sources:
-- Feeding America. (2025). Map the Meal Gap. https://www.feedingamerica.org/research/map-the-meal-gap
-- U.S. Census Bureau. (2024). American Community Survey 5-Year Estimates. https://www.census.gov/programs-surveys/acs
-```
-
----
-
-## Acknowledgments
-
-- **Feeding America** for comprehensive county-level food insecurity data
-- **U.S. Census Bureau** for American Community Survey data
-- **American University** for institutional support
-
----
-
-**Last Updated:** February 2026
-**Version:** 2.0.0 (Python/Streamlit)
-**Status:** Production Ready
+Map the Meal Gap data © Feeding America, used with attribution and not redistributed here. USDA and Census data are public domain.
