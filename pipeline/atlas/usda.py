@@ -81,3 +81,13 @@ def states(path):
     })
     out = out[out.state.isin(set(STATES) | {"U.S."})].reset_index(drop=True)
     return out, (int(period[1]), int(period[2])) if period else None
+
+
+def change_vs_prior_year(path):
+    """ERS's own significance test of the latest year against the year before, all households."""
+    df = pd.read_excel(path, header=1)
+    df.columns = [re.sub(r"\s+", " ", str(c)).strip() for c in df.columns]
+    row = df[df.iloc[:, 1].astype(str).str.strip() == "All households"].iloc[0]
+    years = [int(y) for y in re.findall(r"in (20\d\d)", " ".join(df.columns[2:4]))]
+    sig = str(row.iloc[5]).strip().lower() == "yes"
+    return {"from": years[0], "to": years[1], "change_pts": float(row.iloc[4]), "significant": sig}

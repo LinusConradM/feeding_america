@@ -49,8 +49,8 @@ def ledger_entry(v):
 # ---------------------------------------------------------------- USDA
 
 def build_usda(manifest, ck):
-    inter, pdf, mapd = (latest(manifest, s) for s in ("usda-interactive", "usda-err358-pdf", "usda-mapdata"))
-    if not (inter and pdf and mapd):
+    inter, pdf, mapd, ins = (latest(manifest, s) for s in ("usda-interactive", "usda-err358-pdf", "usda-mapdata", "usda-insecurity"))
+    if not (inter and pdf and mapd and ins):
         ck.add("USDA", "files present", False, "USDA ERS files have not been fetched")
         return None
     hh = usda.national_households(inter["abs"])
@@ -82,7 +82,10 @@ def build_usda(manifest, ck):
             return "ns"
         return "higher" if row.fi_pct > us.fi_pct else "lower"
 
+    change = usda.change_vs_prior_year(ins["abs"])
+    ck.add("USDA", "change file covers the newest year", change["to"] == int(hh.year.max()), str(change))
     return {
+        "change": change,
         "national": [{
             "year": int(x.year),
             "hh_pct": float(x.hh_fi_pct), "hh_k": int(x.hh_fi_k), "hh_total_k": int(x.hh_total_k),
@@ -95,7 +98,7 @@ def build_usda(manifest, ck):
             "rows": {x.state: {"pct": r(x.fi_pct, 2), "moe": r(x.fi_moe, 2), "sig": sig(x),
                                "households": i(x.households), "interviewed": i(x.interviewed)} for x in st.itertuples()},
         },
-        "files": {"interactive": ledger_entry(inter), "pdf": ledger_entry(pdf), "mapdata": ledger_entry(mapd)},
+        "files": {"interactive": ledger_entry(inter), "pdf": ledger_entry(pdf), "mapdata": ledger_entry(mapd), "insecurity": ledger_entry(ins)},
     }
 
 
@@ -254,7 +257,7 @@ def main(strict=False):
     SITE_DATA.mkdir(parents=True, exist_ok=True)
     out = {
         "meta.json": meta,
-        "national.json": u["national"] if u else None,
+        "national.json": {"rows": u["national"], "change": u["change"]} if u else None,
         "usda_states.json": u["states"] if u else None,
         "mmg_states.json": {"names": mmg.STATES, "series": m["states"]} if m else None,
         "counties.json": {k: m[k] for k in ("county_year", "county_edition", "counties", "missing")} if m else None,
