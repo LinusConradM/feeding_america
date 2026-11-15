@@ -22,7 +22,7 @@ addEventListener("resize", () => charts.forEach((c) => c.resize()));
 export function base() {
   return {
     animation: !reduced(),
-    textStyle: { fontFamily: "Inter, system-ui, sans-serif", color: css("--fg-2") },
+    textStyle: { fontFamily: "IBM Plex Sans, system-ui, sans-serif", color: css("--fg-2") },
     tooltip: { trigger: "axis", backgroundColor: css("--surface"), borderColor: css("--border"), textStyle: { color: css("--fg"), fontSize: 13 }, confine: true },
   } as any;
 }
