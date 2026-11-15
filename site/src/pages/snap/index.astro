@@ -34,7 +34,7 @@ const cmini = Object.fromEntries(Object.entries<any>((counties as any).counties)
     <div class="figs">
       <Fig k="Correlation, county food insecurity vs SNAP share" v={S.r.toFixed(2)} ci={`Pearson r, ${S.n.toLocaleString("en-US")} counties`} src={der} />
       <Fig k="Same, holding poverty constant" v={S.partial_r.toFixed(2)} ci="Partial r after removing the ACS poverty rate from both" src={der} />
-      {S.us && <Fig k="US households receiving SNAP" v={pct(S.us.share)} unit="of households" ci={`90% margin of error ±${(S.us.moe * 100).toFixed(1)} points`} src={acsSrc} />}
+      {S.us && <Fig k="US households receiving SNAP" v={pct(S.us.share)} unit="of households" ci={`90% margin of error ±${(S.us.moe * 100).toFixed(2)} points`} src={acsSrc} />}
     </div>
     <p class="finding">Most of the link between SNAP use and food insecurity runs through poverty: holding poverty constant, the correlation falls from {S.r.toFixed(2)} to {S.partial_r.toFixed(2)}. The useful signal is the spread within each group.</p>
 

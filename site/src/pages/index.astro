@@ -8,6 +8,8 @@ const n = national as any;
 const rows = n.rows as any[];
 const last = rows[rows.length - 1];
 const ch = n.change;
+const cyear = (counties as any).county_year;
+const rates = Object.fromEntries(Object.entries<any>((counties as any).counties).map(([f, r]) => [f, r[2]]));
 const t1a = usdaSrc("Table 1A and the ERS chart data file. Households: share of all US households. People: everyone living in a food-insecure household, as a share of all people.");
 const tch = usdaSrc("ERS chart data file, children by food security status of household.");
 const changeText = ch.significant
@@ -15,11 +17,27 @@ const changeText = ch.significant
   : `not statistically different from ${ch.from} (${ch.change_pts > 0 ? "+" : ""}${ch.change_pts} points; USDA test at 90% confidence)`;
 ---
 <Base title="National" page="national" description="US household food insecurity, 2001 to 2024, from USDA's final Household Food Security report.">
-  <div class="lede">
-    <span class="eyebrow">National picture · USDA survey estimates</span>
-    <h1>{pts(last.hh_pct)} of US households were food insecure in {last.year}</h1>
-    <p>That is {millions(last.hh_k)} million households. {millions(last.ppl_k)} million people lived in those households, {pts(last.ppl_pct)} of all people, including {millions(last.ch_k)} million children ({pts(last.ch_pct)} of children). The household rate was {changeText}. {last.year} is the last year USDA will report: it ended the survey behind these figures in 2025.</p>
+  <div class="hero">
+    <div>
+      <div class="kicker"><span>United States</span><span>·</span><span>{last.year} data</span><span>·</span><span class="hot">Final year of USDA's survey</span></div>
+      <h1 style="margin-top:18px">{millions(last.ppl_k)} million<span>people lived in food-insecure households in {last.year}.</span></h1>
+    </div>
+    <aside>
+      <p>That is {pts(last.ppl_pct)} of all people, including {millions(last.ch_k)} million children. By households, {pts(last.hh_pct)} were food insecure, {changeText}. USDA ended the survey behind these figures in 2025, so no later count will follow.</p>
+      <Source s={t1a} />
+    </aside>
   </div>
+
+  <figure class="bigmap" style="margin:0">
+    <a href={`${import.meta.env.BASE_URL}counties/`} aria-label={`County map of the share of people food insecure in ${cyear}. Open the Counties page to explore it.`}><div id="nat-map" role="img" aria-label={`County map of the share of people food insecure, ${cyear}. Every county's value is listed on the Counties page.`}></div></a>
+    <figcaption>
+      <span class="cap">Share of people food insecure, by county, {cyear}</span>
+      <span class="ramp"><span>Under 10%</span><i style="background:var(--q1)"></i><i style="background:var(--q2)"></i><i style="background:var(--q3)"></i><i style="background:var(--q4)"></i><i style="background:var(--q5)"></i><i style="background:var(--q6)"></i><span>20% or more</span></span>
+      <span class="note" style="width:100%">Modeled estimates. Feeding America publishes no county intervals, so neighboring shades may not differ meaningfully. <a class="more-link" href={`${import.meta.env.BASE_URL}counties/`}>Explore every county</a></span>
+      <span style="width:100%"><Source s={mmgYearSource(cyear)} /></span>
+    </figcaption>
+  </figure>
+
   <div class="figs">
     <Fig k={`Households food insecure, ${last.year}`} v={last.hh_pct.toFixed(1)} small="%" unit="of households" ci={`${millions(last.hh_k)} million of ${millions(last.hh_total_k)} million households`} src={t1a} />
     <Fig k={`People in food-insecure households, ${last.year}`} v={millions(last.ppl_k)} small=" million" unit="people" ci={`${pts(last.ppl_pct)} of people`} src={t1a} />
@@ -53,11 +71,15 @@ const changeText = ch.significant
     <Source s={mmgYearSource((counties as any).county_year)} />
   </div>
   <script type="application/json" id="d-nat" set:html={JSON.stringify(rows)}></script>
+  <script type="application/json" id="d-rates" set:html={JSON.stringify({ rates, base: import.meta.env.BASE_URL })}></script>
 </Base>
 
 <script>
   import { chart, base, axis, css, onTheme, readJSON } from "../lib/charts";
+  import { drawCountyMap } from "../lib/countymap";
   const rows = readJSON<any[]>("d-nat");
+  const R = readJSON<any>("d-rates");
+  drawCountyMap(document.getElementById("nat-map")!, R.rates, R.base);
   let g = "hh", m = "pct";
   const LABEL: Record<string, string> = { hh: "households", ppl: "people", ch: "children" };
   function render() {
@@ -75,7 +97,7 @@ const changeText = ch.significant
       yAxis: { type: "value", min: 0, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => (isPct ? v + "%" : v + "M") } },
       tooltip: { ...base().tooltip, valueFormatter: fmt },
       series: [{
-        type: "line", data, symbol: "circle", symbolSize: 5, lineStyle: { width: 2.5, color: col }, itemStyle: { color: col }, areaStyle: { color: col, opacity: 0.07 },
+        type: "line", data, symbol: "circle", symbolSize: 5, lineStyle: { width: 2.5, color: col }, itemStyle: { color: col }, areaStyle: { color: css("--area"), opacity: 0.35 },
         markLine: { symbol: "none", silent: true, label: { color: css("--muted"), fontSize: 11, formatter: (p: any) => p.name, position: "insideEndTop" }, lineStyle: { color: css("--border"), type: "dashed" },
           data: [{ xAxis: 2008, name: "2008 recession" }] },
         endLabel: { show: true, color: css("--fg"), fontWeight: 600, formatter: (p: any) => (isPct ? p.value[1].toFixed(1) + "%" : p.value[1].toFixed(1) + "M") },
