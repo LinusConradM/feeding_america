@@ -37,3 +37,12 @@ def test_state_file_has_every_state_with_moe():
     st, period = usda.states(latest(M, "usda-mapdata")["abs"])
     assert period == (2022, 2024)
     assert len(st) == 52 and st.fi_moe.notna().all()
+
+
+def test_mmg_watch_ignores_bare_mentions_of_future_editions():
+    from atlas.fetch import released_editions
+    page = ("<h2>Map the Meal Gap 2026</h2><p>An analysis of food insecurity in 2024.</p>"
+            "<p>Starting with Map the Meal Gap 2027, our method will change.</p>")
+    mentions, released = released_editions(page)
+    assert set(mentions) == {2026, 2027}
+    assert released == {2026}

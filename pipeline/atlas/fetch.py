@@ -163,25 +163,48 @@ def fetch_geo(store, years):
             store.fail(sid, last)
 
 
+def released_editions(text):
+    """Editions the page presents as released: "Map the Meal Gap N" followed within 400
+    characters by its data year N-2 (every edition reports data from two years earlier).
+    A bare mention, such as a planned future edition, does not count. Returns
+    {edition: [context snippets]} for every mention, and the set that look released."""
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    mentions, released = {}, set()
+    for m in re.finditer(r"Map the Meal Gap (20\d\d)", text):
+        ed = int(m[1])
+        after = text[m.end(): m.end() + 400]
+        snippet = text[max(0, m.start() - 120): m.end() + 200].strip()
+        mentions.setdefault(ed, []).append(snippet)
+        if str(ed - 2) in after:
+            released.add(ed)
+    return mentions, released
+
+
 def watch_mmg(store, known_editions):
     """Look for a Map the Meal Gap edition newer than the newest file in the private repo."""
-    seen = set()
+    mentions, released = {}, set()
     for url in registry.MMG_PAGES:
         try:
             status, _, body = http_get(url)
             if status == 200:
-                seen |= {int(y) for y in re.findall(r"Map the Meal Gap (20\d\d)", body.decode("utf-8", "replace"))}
+                m, r = released_editions(body.decode("utf-8", "replace"))
+                for k, v in m.items():
+                    mentions.setdefault(k, []).extend(v)
+                released |= r
         except Exception as e:
             store.fail("mmg-watch", e)
             return None
-    newest_site = max(seen) if seen else None
+    newest_site = max(released) if released else None
     newest_local = max(known_editions) if known_editions else None
     store.checks["mmg-watch"] = {
         "checked_at": now(),
         "status": "ok" if newest_site else "error",
         "newest_on_site": newest_site,
         "newest_in_data_repo": newest_local,
+        "mentioned": sorted(mentions),
     }
     if newest_site and newest_local and newest_site > newest_local:
+        (ROOT / "mmg_watch.txt").write_text("\n\n".join(f"> {s}" for s in mentions[newest_site][:3]))
         return newest_site
     return None
