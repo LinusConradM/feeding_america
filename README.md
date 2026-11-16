@@ -26,6 +26,8 @@ Live site: https://linusconradm.github.io/feeding_america/ (GitHub Pages, deploy
 
 Release dates the files do not carry themselves are recorded with a citation in `pipeline/atlas/sources.py`. Map the Meal Gap files from 2020 and earlier state no release date, and the site says "Release date not published" rather than estimating one.
 
+The Counties page draws its interactive map with [MapLibre GL JS](https://maplibre.org) on the free [OpenFreeMap](https://openfreemap.org) basemap (no API key; map data © OpenStreetMap contributors, credited on the map). The basemap only gives roads, water and place names for context. Every shaded value comes from the county file above, and if the basemap cannot load, the map still draws the counties on a plain background.
+
 ## How the pipeline works
 
 `.github/workflows/pipeline.yml` runs daily at 11:23 UTC, on every push, and on demand.

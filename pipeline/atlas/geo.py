@@ -1,8 +1,10 @@
-"""Turn the Census cartographic boundary zips into one small TopoJSON for the map.
+"""Turn the Census cartographic boundary zips into small TopoJSON files for the maps.
 
-mapshaper (an npm dev dependency of the site) projects to Albers USA with Alaska
-and Hawaii inset, keeps only the GEOID, drops territories outside the 50 states
-and DC, and simplifies. The original zips stay untouched in data/raw.
+mapshaper (an npm dev dependency of the site) keeps only the GEOID, drops
+territories outside the 50 states and DC, and simplifies. With project=True it
+projects to Albers USA with Alaska and Hawaii inset (the static national map);
+with project=False it keeps longitude and latitude (the interactive county map).
+The original zips stay untouched in data/raw.
 """
 import subprocess
 import tempfile
@@ -14,7 +16,7 @@ from .paths import ROOT
 TERRITORIES = "'60','66','69','72','78'"
 
 
-def build_topojson(county_zip, state_zip, out_path):
+def build_topojson(county_zip, state_zip, out_path, project=True):
     mapshaper = ROOT / "site" / "node_modules" / ".bin" / "mapshaper"
     with tempfile.TemporaryDirectory() as tmp:
         shp = {}
@@ -32,7 +34,7 @@ def build_topojson(county_zip, state_zip, out_path):
             "-filter", f"[{TERRITORIES}].indexOf(STATEFP) < 0", "target=*",
             "-each", "id=GEOID", "target=*",
             "-filter-fields", "id", "target=*",
-            "-proj", "albersusa", "target=*",
+            *(["-proj", "albersusa", "target=*"] if project else []),
             "-simplify", "8%", "keep-shapes", "target=*",
             "-o", str(out_path), "format=topojson", "quantization=1e5", "target=*",
         ], check=True, capture_output=True, text=True)
