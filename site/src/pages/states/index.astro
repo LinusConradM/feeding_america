@@ -118,7 +118,7 @@ const latestSrc = yearSrc[latestYear];
     chart("st-trend").setOption({
       ...base(), grid: { left: 44, right: 18, top: 20, bottom: 28 },
       tooltip: { ...base().tooltip, trigger: "item", formatter: (p: any) => `${p.value[0]}: ${(p.value[1] * 100).toFixed(1)}% of ${g === "fi" ? "people" : "children"}<br><span style="color:${css("--muted")}">${esc(yearSrc[p.value[0]].when)}</span>` },
-      xAxis: { type: "value", min: ser[0].y - 0.5, max: latestYear + 0.5, interval: 3, ...axis(), splitLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => (Number.isInteger(v) ? String(v) : "") } },
+      xAxis: { type: "value", min: ser[0].y - 1, max: latestYear + 1, interval: 1, ...axis(), splitLine: { show: false }, axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => (v >= ser[0].y && v <= latestYear && ((v - ser[0].y) % 3 === 0 || v === latestYear) ? String(v) : "") } },
       yAxis: { type: "value", min: 0, ...axis(), axisLabel: { color: css("--muted"), fontSize: 12, formatter: (v: number) => Math.round(v * 100) + "%" } },
       series: [{
         type: "scatter", data: ser.map((r: any) => [r.y, r[key]]), symbolSize: 9, itemStyle: { color: col },
