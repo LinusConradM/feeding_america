@@ -14,7 +14,7 @@ const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ")
   <div class="lede">
     <span class="eyebrow">Counties · Map the Meal Gap {year + 2}, {year} data · share of people</span>
     <h1>Food insecurity by county</h1>
-    <p>Tap a county or search for one. These are modeled estimates of the share of people who were food insecure. Small counties are especially uncertain, and Feeding America's county file publishes no confidence intervals, so neighbors with similar shades are often not meaningfully different.</p>
+    <p>Drag and zoom the map, hover or tap a county, or search for one. These are modeled estimates of the share of people who were food insecure. Small counties are especially uncertain, and Feeding America's county file publishes no confidence intervals, so neighbors with similar shades are often not meaningfully different.</p>
   </div>
   <div class="pickers">
     <label class="fl" for="ct-search">Find a county<input type="search" id="ct-search" list="ct-list" placeholder="Type a county name" autocomplete="off" /></label>
@@ -23,7 +23,7 @@ const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ")
   <datalist id="ct-list"></datalist>
   <div class="grid2">
     <div class="card map">
-      <div id="map" role="img" aria-label={`County map shaded by share of people food insecure, ${year}. The table below lists every county in the selected state.`}></div>
+      <div id="map" class="slippy" role="region" aria-label={`Interactive county map shaded by share of people food insecure, ${year}. Drag to pan, use the plus and minus buttons or Ctrl and scroll to zoom. The table below lists every county in the selected state.`}></div>
       <div class="legend" id="map-legend"></div>
       <p class="note">No data for {missing}: Feeding America did not publish an estimate. Connecticut figures use its planning regions, which replaced counties in Census data from 2022.</p>
       <Source s={src} />
@@ -39,8 +39,10 @@ const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ")
 </Base>
 
 <script>
-  import { geoPath, geoIdentity } from "d3-geo";
-  import { feature, mesh } from "topojson-client";
+  import * as maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+  import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+  import { feature } from "topojson-client";
   import { css, readJSON, onTheme } from "../../lib/charts";
   import { pct, num, usd, bigUsd, esc } from "../../lib/format";
   const { C, names, stateRates, year, src, base } = readJSON<any>("d-ct");
@@ -48,59 +50,101 @@ const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ")
   const BREAKS = [0.1, 0.125, 0.15, 0.175, 0.2];
   const LABELS = ["Under 10%", "10 to 12.4%", "12.5 to 14.9%", "15 to 17.4%", "17.5 to 19.9%", "20% or more"];
   const binOf = (v: number | null) => (v == null ? -1 : BREAKS.filter((b) => v >= b).length);
-  const NS = "http://www.w3.org/2000/svg";
-  let cur = "28049", W = 975, H = 610;
-  const svg = document.createElementNS(NS, "svg");
-  document.getElementById("map")!.append(svg);
-  let paths: SVGPathElement[] = [], pathFn: any, stateFeat: any[] = [];
+  const LOWER48: [[number, number], [number, number]] = [[-125, 24], [-66.5, 49.5]];
+  // OpenFreeMap: free vector basemap, no key (https://openfreemap.org). If it cannot be reached
+  // the map still works on a plain background, because the county data never depend on it.
+  const STYLE = (dark: boolean) => `https://tiles.openfreemap.org/styles/${dark ? "dark" : "positron"}`;
+  const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+  let cur = "28049", counties: any, states: any, hovered: string | null = null, ready = false;
+  const bboxes: Record<string, [[number, number], [number, number]]> = {};
 
-  fetch(base + "geo/us.json").then((r) => r.json()).then((topo) => {
-    const cf = (feature(topo, topo.objects.counties) as any).features;
-    stateFeat = (feature(topo, topo.objects.states) as any).features;
-    const proj = geoIdentity().reflectY(true).fitSize([W, H], feature(topo, topo.objects.states) as any);
-    pathFn = geoPath(proj);
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    const gC = document.createElementNS(NS, "g"), gS = document.createElementNS(NS, "path");
-    for (const f of cf) {
-      const p = document.createElementNS(NS, "path");
-      p.setAttribute("d", pathFn(f)); p.setAttribute("class", "c"); p.dataset.f = f.properties.id;
-      const r = C[f.properties.id];
-      const t = document.createElementNS(NS, "title");
-      t.textContent = r ? `${r[0]}, ${r[1]}: ${pct(r[2])} of people` : "No estimate published";
-      p.append(t);
-      p.addEventListener("click", () => select(f.properties.id));
-      gC.append(p); paths.push(p);
+  // Census cartographic boundaries put the far Aleutians at positive longitudes; shift them
+  // west of -180 so Alaska draws as one piece.
+  function fix(fc: any, key: (f: any) => string) {
+    for (const f of fc.features) {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      const walk = (c: any) => { if (typeof c[0] === "number") { if (c[0] > 0) c[0] -= 360; x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); } else c.forEach(walk); };
+      walk(f.geometry.coordinates);
+      bboxes[key(f)] = [[x0, y0], [x1, y1]];
     }
-    gS.setAttribute("class", "s");
-    gS.setAttribute("d", pathFn(mesh(topo, topo.objects.states, (a: any, b: any) => a !== b)));
-    svg.append(gC, gS);
-    paint(); select(cur);
-  });
-
-  function paint() {
-    const cols = ["--q1", "--q2", "--q3", "--q4", "--q5", "--q6"].map(css), nd = css("--nodata");
-    for (const p of paths) {
-      const r = C[p.dataset.f!]; const b = r ? binOf(r[2]) : -1;
-      p.setAttribute("fill", b < 0 ? nd : cols[b]);
-      p.classList.toggle("sel", p.dataset.f === cur);
-      if (p.dataset.f === cur) p.parentNode!.append(p);
-    }
+  }
+  async function style(dark: boolean) {
+    try {
+      const r = await fetch(STYLE(dark));
+      if (r.ok) { const st = await r.json(); for (const l of st.layers) if (l.type === "background") l.paint = { "background-color": css("--bg") }; return st; }
+    } catch {}
+    return { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": css("--bg") } }] };
+  }
+  function colors() {
+    const cols = ["--q1", "--q2", "--q3", "--q4", "--q5", "--q6"].map(css);
+    return { cols, nd: css("--nodata"), fill: ["match", ["get", "b"], -1, css("--nodata"), ...cols.flatMap((c, i) => [i, c]), css("--nodata")] as any };
+  }
+  function legend() {
+    const { cols, nd } = colors();
     document.getElementById("map-legend")!.innerHTML = LABELS.map((l, i) => `<span class="key"><span class="sw" style="background:${cols[i]}"></span>${l}</span>`).join("") + `<span class="key"><span class="sw" style="background:${nd}"></span>No estimate</span>`;
   }
+
+  maplibregl.setWorkerUrl(workerUrl);
+  const map = new maplibregl.Map({ container: "map", style: { version: 8, sources: {}, layers: [] } as any, bounds: LOWER48, fitBoundsOptions: { padding: 12 }, cooperativeGestures: true, attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false, touchPitch: false });
+  map.touchZoomRotate.disableRotation();
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+  const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10, className: "ct-tip" });
+
+  function addLayers() {
+    if (map.getSource("counties")) return;
+    const { fill } = colors();
+    const firstLabel = map.getStyle().layers.find((l: any) => l.type === "symbol")?.id;
+    map.addSource("counties", { type: "geojson", data: counties, promoteId: "id" });
+    map.addSource("states", { type: "geojson", data: states });
+    map.addLayer({ id: "ct-fill", type: "fill", source: "counties", paint: { "fill-color": fill, "fill-opacity": 0.88 } }, firstLabel);
+    map.addLayer({ id: "ct-line", type: "line", source: "counties", paint: { "line-color": css("--bg"), "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.1, 7, 0.8] } }, firstLabel);
+    map.addLayer({ id: "st-line", type: "line", source: "states", paint: { "line-color": css("--bg"), "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.8, 7, 2] } }, firstLabel);
+    map.addLayer({ id: "ct-hl", type: "line", source: "counties", paint: { "line-color": css("--fg"), "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 2.4, ["boolean", ["feature-state", "hover"], false], 1.2, 0] } });
+    map.setFeatureState({ source: "counties", id: cur }, { sel: true });
+    ready = true;
+  }
+  async function setTheme() {
+    legend();
+    if (!counties) return;
+    ready = false;
+    const st = await style(isDark());
+    map.once("style.load", addLayers);
+    map.setStyle(st, { diff: false });
+  }
+
+  fetch(base + "geo/us-lonlat.json").then((r) => r.json()).then((topo) => {
+    counties = feature(topo, topo.objects.counties);
+    states = feature(topo, topo.objects.states);
+    fix(counties, (f) => f.properties.id);
+    fix(states, (f) => "s" + f.properties.id);
+    for (const f of counties.features) { const r = C[f.properties.id]; f.properties.b = r ? binOf(r[2]) : -1; }
+    setTheme();
+  });
+
+  map.on("mousemove", "ct-fill", (e: any) => {
+    const f = e.features?.[0]; if (!f) return;
+    const id = f.properties.id;
+    if (hovered !== id) { if (hovered) map.setFeatureState({ source: "counties", id: hovered }, { hover: false }); hovered = id; map.setFeatureState({ source: "counties", id }, { hover: true }); }
+    map.getCanvas().style.cursor = "pointer";
+    const r = C[id];
+    tip.setLngLat(e.lngLat).setHTML(r ? `<b>${esc(r[0])}, ${esc(r[1])}</b><span>${pct(r[2])} of people food insecure</span>` : "<b>No estimate published</b>").addTo(map);
+  });
+  map.on("mouseleave", "ct-fill", () => { if (hovered) map.setFeatureState({ source: "counties", id: hovered }, { hover: false }); hovered = null; map.getCanvas().style.cursor = ""; tip.remove(); });
+  map.on("click", "ct-fill", (e: any) => { const id = e.features?.[0]?.properties.id; if (id) select(id); });
+
+  function fit(b: [[number, number], [number, number]] | undefined, maxZoom = 9) { if (b) map.fitBounds(b, { padding: 24, maxZoom, duration: 900 }); }
   function zoomTo(abbr: string) {
-    if (!abbr || !pathFn) { svg.setAttribute("viewBox", `0 0 ${W} ${H}`); return; }
+    if (!abbr) { fit(LOWER48); return; }
     const fips = Object.entries<any>(C).find(([, r]) => r[1] === abbr)?.[0].slice(0, 2);
-    const sf = stateFeat.find((f) => f.properties.id === fips); if (!sf) return;
-    const [[x0, y0], [x1, y1]] = pathFn.bounds(sf); const pad = Math.max(x1 - x0, y1 - y0) * 0.06;
-    svg.setAttribute("viewBox", `${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}`);
+    fit(bboxes["s" + fips], 8);
   }
   function fig(k: string, v: string, unit: string, ci: string) {
     return `<div class="fig"><span class="k">${k}</span><span class="v">${v}</span>${unit ? `<span class="unit">${unit}</span>` : ""}<span class="ci">${ci}</span></div>`;
   }
   function select(f: string) {
     if (!C[f]) return;
+    if (ready) { map.setFeatureState({ source: "counties", id: cur }, { sel: false }); map.setFeatureState({ source: "counties", id: f }, { sel: true }); }
     cur = f; const r = C[f], st = r[1];
-    if (pathFn) paint();
     const sr = stateRates[st], diff = r[2] == null || sr == null ? null : r[2] - sr;
     const cmp = diff == null ? "" : `${Math.abs(diff) < 0.005 ? "About the same as" : (diff > 0 ? (diff * 100).toFixed(1) + " points above" : (-diff * 100).toFixed(1) + " points below")} the ${esc(names[st])} rate of ${pct(sr)} of people. Both are point estimates with no published interval, so a gap of a few points may not be meaningful.`;
     document.getElementById("ct-panel")!.innerHTML = `
@@ -120,16 +164,17 @@ const missing = C.missing.map((m: string[]) => `${m[0]}, ${m[1]}`).join(" and ")
     const rows = Object.entries<any>(C).filter(([, r]) => r[1] === st).sort((a, b) => (b[1][2] ?? -1) - (a[1][2] ?? -1));
     document.getElementById("ct-tbl-title")!.textContent = `Counties in ${names[st]}, ${year}`;
     document.getElementById("ct-table")!.innerHTML = `<table><caption class="sr">Counties in ${esc(names[st])}, Map the Meal Gap ${year}</caption><thead><tr><th scope="col">County</th><th scope="col">% of people</th><th scope="col">People</th><th scope="col">% of children</th><th scope="col">Cost per meal</th><th scope="col">Annual meal gap</th></tr></thead><tbody>${rows.map(([f, r]) => `<tr class="${f === cur ? "sel" : ""}"><th scope="row"><button type="button" class="linkish" data-f="${f}">${esc(r[0])}</button></th><td>${pct(r[2])}</td><td>${num(r[3])}</td><td>${pct(r[4])}</td><td>${usd(r[6])}</td><td>${r[7] == null ? "–" : "$" + num(r[7])}</td></tr>`).join("")}</tbody></table>`;
-    document.querySelectorAll<HTMLButtonElement>("#ct-table button[data-f]").forEach((b) => b.addEventListener("click", () => { zoomTo(st); select(b.dataset.f!); }));
+    document.querySelectorAll<HTMLButtonElement>("#ct-table button[data-f]").forEach((b) => b.addEventListener("click", () => { fit(bboxes[b.dataset.f!]); select(b.dataset.f!); }));
   }
   const idx: Record<string, string> = {};
   document.getElementById("ct-list")!.innerHTML = Object.entries<any>(C).map(([f, r]) => { const k = `${r[0]}, ${r[1]}`; idx[k.toLowerCase()] = f; return `<option value="${esc(k)}">`; }).join("");
   const sel = document.getElementById("ct-state") as HTMLSelectElement;
   document.getElementById("ct-search")!.addEventListener("change", (e) => {
     const f = idx[(e.target as HTMLInputElement).value.trim().toLowerCase()];
-    if (f) { zoomTo(C[f][1]); sel.value = C[f][1]; select(f); }
+    if (f) { fit(bboxes[f]); sel.value = C[f][1]; select(f); }
   });
   sel.addEventListener("change", () => { zoomTo(sel.value); if (sel.value) table(sel.value); });
-  onTheme(paint);
+  onTheme(setTheme);
+  legend();
   select(cur);
 </script>

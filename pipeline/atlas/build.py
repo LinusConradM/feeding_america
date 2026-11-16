@@ -292,11 +292,12 @@ def main(strict=False):
 
     gc, gs = latest(manifest, "geo-county"), latest(manifest, "geo-state")
     if gc and gs:
-        topo = geo.build_topojson(gc["abs"], gs["abs"], ROOT / "site" / "public" / "geo" / "us.json")
-        ids = {g["properties"]["id"] for g in json.loads(topo.read_text())["objects"]["counties"]["geometries"]}
-        if m:
-            missing = sorted(set(m["counties"]) - ids)
-            ck.add("Geography", "every MMG county has a boundary", not missing, ", ".join(missing[:10]))
+        for name, project in (("us.json", True), ("us-lonlat.json", False)):
+            topo = geo.build_topojson(gc["abs"], gs["abs"], ROOT / "site" / "public" / "geo" / name, project)
+            ids = {g["properties"]["id"] for g in json.loads(topo.read_text())["objects"]["counties"]["geometries"]}
+            if m:
+                missing = sorted(set(m["counties"]) - ids)
+                ck.add("Geography", f"every MMG county has a boundary ({name})", not missing, ", ".join(missing[:10]))
     else:
         ck.add("Geography", "boundary files present", False, "Census boundaries have not been fetched")
 
