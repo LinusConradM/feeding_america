@@ -1,0 +1,398 @@
+{
+  "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+  "@id": "https://api.census.gov/data/2024/acs/acs5/cprofile.json",
+  "@type": "dcat:Catalog",
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+  "dataset": [
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5",
+        "cprofile"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/cprofile/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/cprofile/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/cprofile/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/cprofile/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/cprofile/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/cprofile/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isAggregate": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "ACS 5-Year Comparison Profiles",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. The Comparison Profiles include the following geographies: nation, all states (including DC and Puerto Rico), all metropolitan areas, all congressional districts, all counties, all places and all tracts. Comparison Profiles contain broad social, economic, housing, and demographic information. The data are presented as both counts and percentages. There are over 2,400 variables in this dataset.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5/cprofile",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSCP5Y2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-09-02 17:33:43.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "US",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    },
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isAggregate": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "ACS 5-Year Detailed Tables",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. Summary files include the following geographies: nation, all states (including DC and Puerto Rico), all metropolitan areas, all congressional districts, all counties, all places, and all tracts and block groups. Summary files contain the most detailed cross-tabulations, many of which are published down to block groups. The data are population and housing counts. There are over 64,000 variables in this dataset.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSDT5Y2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-09-02 17:33:50.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "US",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    },
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5",
+        "profile"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/profile/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/profile/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/profile/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/profile/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/profile/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/profile/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isAggregate": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "ACS 5-Year Data Profiles",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, housing, and demographic characteristics of the U.S. population. The ACS 5-year data profiles include the following geographies: nation, all states (including DC and Puerto Rico), all metropolitan areas, all congressional districts, all counties, all places and all tracts. The Data profiles contain broad social, economic, housing, and demographic information. The data are presented as both counts and percentages. There are over 2,400 variables in this dataset.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5/profile",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSDP5Y2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-09-02 17:33:54.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "US",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    },
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5",
+        "subject"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/subject/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/subject/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/subject/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/subject/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/subject/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/subject/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isAggregate": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "ACS 5-Year Subject Tables",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. The subject tables include the following geographies: nation, all states (including DC and Puerto Rico), all metropolitan areas, all congressional districts, all counties, all places and all tracts. Subject tables provide an overview of the estimates available in a particular topic. The data are presented as both counts and percentages. There are over 66,000 variables in this dataset.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5/subject",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSST5Y2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-09-02 17:33:47.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "US",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    },
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5",
+        "pums"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/pums/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/pums/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/pums/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/pums/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/pums/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/pums/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isMicrodata": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "2024 American Community Survey: 5-Year Estimates - Public Use Microdata Sample",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The American Community Survey (ACS) Public Use Microdata Sample (PUMS) contains a sample of responses to the ACS. The ACS PUMS dataset includes variables for nearly every question on the survey, as well as many new variables that were derived after the fact from multiple survey responses (such as poverty status). Each record in the file represents a single person, or, in the household-level dataset, a single housing unit. In the person-level file, individuals are organized into households, making possible the study of people within the contexts of their families and other household members. Individuals living in Group Quarters, such as nursing facilities or college facilities, are also included on the person file. ACS PUMS data are available at the nation, state, and Public Use Microdata Area (PUMA) levels. PUMAs are special non-overlapping areas that partition each state into contiguous geographic units containing roughly 100,000 people each. ACS PUMS files for an individual year, such as 2023, contain data on approximately one percent of the United States population.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5/pums",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSPUMS5Y2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-12-23 15:02:39.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "US",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    },
+    {
+      "c_vintage": 2024,
+      "c_dataset": [
+        "acs",
+        "acs5",
+        "pumspr"
+      ],
+      "c_geographyLink": "https://api.census.gov/data/2024/acs/acs5/pumspr/geography.json",
+      "c_variablesLink": "https://api.census.gov/data/2024/acs/acs5/pumspr/variables.json",
+      "c_tagsLink": "https://api.census.gov/data/2024/acs/acs5/pumspr/tags.json",
+      "c_examplesLink": "https://api.census.gov/data/2024/acs/acs5/pumspr/examples.json",
+      "c_groupsLink": "https://api.census.gov/data/2024/acs/acs5/pumspr/groups.json",
+      "c_sorts_url": "https://api.census.gov/data/2024/acs/acs5/pumspr/sorts.json",
+      "c_documentationLink": "https://www.census.gov/developer/",
+      "c_isMicrodata": true,
+      "c_isCube": true,
+      "c_isAvailable": true,
+      "@type": "dcat:Dataset",
+      "title": "2024 American Community Survey: 5-Year Estimates - Public Use Microdata Sample Puerto Rico",
+      "accessLevel": "public",
+      "bureauCode": [
+        "006:07"
+      ],
+      "description": "The Public Use Microdata Sample (PUMS) for Puerto Rico (PR) contains a sample of responses to the Puerto Rico Community Survey (PRCS). The PRCS is similar to, but separate from, the American Community Survey (ACS). The PRCS collects data about the population and housing units in Puerto Rico. Puerto Rico data is not included in the national PUMS files. It is published as a state equivalent file and has a State FIPS code of \"72\". The file includes variables for nearly every question on the survey, as well as many new variables that were derived after the fact from multiple survey responses (such as poverty status). Each record in the file represents a single person, or, in the household-level dataset, a single housing unit. In the person-level file, individuals are organized into households, making possible the study of people within the contexts of their families and other household members. Individuals in Group Quarters, such as nursing facilities or college facilities, are also included on the person file. Data are available at the state and Public Use Microdata Area (PUMA) levels. PUMAs are special non-overlapping areas that partition Puerto Rico into contiguous geographic units containing roughly 100,000 people each. The Puerto Rico PUMS file for an individual year, such as 2024, contain data on approximately one percent of the Puerto Rico population.",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://api.census.gov/data/2024/acs/acs5/pumspr",
+          "description": "API endpoint",
+          "format": "API",
+          "mediaType": "application/json",
+          "title": "API endpoint"
+        }
+      ],
+      "contactPoint": {
+        "fn": "American Community Survey Office",
+        "hasEmail": "mailto:acso.users.support@census.gov"
+      },
+      "identifier": "https://api.census.gov/data/id/ACSPUMS5YPR2024",
+      "keyword": [
+        "census"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modified": "2025-12-23 15:02:35.0",
+      "programCode": [
+        "006:004"
+      ],
+      "references": [
+        "https://www.census.gov/developers/"
+      ],
+      "spatial": "Puerto Rico",
+      "temporal": "2024/2024",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "U.S. Census Bureau",
+        "subOrganizationOf": {
+             "@type": "org:Organization",
+             "name": "U.S. Department Of Commerce",
+             "subOrganizationOf": {
+                 "@type": "org:Organization",
+                 "name": "U.S. Government"
+             }
+         }
+      }
+    }
+  ]
+}
