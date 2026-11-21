@@ -40,6 +40,17 @@
           "retrieved_at": "2026-11-20T19:10:13+00:00",
           "sha256": "1cb232e25071cda525d8f1d21af85e0b7ca84dc2a85b619810dd4d7ef7cc5766",
           "vintage": 2024
+        },
+        {
+          "api_modified": "2025-09-02 17:33:43.0",
+          "api_title": "ACS 5-Year Comparison Profiles",
+          "bytes": 18957,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-meta/2026-11-21/acs5_2024_meta.json",
+          "retrieved_at": "2026-11-21T18:05:27+00:00",
+          "sha256": "00ee0f3414796b6f4b45ef2939601b6badd370b56f9d7796a284c82f040b2041",
+          "vintage": 2024
         }
       ]
     },
