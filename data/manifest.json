@@ -84,6 +84,17 @@
           "retrieved_at": "2026-11-24T21:23:10+00:00",
           "sha256": "1cb232e25071cda525d8f1d21af85e0b7ca84dc2a85b619810dd4d7ef7cc5766",
           "vintage": 2024
+        },
+        {
+          "api_modified": "2025-09-02 17:33:50.0",
+          "api_title": "ACS 5-Year Detailed Tables",
+          "bytes": 18948,
+          "etag": null,
+          "last_modified": null,
+          "path": "data/raw/acs-meta/2026-11-25/acs5_2024_meta.json",
+          "retrieved_at": "2026-11-25T20:31:56+00:00",
+          "sha256": "0687c5483e27c50d890d3bc39946cfb8312cb8b4f42de9c630edeaf3a4ef3645",
+          "vintage": 2024
         }
       ]
     },
